@@ -1,0 +1,99 @@
+<!--pages/menu/menu.wxml-->
+<view class="container">
+  <!-- 店铺信息区域 -->
+  <view class="store-info">
+    <view class="store-header">
+      <view class="store-name" bindlongpress="onStoreLongPress">{{storeName}}</view>
+      <view class="store-subtitle">{{storeSubtitle}}</view>
+    </view>
+    <view class="store-stats">
+      <view class="rating">
+        <text class="rating-score">{{storeRating}}</text>
+        <text class="rating-text">月售{{monthSales}}单</text>
+        <text class="delivery-text">配送约{{deliveryTime}}分钟</text>
+        <text class="distance-text">距离{{distance}}km</text>
+      </view>
+    </view>
+    <view class="store-tags">
+      <view class="tag promotion">满{{promotionMin}}减{{promotionSave}}元</view>
+      <view class="tag">{{itemCount}}菜品</view>
+      <view class="tag">{{categoryCount}}分类</view>
+      <view class="tag">{{ratingPercent}}好评率</view>
+    </view>
+  </view>
+
+  <!-- 主要内容区域 -->
+  <view class="main-content">
+    <!-- 左侧分类菜单 -->
+    <scroll-view class="category-menu" scroll-y="true">
+      <view class="category-item {{currentCategory === item.id ? 'active' : ''}}" 
+            wx:for="{{categories}}" 
+            wx:key="id"
+            bindtap="onCategoryChange"
+            data-id="{{item.id}}">
+        <text class="category-name">{{item.name}}</text>
+        <text class="category-count" wx:if="{{item.count > 0}}">{{item.count}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧商品列表 -->
+    <scroll-view class="product-content" scroll-y="true">
+      <view class="product-section" wx:for="{{categorizedProducts}}" wx:key="categoryId">
+        <view class="section-title">{{item.categoryName}}</view>
+        <view class="product-list">
+          <view class="product-item" 
+                wx:for="{{item.products}}" 
+                wx:key="id"
+                wx:for-item="product"
+                bindtap="goToProduct"
+                data-id="{{product.id}}">
+            <image src="{{product.image}}" class="product-image"></image>
+            <view class="product-info">
+              <text class="product-name">{{product.name}}</text>
+              <text class="product-desc">{{product.description}}</text>
+              <view class="product-rating">
+                <text class="rating-star">★</text>
+                <text class="rating-score">{{product.rating}}</text>
+                <text class="rating-count">好评率{{product.ratingPercent}}%</text>
+              </view>
+              <view class="product-bottom">
+                <text class="product-price">¥{{product.price}}</text>
+                <view class="quantity-control" wx:if="{{product.cartQuantity > 0}}">
+                  <view class="quantity-btn" bindtap="decreaseQuantity" data-id="{{product.id}}" catchtap="true">-</view>
+                  <text class="quantity-text">{{product.cartQuantity}}</text>
+                  <view class="quantity-btn" bindtap="increaseQuantity" data-id="{{product.id}}" catchtap="true">+</view>
+                </view>
+                <view class="add-btn" wx:else bindtap="addToCart" data-product="{{product}}" catchtap="true">
+                  <text class="add-icon">+</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{categorizedProducts.length === 0}}">
+        <image src="/images/empty.png" class="empty-image"></image>
+        <text class="empty-text">暂无商品</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 购物车栏 -->
+  <view class="cart-bar" wx:if="{{cartCount > 0}}">
+    <view class="cart-info" bindtap="goToCart">
+      <view class="cart-icon">
+        <image src="/images/cart-white.png" class="cart-img"></image>
+        <view class="cart-badge">{{cartCount}}</view>
+      </view>
+      <view class="cart-detail">
+        <text class="cart-price">¥{{cartTotal}}</text>
+        <text class="cart-desc">已选{{cartCount}}件</text>
+      </view>
+    </view>
+    <view class="checkout-btn" bindtap="goToOrder">
+      去结算
+    </view>
+  </view>
+</view> 

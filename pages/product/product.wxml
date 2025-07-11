@@ -1,0 +1,47 @@
+<!--pages/product/product.wxml-->
+<view class="container">
+  <!-- 商品图片 -->
+  <view class="product-image-container">
+    <image class="product-image" src="{{product.image}}" mode="aspectFill"></image>
+  </view>
+
+  <!-- 商品信息 -->
+  <view class="product-info">
+    <view class="product-name">{{product.name}}</view>
+    <view class="product-price">¥{{product.price}}</view>
+    <view class="product-description">{{product.description}}</view>
+  </view>
+
+  <!-- 规格选择 -->
+  <view class="spec-section" wx:if="{{product.specs && product.specs.length > 0}}">
+    <view class="section-title">规格选择</view>
+    <view class="spec-list">
+      <view class="spec-item {{selectedSpec === index ? 'selected' : ''}}" 
+            wx:for="{{product.specs}}" 
+            wx:key="index" 
+            bindtap="selectSpec" 
+            data-index="{{index}}">
+        {{item.name}} (+¥{{item.price}})
+      </view>
+    </view>
+  </view>
+
+  <!-- 数量选择 -->
+  <view class="quantity-section">
+    <view class="section-title">数量</view>
+    <view class="quantity-control">
+      <view class="quantity-btn {{quantity <= 1 ? 'disabled' : ''}}" bindtap="decreaseQuantity">-</view>
+      <view class="quantity-input">{{quantity}}</view>
+      <view class="quantity-btn" bindtap="increaseQuantity">+</view>
+    </view>
+  </view>
+</view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-bar">
+  <view class="cart-btn" bindtap="goToCart">
+    <text>购物车</text>
+    <view class="cart-count" wx:if="{{cartCount > 0}}">{{cartCount}}</view>
+  </view>
+  <view class="add-cart-btn" bindtap="addToCart">加入购物车</view>
+</view>

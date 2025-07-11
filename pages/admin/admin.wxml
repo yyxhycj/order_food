@@ -1,0 +1,77 @@
+<!--pages/admin/admin.wxml-->
+<view class="container">
+  <!-- 头部欢迎 -->
+  <view class="header">
+    <view class="welcome-text">店家管理后台</view>
+    <view class="date-text">{{currentDate}}</view>
+  </view>
+
+  <!-- 今日统计 -->
+  <view class="stats-section">
+    <view class="section-title">今日统计</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-number">{{todayStats.orderCount}}</view>
+        <view class="stat-label">今日订单</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-number">¥{{todayStats.totalAmount}}</view>
+        <view class="stat-label">今日收入</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-number">{{todayStats.productCount}}</view>
+        <view class="stat-label">商品总数</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-number">{{todayStats.pendingCount}}</view>
+        <view class="stat-label">待处理</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="section-title">快捷操作</view>
+    <view class="action-grid">
+      <view class="action-item" bindtap="goToOrders">
+        <view class="action-icon">📋</view>
+        <view class="action-text">订单管理</view>
+        <view class="action-badge" wx:if="{{todayStats.pendingCount > 0}}">{{todayStats.pendingCount}}</view>
+      </view>
+      <view class="action-item" bindtap="goToMenu">
+        <view class="action-icon">🍽️</view>
+        <view class="action-text">菜单管理</view>
+      </view>
+      <view class="action-item" bindtap="goToCategories">
+        <view class="action-icon">📂</view>
+        <view class="action-text">分类管理</view>
+      </view>
+      <view class="action-item" bindtap="refreshData">
+        <view class="action-icon">🔄</view>
+        <view class="action-text">刷新数据</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最新订单 -->
+  <view class="recent-orders">
+    <view class="section-title">最新订单</view>
+    <view class="order-list" wx:if="{{recentOrders.length > 0}}">
+      <view class="order-item" wx:for="{{recentOrders}}" wx:key="id" bindtap="goToOrderDetail" data-id="{{item.id}}">
+        <view class="order-info">
+          <view class="order-no">订单号：{{item.orderNo}}</view>
+          <view class="order-user">{{item.userInfo.name}} - {{item.userInfo.phone}}</view>
+          <view class="order-time">{{item.createTime}}</view>
+        </view>
+        <view class="order-status">
+          <view class="status-text {{item.status}}">{{item.statusText}}</view>
+          <view class="order-amount">¥{{item.totalAmount}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📋</view>
+      <view class="empty-text">暂无订单</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,153 @@
+<!--pages/admin/orders/orders.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">订单管理</text>
+    <view class="header-actions">
+      <button class="refresh-btn" bindtap="refreshOrders">
+        <text class="refresh-icon">↻</text>
+        刷新
+      </button>
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="status-filter">
+    <scroll-view class="status-scroll" scroll-x="true">
+      <view class="status-item {{currentStatus === item.value ? 'active' : ''}}" 
+            wx:for="{{statusOptions}}" 
+            wx:key="value"
+            data-status="{{item.value}}"
+            bindtap="onStatusChange">
+        <text>{{item.label}}</text>
+        <text class="status-count" wx:if="{{item.count > 0}}">{{item.count}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view class="order-card" wx:for="{{filteredOrders}}" wx:key="id">
+      <view class="order-header">
+        <view class="order-info">
+          <text class="order-number">订单号: {{item.orderNo}}</text>
+          <text class="order-time">{{item.createTime}}</text>
+        </view>
+        <view class="order-status">
+          <text class="status-badge {{item.status}}">{{item.statusText}}</text>
+        </view>
+      </view>
+
+      <view class="order-customer">
+        <text class="customer-name">{{item.userInfo.name}}</text>
+        <text class="customer-phone">{{item.userInfo.phone}}</text>
+      </view>
+
+      <view class="order-items">
+        <view class="item-row" wx:for="{{item.items}}" wx:key="id" wx:for-item="product">
+          <text class="item-name">{{product.name}}</text>
+          <text class="item-quantity">x{{product.quantity}}</text>
+          <text class="item-price">¥{{product.subtotal}}</text>
+        </view>
+      </view>
+
+      <view class="order-footer">
+        <view class="order-total">
+          <text class="total-label">总计:</text>
+          <text class="total-amount">¥{{item.totalAmount}}</text>
+        </view>
+        <view class="order-actions">
+          <button class="action-btn detail-btn" data-id="{{item.id}}" bindtap="viewOrderDetail">详情</button>
+          <button class="action-btn status-btn" 
+                  wx:if="{{item.status === 'pending'}}"
+                  data-id="{{item.id}}" 
+                  bindtap="acceptOrder">接单</button>
+          <button class="action-btn status-btn" 
+                  wx:if="{{item.status === 'processing'}}"
+                  data-id="{{item.id}}" 
+                  bindtap="completeOrder">完成</button>
+          <button class="action-btn cancel-btn" 
+                  wx:if="{{item.status === 'pending' || item.status === 'processing'}}"
+                  data-id="{{item.id}}" 
+                  bindtap="cancelOrder">取消</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredOrders.length === 0}}">
+    <image class="empty-image" src="/images/empty-orders.png"></image>
+    <text class="empty-text">暂无订单</text>
+    <text class="empty-desc">等待客户下单...</text>
+  </view>
+
+  <!-- 订单详情弹窗 -->
+  <view class="modal-overlay" wx:if="{{showDetailModal}}" bindtap="hideDetailModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">订单详情</text>
+        <text class="modal-close" bindtap="hideDetailModal">×</text>
+      </view>
+      <view class="modal-body" wx:if="{{selectedOrder}}">
+        <view class="detail-section">
+          <text class="section-title">订单信息</text>
+          <view class="detail-row">
+            <text class="detail-label">订单号:</text>
+            <text class="detail-value">{{selectedOrder.orderNo}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">下单时间:</text>
+            <text class="detail-value">{{selectedOrder.createTime}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">订单状态:</text>
+            <text class="detail-value status-badge {{selectedOrder.status}}">{{selectedOrder.statusText}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{selectedOrder.pickupTime}}">
+            <text class="detail-label">取餐时间:</text>
+            <text class="detail-value">{{selectedOrder.pickupTime}}</text>
+          </view>
+        </view>
+
+        <view class="detail-section">
+          <text class="section-title">客户信息</text>
+          <view class="detail-row">
+            <text class="detail-label">姓名:</text>
+            <text class="detail-value">{{selectedOrder.userInfo.name}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">电话:</text>
+            <text class="detail-value">{{selectedOrder.userInfo.phone}}</text>
+          </view>
+        </view>
+
+        <view class="detail-section">
+          <text class="section-title">商品明细</text>
+          <view class="detail-item" wx:for="{{selectedOrder.items}}" wx:key="id">
+            <view class="item-info">
+              <text class="item-name">{{item.name}}</text>
+              <text class="item-spec">¥{{item.price}} × {{item.quantity}}</text>
+            </view>
+            <text class="item-total">¥{{item.subtotal}}</text>
+          </view>
+          <view class="detail-total">
+            <text class="total-label">订单总计:</text>
+            <text class="total-amount">¥{{selectedOrder.totalAmount}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="hideDetailModal">关闭</button>
+        <button class="modal-btn confirm-btn" 
+                wx:if="{{selectedOrder.status === 'pending'}}"
+                data-id="{{selectedOrder.id}}" 
+                bindtap="acceptOrderFromModal">接单</button>
+        <button class="modal-btn confirm-btn" 
+                wx:if="{{selectedOrder.status === 'processing'}}"
+                data-id="{{selectedOrder.id}}" 
+                bindtap="completeOrderFromModal">完成</button>
+      </view>
+    </view>
+  </view>
+</view>

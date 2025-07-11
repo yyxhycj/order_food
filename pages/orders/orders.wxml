@@ -1,0 +1,38 @@
+<!--pages/orders/orders.wxml-->
+<view class="container">
+  <!-- 订单列表 -->
+  <scroll-view class="order-list" scroll-y="true" wx:if="{{orders.length > 0}}">
+    <view class="order-item" wx:for="{{orders}}" wx:key="orderNo" bindtap="goToOrderDetail" data-order-no="{{item.orderNo}}">
+      <view class="order-header">
+        <text class="order-no">订单号: {{item.orderNo}}</text>
+        <text class="order-status {{item.status}}">{{statusText[item.status]}}</text>
+      </view>
+      
+      <view class="order-products">
+        <view class="product-item" wx:for="{{item.items}}" wx:key="productId" wx:for-item="product">
+          <text class="product-name">{{product.name}}</text>
+          <text class="product-info">x{{product.quantity}} ¥{{product.subtotal}}</text>
+        </view>
+      </view>
+      
+      <view class="order-footer">
+        <view class="order-info">
+          <text class="order-time">{{item.createTime}}</text>
+          <text class="pickup-time">取餐时间: {{item.pickupTime}}</text>
+        </view>
+        <view class="order-total">
+          <text class="total-text">共{{item.totalQuantity}}件</text>
+          <text class="total-amount">¥{{item.totalAmount}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 空状态 -->
+  <view class="empty-orders" wx:else>
+    <image src="/images/empty-orders.png" class="empty-image"></image>
+    <text class="empty-text">暂无订单</text>
+    <text class="empty-desc">快去点一些好吃的吧</text>
+    <button class="go-shopping-btn" bindtap="goToMenu">去点餐</button>
+  </view>
+</view> 

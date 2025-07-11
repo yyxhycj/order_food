@@ -1,0 +1,177 @@
+<!--pages/admin/menu/menu.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">菜单管理</text>
+    <view class="header-actions">
+      <button class="add-btn category-btn" bindtap="showAddCategoryModal">
+        <text class="add-icon">+</text>
+        添加分类
+      </button>
+      <button class="add-btn product-btn" bindtap="showAddProductModal">
+        <text class="add-icon">+</text>
+        添加商品
+      </button>
+    </view>
+  </view>
+
+  <!-- 分类管理区域 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">分类管理</text>
+      <text class="section-count">{{categories.length}}个分类</text>
+    </view>
+    
+    <!-- 分类列表 -->
+    <view class="category-list">
+      <view class="category-card" wx:for="{{categories}}" wx:key="id" wx:if="{{item.id !== 0}}">
+        <view class="category-icon">
+          <image src="{{item.icon}}" mode="aspectFit" wx:if="{{item.icon}}"></image>
+          <text class="default-icon" wx:else>📁</text>
+        </view>
+        <view class="category-info">
+          <view class="category-name">{{item.name}}</view>
+          <view class="category-desc">{{item.description || '暂无描述'}}</view>
+          <view class="category-stats">
+            <text class="stats-item">排序: {{item.sort}}</text>
+            <text class="stats-item">商品数: {{item.productCount || 0}}</text>
+          </view>
+        </view>
+        <view class="category-actions">
+          <button class="action-btn edit-btn" data-category="{{item}}" bindtap="editCategory">编辑</button>
+          <button class="action-btn delete-btn" data-id="{{item.id}}" bindtap="deleteCategory">删除</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品管理区域 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">商品管理</text>
+      <text class="section-count">{{products.length}}个商品</text>
+    </view>
+    
+    <!-- 分类筛选 -->
+    <view class="category-filter">
+      <scroll-view class="category-scroll" scroll-x="true">
+        <view class="category-item {{currentCategory === item.id ? 'active' : ''}}" 
+              wx:for="{{categories}}" 
+              wx:key="id"
+              data-id="{{item.id}}"
+              bindtap="onCategoryChange">
+          <text>{{item.name}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="product-list">
+      <view class="product-card" wx:for="{{filteredProducts}}" wx:key="id">
+        <image class="product-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="product-info">
+          <view class="product-name">{{item.name}}</view>
+          <view class="product-description">{{item.description}}</view>
+          <view class="product-status">
+            <text class="status-text {{item.status === 'available' ? 'available' : 'unavailable'}}">
+              {{item.status === 'available' ? '上架中' : '已下架'}}
+            </text>
+          </view>
+        </view>
+        <view class="product-actions">
+          <button class="action-btn edit-btn" data-product="{{item}}" bindtap="editProduct">编辑</button>
+          <button class="action-btn status-btn" data-id="{{item.id}}" data-status="{{item.status}}" bindtap="toggleStatus">
+            {{item.status === 'available' ? '下架' : '上架'}}
+          </button>
+          <button class="action-btn delete-btn" data-id="{{item.id}}" bindtap="deleteProduct">删除</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{filteredProducts.length === 0}}">
+      <image class="empty-image" src="/images/empty.png"></image>
+      <text class="empty-text">暂无商品</text>
+      <button class="empty-btn" bindtap="showAddProductModal">添加第一个商品</button>
+    </view>
+  </view>
+
+  <!-- 添加/编辑分类弹窗 -->
+  <view class="modal-overlay" wx:if="{{showCategoryModal}}" bindtap="hideCategoryModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">{{isCategoryEdit ? '编辑分类' : '添加分类'}}</text>
+        <text class="modal-close" bindtap="hideCategoryModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <text class="form-label">分类名称</text>
+          <input class="form-input" placeholder="请输入分类名称" value="{{categoryFormData.name}}" bindinput="onCategoryInputChange" data-field="name"/>
+        </view>
+        <view class="form-group">
+          <text class="form-label">分类描述</text>
+          <textarea class="form-textarea" placeholder="请输入分类描述（可选）" value="{{categoryFormData.description}}" bindinput="onCategoryInputChange" data-field="description"></textarea>
+        </view>
+        <view class="form-group">
+          <text class="form-label">排序</text>
+          <input class="form-input" type="number" placeholder="请输入排序数字" value="{{categoryFormData.sort}}" bindinput="onCategoryInputChange" data-field="sort"/>
+        </view>
+        <view class="form-group">
+          <text class="form-label">分类图标</text>
+          <view class="icon-selection">
+            <view class="icon-item {{categoryFormData.icon === item ? 'selected' : ''}}" 
+                  wx:for="{{iconOptions}}" 
+                  wx:key="*this"
+                  data-icon="{{item}}"
+                  bindtap="selectIcon">
+              <image src="{{item}}" mode="aspectFit"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="hideCategoryModal">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="saveCategory">{{isCategoryEdit ? '保存' : '添加'}}</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加/编辑商品弹窗 -->
+  <view class="modal-overlay" wx:if="{{showProductModal}}" bindtap="hideProductModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">{{isProductEdit ? '编辑商品' : '添加商品'}}</text>
+        <text class="modal-close" bindtap="hideProductModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-group">
+          <text class="form-label">商品名称</text>
+          <input class="form-input" placeholder="请输入商品名称" value="{{productFormData.name}}" bindinput="onProductInputChange" data-field="name"/>
+        </view>
+        <view class="form-group">
+          <text class="form-label">商品描述</text>
+          <textarea class="form-textarea" placeholder="请输入商品描述" value="{{productFormData.description}}" bindinput="onProductInputChange" data-field="description"></textarea>
+        </view>
+        <view class="form-group">
+          <text class="form-label">商品分类</text>
+          <picker class="form-picker" mode="selector" range="{{categoryOptions}}" range-key="name" value="{{productFormData.categoryIndex}}" bindchange="onCategorySelect">
+            <view class="picker-text">{{categoryOptions[productFormData.categoryIndex].name}}</view>
+          </picker>
+        </view>
+        <view class="form-group">
+          <text class="form-label">商品图片</text>
+          <view class="image-upload">
+            <image class="preview-image" src="{{productFormData.image}}" wx:if="{{productFormData.image}}" mode="aspectFill"></image>
+            <view class="upload-btn" bindtap="chooseImage">
+              <text class="upload-text">{{productFormData.image ? '更换图片' : '选择图片'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="hideProductModal">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="saveProduct">{{isProductEdit ? '保存' : '添加'}}</button>
+      </view>
+    </view>
+  </view>
+</view>
