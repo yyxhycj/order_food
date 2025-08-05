@@ -1,0 +1,90 @@
+<!-- pages/admin/store-config/store-config.wxml -->
+<view class="container">
+  <view class="header">
+    <text class="title">店铺配置</text>
+    <view class="header-actions">
+      <button class="btn-preview" size="mini" bindtap="togglePreview">
+        {{previewMode ? '编辑' : '预览'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 预览模式 -->
+  <view wx:if="{{previewMode}}" class="preview-section">
+    <view class="preview-store-info" style="background: {{bannerColor}};">
+      <image wx:if="{{bannerImage}}" src="{{bannerImage}}" class="preview-banner-image"></image>
+      <view class="preview-store-header">
+        <view class="preview-store-name">{{storeName || '点单小程序'}}</view>
+        <view class="preview-store-subtitle">{{storeSubtitle || '(示例店铺)'}}</view>
+      </view>
+      <view class="preview-store-stats">
+        <view class="preview-rating">
+          <text class="preview-rating-score">{{storeRating || '4.6'}}</text>
+          <text class="preview-rating-text">月售{{monthSales || '2123'}}单</text>
+          <text class="preview-rating-percent">{{ratingPercent || '94'}}%好评率</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 编辑模式 -->
+  <view wx:else class="form-container">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      <view class="form-item">
+        <text class="label">店铺名称 *</text>
+        <input class="input" value="{{storeName}}" placeholder="请输入店铺名称" bindinput="onStoreNameInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">店铺副标题</text>
+        <input class="input" value="{{storeSubtitle}}" placeholder="请输入店铺副标题" bindinput="onStoreSubtitleInput"/>
+      </view>
+    </view>
+
+    <!-- 店铺数据 -->
+    <view class="form-section">
+      <view class="section-title">店铺数据</view>
+      <view class="form-item">
+        <text class="label">店铺评分 (0-5)</text>
+        <input class="input" type="digit" value="{{storeRating}}" placeholder="请输入店铺评分" bindinput="onStoreRatingInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">月销量</text>
+        <input class="input" type="number" value="{{monthSales}}" placeholder="请输入月销量" bindinput="onMonthSalesInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">好评率 (%)</text>
+        <input class="input" type="number" value="{{ratingPercent}}" placeholder="请输入好评率" bindinput="onRatingPercentInput"/>
+      </view>
+    </view>
+
+    <!-- 视觉配置 -->
+    <view class="form-section">
+      <view class="section-title">视觉配置</view>
+      <view class="form-item">
+        <text class="label">背景颜色</text>
+        <view class="color-input-wrapper">
+          <input class="input color-input" value="{{bannerColor}}" placeholder="请输入颜色值" bindinput="onBannerColorInput"/>
+          <view class="color-preview" style="background-color: {{bannerColor}};"></view>
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="label">背景图片</text>
+        <view class="image-upload" bindtap="uploadBannerImage">
+          <image wx:if="{{bannerImage}}" src="{{bannerImage}}" class="preview-image"/>
+          <view wx:else class="upload-placeholder">
+            <text class="upload-icon">📷</text>
+            <text class="upload-text">点击上传图片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="resetConfig">重置</button>
+    <button class="btn-primary" bindtap="saveConfig" loading="{{loading}}">保存配置</button>
+  </view>
+</view> 

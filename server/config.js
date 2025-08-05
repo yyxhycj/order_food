@@ -14,9 +14,8 @@ module.exports = {
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     connectionLimit: 10,
-    acquireTimeout: 60000,
-    timeout: 60000,
-    reconnect: true
+    waitForConnections: true,
+    queueLimit: 0
   },
 
   // JWT配置

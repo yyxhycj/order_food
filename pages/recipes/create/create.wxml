@@ -1,0 +1,253 @@
+<view class="recipe-create">
+  <!-- 步骤导航 -->
+  <view class="steps-nav">
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}}" bindtap="goToStep" data-step="1">
+      <view class="step-number">1</view>
+      <text class="step-text">基本信息</text>
+    </view>
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}}" bindtap="goToStep" data-step="2">
+      <view class="step-number">2</view>
+      <text class="step-text">食材清单</text>
+    </view>
+    <view class="step-item {{currentStep >= 3 ? 'active' : ''}}" bindtap="goToStep" data-step="3">
+      <view class="step-number">3</view>
+      <text class="step-text">制作步骤</text>
+    </view>
+    <view class="step-item {{currentStep >= 4 ? 'active' : ''}}" bindtap="goToStep" data-step="4">
+      <view class="step-number">4</view>
+      <text class="step-text">完成</text>
+    </view>
+  </view>
+
+  <!-- 步骤1：基本信息 -->
+  <view class="step-content" wx:if="{{currentStep === 1}}">
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      
+      <!-- 主图片上传 -->
+      <view class="form-item">
+        <view class="form-label">主图片</view>
+        <view class="image-upload">
+          <image wx:if="{{recipeData.main_image}}" class="main-image" src="{{recipeData.main_image}}" mode="aspectFill" bindtap="previewMainImage"></image>
+          <view wx:else class="upload-placeholder" bindtap="uploadMainImage">
+            <image class="upload-icon" src="/images/camera.png"></image>
+            <text class="upload-text">点击上传主图片</text>
+          </view>
+          <view wx:if="{{recipeData.main_image}}" class="image-actions">
+            <button class="action-btn" bindtap="uploadMainImage">重新上传</button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 菜谱名称 -->
+      <view class="form-item">
+        <view class="form-label">菜谱名称 <text class="required">*</text></view>
+        <input class="form-input" placeholder="请输入菜谱名称" value="{{recipeData.name}}" bindinput="onInputChange" data-field="name" maxlength="50"/>
+      </view>
+
+      <!-- 菜谱描述 -->
+      <view class="form-item">
+        <view class="form-label">菜谱描述</view>
+        <textarea class="form-textarea" placeholder="请描述这道菜的特色、口感或制作心得" value="{{recipeData.description}}" bindinput="onInputChange" data-field="description" maxlength="200"></textarea>
+      </view>
+
+      <!-- 制作时间 -->
+      <view class="form-item">
+        <view class="form-label">制作时间 <text class="required">*</text></view>
+        <picker class="form-picker" mode="selector" range="{{timeOptions}}" range-key="label" bindchange="onTimeChange">
+          <view class="picker-value">{{selectedTime || '请选择制作时间'}}</view>
+        </picker>
+      </view>
+
+      <!-- 难度等级 -->
+      <view class="form-item">
+        <view class="form-label">难度等级</view>
+        <view class="difficulty-options">
+          <block wx:for="{{difficultyOptions}}" wx:key="value">
+            <view class="difficulty-option {{recipeData.difficulty === item.value ? 'selected' : ''}}" bindtap="selectDifficulty" data-value="{{item.value}}">
+              <text class="difficulty-text">{{item.label}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- 分类选择 -->
+      <view class="form-item">
+        <view class="form-label">菜谱分类</view>
+        <picker class="form-picker" mode="selector" range="{{categoryOptions}}" range-key="name" bindchange="onCategoryChange">
+          <view class="picker-value">{{selectedCategory || '请选择分类'}}</view>
+        </picker>
+      </view>
+
+      <!-- 季节标签 -->
+      <view class="form-item">
+        <view class="form-label">季节标签</view>
+        <view class="season-tags">
+          <block wx:for="{{seasonOptions}}" wx:key="value">
+            <view class="season-tag {{recipeData.seasonal_tags && recipeData.seasonal_tags.includes(item.value) ? 'selected' : ''}}" bindtap="toggleSeasonTag" data-value="{{item.value}}">
+              {{item.label}}
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤2：食材清单 -->
+  <view class="step-content" wx:if="{{currentStep === 2}}">
+    <view class="form-section">
+      <view class="section-title">食材清单</view>
+      
+      <!-- 食材列表 -->
+      <view class="ingredients-list">
+        <block wx:for="{{recipeData.ingredients}}" wx:key="index">
+          <view class="ingredient-item">
+            <view class="ingredient-number">{{index + 1}}</view>
+            <view class="ingredient-inputs">
+              <input class="ingredient-name" placeholder="食材名称" value="{{item.name}}" bindinput="onIngredientChange" data-index="{{index}}" data-field="name"/>
+              <input class="ingredient-amount" placeholder="用量" value="{{item.amount}}" bindinput="onIngredientChange" data-index="{{index}}" data-field="amount"/>
+            </view>
+            <view class="ingredient-actions">
+              <button class="remove-btn" bindtap="removeIngredient" data-index="{{index}}">删除</button>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <!-- 添加食材按钮 -->
+      <view class="add-ingredient" bindtap="addIngredient">
+        <image class="add-icon" src="/images/plus.png"></image>
+        <text class="add-text">添加食材</text>
+      </view>
+
+      <!-- 智能推荐食材 -->
+      <view class="recommend-ingredients" wx:if="{{recommendedIngredients.length > 0}}">
+        <view class="recommend-title">推荐食材</view>
+        <view class="recommend-list">
+          <block wx:for="{{recommendedIngredients}}" wx:key="name">
+            <view class="recommend-item" bindtap="addRecommendedIngredient" data-ingredient="{{item}}">
+              <text class="recommend-name">{{item.name}}</text>
+              <text class="recommend-amount">{{item.amount}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤3：制作步骤 -->
+  <view class="step-content" wx:if="{{currentStep === 3}}">
+    <view class="form-section">
+      <view class="section-title">制作步骤</view>
+      
+      <!-- 步骤列表 -->
+      <view class="steps-list">
+        <block wx:for="{{recipeData.steps}}" wx:key="index">
+          <view class="step-item">
+            <view class="step-number">{{index + 1}}</view>
+            <view class="step-content">
+              <textarea class="step-description" placeholder="请描述这个步骤的具体操作" value="{{item.description}}" bindinput="onStepChange" data-index="{{index}}" data-field="description" maxlength="300"></textarea>
+              
+              <!-- 步骤图片 -->
+              <view class="step-image-upload">
+                <image wx:if="{{item.image}}" class="step-image" src="{{item.image}}" mode="aspectFill" bindtap="previewStepImage" data-src="{{item.image}}"></image>
+                <view wx:else class="upload-placeholder small" bindtap="uploadStepImage" data-index="{{index}}">
+                  <image class="upload-icon" src="/images/camera.png"></image>
+                  <text class="upload-text">添加图片</text>
+                </view>
+                <view wx:if="{{item.image}}" class="image-actions">
+                  <button class="action-btn" bindtap="uploadStepImage" data-index="{{index}}">重新上传</button>
+                  <button class="action-btn remove" bindtap="removeStepImage" data-index="{{index}}">删除</button>
+                </view>
+              </view>
+            </view>
+            <view class="step-actions">
+              <button class="remove-btn" bindtap="removeStep" data-index="{{index}}">删除</button>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <!-- 添加步骤按钮 -->
+      <view class="add-step" bindtap="addStep">
+        <image class="add-icon" src="/images/plus.png"></image>
+        <text class="add-text">添加步骤</text>
+      </view>
+
+      <!-- 制作视频上传 -->
+      <view class="video-upload">
+        <view class="form-label">制作视频（可选）</view>
+        <view wx:if="{{recipeData.video_url}}" class="video-preview">
+          <video class="recipe-video" src="{{recipeData.video_url}}" controls></video>
+          <view class="video-actions">
+            <button class="action-btn" bindtap="uploadVideo">重新上传</button>
+            <button class="action-btn remove" bindtap="removeVideo">删除</button>
+          </view>
+        </view>
+        <view wx:else class="upload-placeholder" bindtap="uploadVideo">
+          <image class="upload-icon" src="/images/video.png"></image>
+          <text class="upload-text">上传制作视频</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤4：完成 -->
+  <view class="step-content" wx:if="{{currentStep === 4}}">
+    <view class="form-section">
+      <view class="section-title">营养信息（可选）</view>
+      
+      <!-- 营养信息输入 -->
+      <view class="nutrition-inputs">
+        <view class="nutrition-item">
+          <text class="nutrition-label">卡路里</text>
+          <input class="nutrition-input" placeholder="千卡" value="{{recipeData.nutrition_info.calories}}" bindinput="onNutritionChange" data-field="calories" type="number"/>
+        </view>
+        <view class="nutrition-item">
+          <text class="nutrition-label">蛋白质</text>
+          <input class="nutrition-input" placeholder="克" value="{{recipeData.nutrition_info.protein}}" bindinput="onNutritionChange" data-field="protein" type="number"/>
+        </view>
+        <view class="nutrition-item">
+          <text class="nutrition-label">碳水化合物</text>
+          <input class="nutrition-input" placeholder="克" value="{{recipeData.nutrition_info.carbs}}" bindinput="onNutritionChange" data-field="carbs" type="number"/>
+        </view>
+        <view class="nutrition-item">
+          <text class="nutrition-label">脂肪</text>
+          <input class="nutrition-input" placeholder="克" value="{{recipeData.nutrition_info.fat}}" bindinput="onNutritionChange" data-field="fat" type="number"/>
+        </view>
+      </view>
+
+      <!-- 发布设置 -->
+      <view class="publish-settings">
+        <view class="setting-item">
+          <text class="setting-label">发布状态</text>
+          <switch class="setting-switch" checked="{{recipeData.status === 'active'}}" bindchange="onStatusChange"/>
+          <text class="setting-desc">{{recipeData.status === 'active' ? '立即发布' : '保存为草稿'}}</text>
+        </view>
+      </view>
+
+      <!-- 预览区域 -->
+      <view class="preview-section">
+        <view class="preview-title">预览</view>
+        <view class="recipe-preview">
+          <image class="preview-image" src="{{recipeData.main_image || '/images/default-recipe.jpg'}}" mode="aspectFill"></image>
+          <view class="preview-info">
+            <view class="preview-name">{{recipeData.name || '菜谱名称'}}</view>
+            <view class="preview-meta">
+              <text class="preview-time">{{recipeData.cooking_time}}分钟</text>
+              <text class="preview-difficulty">{{difficultyMap[recipeData.difficulty]}}</text>
+            </view>
+            <view class="preview-desc">{{recipeData.description || '菜谱描述'}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <button wx:if="{{currentStep > 1}}" class="nav-btn secondary" bindtap="prevStep">上一步</button>
+    <button wx:if="{{currentStep < 4}}" class="nav-btn primary" bindtap="nextStep">下一步</button>
+    <button wx:if="{{currentStep === 4}}" class="nav-btn primary" bindtap="submitRecipe" loading="{{isSubmitting}}">{{isSubmitting ? '发布中...' : '发布菜谱'}}</button>
+  </view>
+</view> 

@@ -1,0 +1,108 @@
+<!--pages/recipes/list/list.wxml-->
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <input placeholder="搜索菜谱名称..." value="{{searchKeyword}}" bindinput="onSearchInput" />
+      <button class="search-btn" bindtap="onSearch">搜索</button>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <view class="filter-item">
+      <text>难度：</text>
+      <picker bindchange="onDifficultyChange" value="{{difficultyIndex}}" range="{{difficultyOptions}}">
+        <view class="picker">{{difficultyOptions[difficultyIndex]}}</view>
+      </picker>
+    </view>
+    <view class="filter-item">
+      <text>分类：</text>
+      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categoryOptions}}" range-key="name">
+        <view class="picker">{{categoryOptions[categoryIndex].name}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 排序选项 -->
+  <view class="sort-bar">
+    <view class="sort-item {{sortBy === 'created_at' ? 'active' : ''}}" bindtap="onSortChange" data-sort="created_at">
+      最新
+    </view>
+    <view class="sort-item {{sortBy === 'view_count' ? 'active' : ''}}" bindtap="onSortChange" data-sort="view_count">
+      热门
+    </view>
+    <view class="sort-item {{sortBy === 'like_count' ? 'active' : ''}}" bindtap="onSortChange" data-sort="like_count">
+      点赞
+    </view>
+    <view class="sort-item {{sortBy === 'collect_count' ? 'active' : ''}}" bindtap="onSortChange" data-sort="collect_count">
+      收藏
+    </view>
+  </view>
+
+  <!-- 菜谱列表 -->
+  <view class="recipe-list">
+    <view class="recipe-item" wx:for="{{recipes}}" wx:key="id" bindtap="onRecipeClick" data-id="{{item.id}}">
+      <image class="recipe-image" src="{{item.main_image || '/images/default-recipe.jpg'}}" mode="aspectFill"></image>
+      <view class="recipe-info">
+        <view class="recipe-title">{{item.name}}</view>
+        <view class="recipe-desc">{{item.description}}</view>
+        <view class="recipe-meta">
+          <text class="meta-item">
+            <text class="icon">⏰</text>
+            {{item.cooking_time}}分钟
+          </text>
+          <text class="meta-item difficulty-{{item.difficulty}}">
+            <text class="icon">📊</text>
+            {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+          </text>
+          <text class="meta-item">
+            <text class="icon">👨‍🍳</text>
+            {{item.creator_name}}
+          </text>
+        </view>
+        <view class="recipe-stats">
+          <text class="stat-item">
+            <text class="icon">👀</text>
+            {{item.view_count}}
+          </text>
+          <text class="stat-item">
+            <text class="icon">👍</text>
+            {{item.like_count}}
+          </text>
+          <text class="stat-item">
+            <text class="icon">⭐</text>
+            {{item.average_rating}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore}}">
+    <button class="load-more-btn" bindtap="onLoadMore" loading="{{loading}}">
+      {{loading ? '加载中...' : '加载更多'}}
+    </button>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!recipes.length && !loading}}">
+    <image class="empty-icon" src="/images/empty-recipes.png"></image>
+    <text class="empty-text">暂无菜谱</text>
+    <button class="create-recipe-btn" bindtap="onCreateRecipe">创建菜谱</button>
+  </view>
+
+  <!-- 浮动按钮 -->
+  <view class="floating-buttons">
+    <view class="fab" bindtap="onCreateRecipe">
+      <text class="fab-icon">+</text>
+    </view>
+    <view class="fab generate-fab" bindtap="onGenerateRecipe">
+      <text class="fab-icon">🤖</text>
+    </view>
+    <view class="fab recommend-fab" bindtap="onRecommendRecipe">
+      <text class="fab-icon">💡</text>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,467 @@
+/* pages/recipes/review/review.wxss */
+.recipe-review {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+/* 菜谱信息 */
+.recipe-info {
+  background: white;
+  padding: 30rpx;
+  display: flex;
+  gap: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.recipe-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+}
+
+.recipe-details {
+  flex: 1;
+}
+
+.recipe-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.recipe-description {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+  display: block;
+  line-height: 1.4;
+}
+
+.recipe-meta {
+  display: flex;
+  gap: 20rpx;
+}
+
+.meta-item {
+  font-size: 22rpx;
+  color: #999;
+  background: #f0f0f0;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+}
+
+/* 评分区域 */
+.rating-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  display: block;
+}
+
+.rating-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+}
+
+.rating-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.rating-label {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: bold;
+}
+
+.star-rating {
+  display: flex;
+  gap: 8rpx;
+}
+
+.star {
+  font-size: 48rpx;
+  color: #ddd;
+  transition: color 0.2s;
+}
+
+.star-filled {
+  color: #ffcc00;
+}
+
+.rating-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 总体评分 */
+.overall-rating {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  padding: 30rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  color: white;
+}
+
+.overall-label {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.overall-stars {
+  display: flex;
+  gap: 8rpx;
+}
+
+.overall-stars .star {
+  font-size: 36rpx;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.overall-stars .star-filled {
+  color: white;
+}
+
+.overall-value {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+/* 评价内容 */
+.content-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 12rpx;
+}
+
+/* 图片上传 */
+.images-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.image-upload {
+  margin-top: 20rpx;
+}
+
+.image-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20rpx;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.uploaded-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+  object-fit: cover;
+}
+
+.image-delete {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  width: 32rpx;
+  height: 32rpx;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.upload-btn {
+  aspect-ratio: 1;
+  border: 2rpx dashed #ddd;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+  transition: all 0.2s;
+}
+
+.upload-btn:active {
+  background: #f0f0f0;
+}
+
+.upload-text {
+  font-size: 60rpx;
+  color: #ccc;
+  font-weight: 300;
+}
+
+.upload-tip {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  margin-top: 20rpx;
+}
+
+/* 季节标签 */
+.season-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.season-tags {
+  display: flex;
+  gap: 20rpx;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.season-tag {
+  padding: 16rpx 32rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 25rpx;
+  background: white;
+  transition: all 0.2s;
+}
+
+.season-tag.selected {
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.season-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.season-tag.selected .season-text {
+  color: white;
+}
+
+/* 挑战类型 */
+.challenge-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.challenge-types {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.challenge-type {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 16rpx;
+  background: white;
+  transition: all 0.2s;
+}
+
+.challenge-type.selected {
+  background: #667eea;
+  border-color: #667eea;
+}
+
+.challenge-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 12rpx;
+}
+
+.challenge-text {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+}
+
+.challenge-type.selected .challenge-text {
+  color: white;
+}
+
+/* 评价预览 */
+.preview-section {
+  background: white;
+  margin: 20rpx 0;
+  padding: 30rpx;
+}
+
+.review-preview {
+  background: #f9f9f9;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.user-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.preview-rating {
+  display: flex;
+  gap: 4rpx;
+}
+
+.preview-rating .star {
+  font-size: 24rpx;
+}
+
+.preview-date {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.preview-content {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+}
+
+.preview-images {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin-bottom: 20rpx;
+}
+
+.preview-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  object-fit: cover;
+}
+
+.preview-tags {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.preview-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  color: white;
+}
+
+.preview-tag.season {
+  background: #ff6b6b;
+}
+
+.preview-tag.challenge {
+  background: #667eea;
+}
+
+/* 提交按钮 */
+.submit-section {
+  padding: 30rpx;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 24rpx;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  color: white;
+  font-size: 32rpx;
+  font-weight: bold;
+  border: none;
+  border-radius: 25rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.3);
+  transition: all 0.2s;
+}
+
+.submit-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.3);
+}
+
+.submit-btn:disabled {
+  background: #cccccc;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 600rpx) {
+  .rating-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .challenge-types {
+    flex-direction: column;
+  }
+  
+  .season-tags {
+    justify-content: center;
+  }
+} 

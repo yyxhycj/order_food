@@ -8,16 +8,45 @@
     "pages/order-detail/order-detail",
     "pages/admin/admin",
     "pages/admin/menu/menu",
-    "pages/admin/orders/orders"
+    "pages/admin/orders/orders",
+    "pages/admin/store-config/store-config",
+    "pages/recipes/list/list",
+    "pages/recipes/detail/detail",
+    "pages/recipes/create/create",
+    "pages/recipes/generator/generator",
+    "pages/recipes/review/review",
+    "pages/recipes/recommend/recommend",
+    "pages/user/tags/tags",
+    "pages/user/profile/profile",
+    "pages/user/taste-profile/taste-profile",
+    "pages/plans/list/list",
+    "pages/plans/detail/detail",
+    "pages/plans/create/create",
+    "pages/plans/follow/follow",
+    "pages/plans/progress/progress",
+    "pages/user/following/following",
+    "pages/user/collections/collections",
+    "pages/user/timeline/timeline",
+    "pages/blind-box/themes/themes",
+    "pages/blind-box/detail/detail",
+    "pages/blind-box/history/history",
+    "pages/reminders/list/list",
+    "pages/reminders/create/create",
+    "pages/reminders/settings/settings",
+    "pages/homepage/config/config",
+    "pages/homepage/preview/preview",
+    "pages/game/achievements/achievements",
+    "pages/game/leaderboard/leaderboard",
+    "pages/game/badges/badges"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "点单小程序",
+    "navigationBarTitleText": "明星厨师show",
     "navigationBarBackgroundColor": "#ffffff"
   },
   "tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#3cc51f",
+    "selectedColor": "#FF6B6B",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [
@@ -28,16 +57,28 @@
         "text": "菜单"
       },
       {
+        "pagePath": "pages/recipes/list/list",
+        "iconPath": "images/recipes.png",
+        "selectedIconPath": "images/recipes-active.png",
+        "text": "菜谱"
+      },
+      {
+        "pagePath": "pages/plans/list/list",
+        "iconPath": "images/plans.png",
+        "selectedIconPath": "images/plans-active.png",
+        "text": "计划"
+      },
+      {
         "pagePath": "pages/cart/cart",
         "iconPath": "images/cart.png",
         "selectedIconPath": "images/cart-active.png",
         "text": "购物车"
       },
       {
-        "pagePath": "pages/orders/orders",
-        "iconPath": "images/orders.png",
-        "selectedIconPath": "images/orders-active.png",
-        "text": "订单"
+        "pagePath": "pages/user/profile/profile",
+        "iconPath": "images/user.png",
+        "selectedIconPath": "images/user-active.png",
+        "text": "我的"
       }
     ]
   },

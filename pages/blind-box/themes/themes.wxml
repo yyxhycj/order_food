@@ -1,0 +1,106 @@
+<!--pages/blind-box/themes/themes.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="title">选择盲盒主题</text>
+    <text class="subtitle">每个主题都有不同的惊喜等你发现</text>
+  </view>
+
+  <!-- 主题列表 -->
+  <view class="themes-grid">
+    <view wx:for="{{themes}}" wx:key="id" class="theme-card" bindtap="selectTheme" data-theme="{{item}}">
+      <view class="theme-icon" style="background-color: {{item.color}}20;">
+        <text class="icon">{{item.icon}}</text>
+      </view>
+      <view class="theme-info">
+        <text class="theme-name">{{item.name}}</text>
+        <text class="theme-description">{{item.description}}</text>
+      </view>
+      <view class="theme-badge" wx:if="{{item.id === recommendedTheme}}">
+        <text class="badge-text">推荐</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义设置 -->
+  <view class="custom-settings">
+    <text class="section-title">自定义设置</text>
+    
+    <!-- 盲盒数量 -->
+    <view class="setting-item">
+      <text class="setting-label">盲盒数量</text>
+      <view class="quantity-selector">
+        <button class="quantity-btn" bindtap="changeQuantity" data-action="decrease">-</button>
+        <text class="quantity-text">{{boxSize}}</text>
+        <button class="quantity-btn" bindtap="changeQuantity" data-action="increase">+</button>
+      </view>
+    </view>
+
+    <!-- 饮食限制 -->
+    <view class="setting-item">
+      <text class="setting-label">饮食限制</text>
+      <view class="restriction-tags">
+        <text wx:for="{{dietaryRestrictions}}" wx:key="*this" class="restriction-tag {{selectedRestrictions.includes(item) ? 'selected' : ''}}" bindtap="toggleRestriction" data-restriction="{{item}}">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 预算范围 -->
+    <view class="setting-item">
+      <text class="setting-label">预算范围</text>
+      <view class="budget-selector">
+        <text wx:for="{{budgetRanges}}" wx:key="value" class="budget-option {{selectedBudget === item.value ? 'selected' : ''}}" bindtap="selectBudget" data-budget="{{item.value}}">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预览按钮 -->
+  <view class="preview-section">
+    <button class="preview-btn" bindtap="previewBlindBox" disabled="{{!selectedTheme}}">
+      <text class="btn-text">预览盲盒</text>
+    </button>
+  </view>
+
+  <!-- 生成按钮 -->
+  <view class="generate-section">
+    <button class="generate-btn primary" bindtap="generateBlindBox" disabled="{{!selectedTheme || generating}}">
+      <text class="btn-text">{{generating ? '生成中...' : '生成盲盒'}}</text>
+    </button>
+  </view>
+</view>
+
+<!-- 预览弹窗 -->
+<view class="preview-modal" wx:if="{{showPreview}}">
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">盲盒预览</text>
+      <text class="modal-close" bindtap="closePreview">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="preview-theme">
+        <text class="preview-theme-name">{{selectedTheme.name}}</text>
+        <text class="preview-theme-desc">{{selectedTheme.description}}</text>
+      </view>
+      <view class="preview-recipes">
+        <text class="preview-subtitle">包含{{previewData.box_size}}个菜谱</text>
+        <view class="recipe-preview-list">
+          <view wx:for="{{previewData.recipe_preview}}" wx:key="id" class="recipe-preview-item">
+            <image class="recipe-preview-image" src="{{item.image}}" mode="aspectFill"></image>
+            <text class="recipe-preview-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="modal-btn secondary" bindtap="closePreview">继续调整</button>
+      <button class="modal-btn primary" bindtap="confirmGenerate">立即生成</button>
+    </view>
+  </view>
+</view>
+
+<!-- 加载提示 -->
+<view class="loading-overlay" wx:if="{{loading}}">
+  <view class="loading-content">
+    <image class="loading-icon" src="/images/loading.gif"></image>
+    <text class="loading-text">{{loadingText}}</text>
+  </view>
+</view> 

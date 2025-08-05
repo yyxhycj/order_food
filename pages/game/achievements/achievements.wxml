@@ -1,0 +1,163 @@
+<!--pages/game/achievements/achievements.wxml-->
+<view class="container">
+  <!-- 用户等级展示 -->
+  <view class="level-section">
+    <view class="level-bg" style="background-color: {{userLevel.level_color}};">
+      <view class="level-info">
+        <text class="level-icon">{{userLevel.level_icon}}</text>
+        <view class="level-details">
+          <text class="level-name">{{userLevel.level_name}}</text>
+          <text class="level-points">{{userLevel.total_points}} 积分</text>
+        </view>
+      </view>
+      <view class="level-progress">
+        <text class="progress-text">距离下一级还需 {{userLevel.next_level_points - userLevel.current_level_points}} 积分</text>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{userLevel.progress_percentage}}%;"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-cards">
+    <view class="stats-card">
+      <text class="stats-number">{{userStats.created_recipes || 0}}</text>
+      <text class="stats-label">创建菜谱</text>
+    </view>
+    <view class="stats-card">
+      <text class="stats-number">{{userStats.review_count || 0}}</text>
+      <text class="stats-label">发布评价</text>
+    </view>
+    <view class="stats-card">
+      <text class="stats-number">{{userStats.earned_badges || 0}}</text>
+      <text class="stats-label">获得徽章</text>
+    </view>
+    <view class="stats-card">
+      <text class="stats-number">{{userStats.earned_achievements || 0}}</text>
+      <text class="stats-label">解锁成就</text>
+    </view>
+  </view>
+
+  <!-- 成就分类导航 -->
+  <view class="category-tabs">
+    <text wx:for="{{categories}}" wx:key="id" class="tab-item {{selectedCategory === item.id ? 'active' : ''}}" bindtap="switchCategory" data-category="{{item.id}}">
+      <text class="tab-icon">{{item.icon}}</text>
+      <text class="tab-name">{{item.name}}</text>
+    </text>
+  </view>
+
+  <!-- 成就列表 -->
+  <view class="achievements-list">
+    <view wx:for="{{filteredAchievements}}" wx:key="id" class="achievement-item {{item.earned ? 'earned' : 'locked'}}">
+      <view class="achievement-icon" style="background-color: {{item.earned ? item.color : '#f0f0f0'}};">
+        <text class="icon">{{item.icon}}</text>
+      </view>
+      <view class="achievement-content">
+        <view class="achievement-header">
+          <text class="achievement-name">{{item.name}}</text>
+          <text class="achievement-earned" wx:if="{{item.earned}}">已获得</text>
+        </view>
+        <text class="achievement-description">{{item.description}}</text>
+        <view class="achievement-progress" wx:if="{{!item.earned}}">
+          <view class="progress-bar small">
+            <view class="progress-fill" style="width: {{(item.progress / item.target) * 100}}%;"></view>
+          </view>
+          <text class="progress-text">{{item.progress}} / {{item.target}}</text>
+        </view>
+        <text class="achievement-reward" wx:if="{{item.reward}}">奖励：{{item.reward}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 徽章展示 -->
+  <view class="badges-section">
+    <view class="section-header">
+      <text class="section-title">我的徽章</text>
+      <text class="section-subtitle">{{earnedBadges.length}} / {{badges.length}}</text>
+    </view>
+    <view class="badges-grid">
+      <view wx:for="{{badges}}" wx:key="id" class="badge-item {{item.earned ? 'earned' : 'locked'}}" bindtap="showBadgeDetail" data-badge="{{item}}">
+        <view class="badge-icon" style="background-color: {{item.earned ? item.color : '#f0f0f0'}};">
+          <text class="icon">{{item.icon}}</text>
+        </view>
+        <text class="badge-name">{{item.name}}</text>
+        <view class="badge-progress" wx:if="{{!item.earned}}">
+          <view class="progress-bar mini">
+            <view class="progress-fill" style="width: {{(item.progress / item.target) * 100}}%;"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐挑战 */
+  <view class="challenges-section">
+    <view class="section-header">
+      <text class="section-title">推荐挑战</text>
+      <text class="section-subtitle">完成挑战获得更多奖励</text>
+    </view>
+    <view class="challenges-list">
+      <view wx:for="{{challenges}}" wx:key="id" class="challenge-item {{item.difficulty}}">
+        <view class="challenge-header">
+          <text class="challenge-title">{{item.title}}</text>
+          <text class="challenge-difficulty">{{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}</text>
+        </view>
+        <text class="challenge-description">{{item.description}}</text>
+        <view class="challenge-progress">
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{(item.progress / item.target) * 100}}%;"></view>
+          </view>
+          <text class="progress-text">{{item.progress}} / {{item.target}}</text>
+        </view>
+        <text class="challenge-reward">{{item.reward}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 排行榜入口 -->
+  <view class="leaderboard-section">
+    <view class="leaderboard-card" bindtap="goToLeaderboard">
+      <view class="leaderboard-icon">
+        <text class="icon">🏆</text>
+      </view>
+      <view class="leaderboard-info">
+        <text class="leaderboard-title">查看排行榜</text>
+        <text class="leaderboard-subtitle">看看你在全站的排名</text>
+      </view>
+      <text class="leaderboard-arrow">></text>
+    </view>
+  </view>
+</view>
+
+<!-- 徽章详情弹窗 -->
+<view class="badge-modal" wx:if="{{showBadgeDetail}}">
+  <view class="modal-content">
+    <view class="modal-header">
+      <view class="badge-detail-icon" style="background-color: {{selectedBadge.earned ? selectedBadge.color : '#f0f0f0'}};">
+        <text class="icon">{{selectedBadge.icon}}</text>
+      </view>
+      <text class="modal-close" bindtap="closeBadgeDetail">×</text>
+    </view>
+    <view class="modal-body">
+      <text class="badge-detail-name">{{selectedBadge.name}}</text>
+      <text class="badge-detail-description">{{selectedBadge.description}}</text>
+      <view class="badge-detail-progress" wx:if="{{!selectedBadge.earned}}">
+        <text class="progress-title">完成进度</text>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{(selectedBadge.progress / selectedBadge.target) * 100}}%;"></view>
+        </view>
+        <text class="progress-text">{{selectedBadge.progress}} / {{selectedBadge.target}}</text>
+      </view>
+      <text class="badge-earned-text" wx:if="{{selectedBadge.earned}}">🎉 恭喜获得此徽章！</text>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-overlay" wx:if="{{loading}}">
+  <view class="loading-content">
+    <image class="loading-icon" src="/images/loading.gif"></image>
+    <text class="loading-text">{{loadingText}}</text>
+  </view>
+</view> 

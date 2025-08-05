@@ -6,7 +6,7 @@ class Product {
   static async findAll(categoryId = null, status = null) {
     let sql = `
       SELECT p.*, c.name as category_name 
-      FROM products p 
+      FROM menu_items p 
       LEFT JOIN categories c ON p.category_id = c.id 
       WHERE 1=1
     `;
@@ -31,7 +31,7 @@ class Product {
   static async findById(id) {
     const sql = `
       SELECT p.*, c.name as category_name 
-      FROM products p 
+      FROM menu_items p 
       LEFT JOIN categories c ON p.category_id = c.id 
       WHERE p.id = ?
     `;
@@ -42,7 +42,7 @@ class Product {
   // 创建商品
   static async create(productData) {
     const sql = `
-      INSERT INTO products (name, description, image, category_id, status, sort) 
+      INSERT INTO menu_items (name, description, image, category_id, status, sort) 
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -61,7 +61,7 @@ class Product {
   // 更新商品
   static async update(id, productData) {
     const sql = `
-      UPDATE products 
+      UPDATE menu_items 
       SET name = ?, description = ?, image = ?, category_id = ?, status = ?, sort = ?
       WHERE id = ?
     `;
@@ -81,14 +81,14 @@ class Product {
 
   // 删除商品
   static async delete(id) {
-    const sql = 'DELETE FROM products WHERE id = ?';
+    const sql = 'DELETE FROM menu_items WHERE id = ?';
     const result = await db.query(sql, [id]);
     return result.affectedRows > 0;
   }
 
   // 更新商品状态
   static async updateStatus(id, status) {
-    const sql = 'UPDATE products SET status = ? WHERE id = ?';
+    const sql = 'UPDATE menu_items SET status = ? WHERE id = ?';
     const result = await db.query(sql, [status, id]);
     return result.affectedRows > 0;
   }
@@ -100,7 +100,7 @@ class Product {
         COUNT(*) as total,
         SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available,
         SUM(CASE WHEN status = 'unavailable' THEN 1 ELSE 0 END) as unavailable
-      FROM products
+      FROM menu_items
     `;
     const result = await db.query(sql);
     return result[0];
@@ -114,7 +114,7 @@ class Product {
         c.name,
         COUNT(p.id) as product_count
       FROM categories c
-      LEFT JOIN products p ON c.id = p.category_id
+      LEFT JOIN menu_items p ON c.id = p.category_id
       GROUP BY c.id, c.name
       ORDER BY c.sort ASC
     `;

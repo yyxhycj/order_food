@@ -10,72 +10,106 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const storeConfigRoutes = require('./routes/storeConfigRoutes');
+const userRoutes = require('./routes/user');
+
+// 导入新的路由
+const recipeRoutes = require('./routes/recipes');
+const userTagRoutes = require('./routes/user-tags');
+const recipePlanRoutes = require('./routes/recipe-plans');
+const userInteractionRoutes = require('./routes/user-interactions');
+const userPlanFollowRoutes = require('./routes/user-plan-follows');
+
+// 导入特色功能路由
+const blindBoxRoutes = require('./routes/blind-box');
+const reminderRoutes = require('./routes/reminders');
+const homepageRoutes = require('./routes/homepage');
+const gameRoutes = require('./routes/game');
+
+// 导入商家功能升级路由
+const inventoryRoutes = require('./routes/inventory');
+const tasteAnalyticsRoutes = require('./routes/taste-analytics');
+const customOrderRoutes = require('./routes/custom-orders');
 
 const app = express();
 
 // 中间件
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, '../images')));
 
-// 请求日志中间件
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
-});
-
-// 路由
+// API路由
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/store-config', storeConfigRoutes);
+app.use('/api/user', userRoutes);
 
-// 健康检查
-app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: '服务运行正常',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0'
-  });
-});
+// 新的API路由
+app.use('/api/recipes', recipeRoutes);
+app.use('/api/user-tags', userTagRoutes);
+app.use('/api/recipe-plans', recipePlanRoutes);
+app.use('/api/interactions', userInteractionRoutes);
+app.use('/api/plan-follows', userPlanFollowRoutes);
+
+// 特色功能API路由
+app.use('/api/blind-box', blindBoxRoutes);
+app.use('/api/reminders', reminderRoutes);
+app.use('/api/homepage', homepageRoutes);
+app.use('/api/game', gameRoutes);
+
+// 商家功能升级API路由
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/taste-analytics', tasteAnalyticsRoutes);
+app.use('/api/custom-orders', customOrderRoutes);
 
 // 根路径
 app.get('/', (req, res) => {
   res.json({
-    success: true,
-    message: '微信小程序点单系统 API 服务',
-    version: '1.0.0',
+    message: '明星厨师show API服务',
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
     endpoints: {
       products: '/api/products',
       orders: '/api/orders',
       categories: '/api/categories',
-      upload: '/api/upload',
-      health: '/health'
+      uploads: '/api/uploads',
+      storeConfig: '/api/store-config',
+      recipes: '/api/recipes',
+      userTags: '/api/user-tags',
+      recipePlans: '/api/recipe-plans',
+      interactions: '/api/interactions',
+      planFollows: '/api/plan-follows',
+      blindBox: '/api/blind-box',
+      reminders: '/api/reminders',
+      homepage: '/api/homepage',
+      game: '/api/game',
+      inventory: '/api/inventory',
+      tasteAnalytics: '/api/taste-analytics',
+      customOrders: '/api/custom-orders'
     }
-  });
-});
-
-// 404 处理
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: '接口不存在',
-    path: req.originalUrl
   });
 });
 
 // 错误处理中间件
 app.use((err, req, res, next) => {
-  console.error('服务器错误:', err);
-  
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || '服务器内部错误',
-    error: config.server.env === 'development' ? err.stack : undefined
+  console.error(err.stack);
+  res.status(500).json({
+    error: '服务器内部错误',
+    message: err.message
+  });
+});
+
+// 404处理
+app.use((req, res) => {
+  res.status(404).json({
+    error: '接口不存在',
+    path: req.path
   });
 });
 

@@ -42,9 +42,9 @@
         <view class="action-icon">🍽️</view>
         <view class="action-text">菜单管理</view>
       </view>
-      <view class="action-item" bindtap="goToCategories">
-        <view class="action-icon">📂</view>
-        <view class="action-text">分类管理</view>
+      <view class="action-item" bindtap="goToStoreConfig">
+        <view class="action-icon">🏪</view>
+        <view class="action-text">店铺配置</view>
       </view>
       <view class="action-item" bindtap="refreshData">
         <view class="action-icon">🔄</view>

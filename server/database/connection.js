@@ -1,11 +1,3 @@
-/*
- * @Author: liyanminghui@codeck.ai
- * @Date: 2025-07-11 15:23:23
- * @LastEditTime: 2025-07-11 18:29:04
- * @LastEditors: liyanminghui@codeck.ai
- * @Description: 
- * @FilePath: /little/server/database/connection.js
- */
 // database/connection.js - 数据库连接
 const mysql = require('mysql2/promise');
 const config = require('../config');
@@ -17,12 +9,9 @@ const pool = mysql.createPool({
   user: config.database.user,
   password: config.database.password,
   database: config.database.database,
-  waitForConnections: true,
+  waitForConnections: config.database.waitForConnections,
   connectionLimit: config.database.connectionLimit,
-  queueLimit: 0,
-  acquireTimeout: config.database.acquireTimeout,
-  timeout: config.database.timeout,
-  reconnect: true
+  queueLimit: config.database.queueLimit
 });
 
 // 测试数据库连接

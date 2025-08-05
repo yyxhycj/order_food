@@ -1,7 +1,8 @@
 <!--pages/menu/menu.wxml-->
 <view class="container">
   <!-- 店铺信息区域 -->
-  <view class="store-info">
+  <view class="store-info" style="background: {{bannerColor}};">
+    <image wx:if="{{bannerImage}}" src="{{bannerImage}}" class="banner-image"></image>
     <view class="store-header">
       <view class="store-name" bindlongpress="onStoreLongPress">{{storeName}}</view>
       <view class="store-subtitle">{{storeSubtitle}}</view>
@@ -10,15 +11,12 @@
       <view class="rating">
         <text class="rating-score">{{storeRating}}</text>
         <text class="rating-text">月售{{monthSales}}单</text>
-        <text class="delivery-text">配送约{{deliveryTime}}分钟</text>
-        <text class="distance-text">距离{{distance}}km</text>
+        <text class="rating-percent">{{ratingPercent}}%好评率</text>
       </view>
     </view>
     <view class="store-tags">
-      <view class="tag promotion">满{{promotionMin}}减{{promotionSave}}元</view>
       <view class="tag">{{itemCount}}菜品</view>
       <view class="tag">{{categoryCount}}分类</view>
-      <view class="tag">{{ratingPercent}}好评率</view>
     </view>
   </view>
 

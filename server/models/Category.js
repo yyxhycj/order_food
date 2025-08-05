@@ -7,7 +7,7 @@ class Category {
     let sql = `
       SELECT c.*, COUNT(p.id) as product_count
       FROM categories c
-      LEFT JOIN products p ON c.id = p.category_id
+      LEFT JOIN menu_items p ON c.id = p.category_id
       WHERE 1=1
     `;
     const params = [];
@@ -27,7 +27,7 @@ class Category {
     const sql = `
       SELECT c.*, COUNT(p.id) as product_count
       FROM categories c
-      LEFT JOIN products p ON c.id = p.category_id
+      LEFT JOIN menu_items p ON c.id = p.category_id
       WHERE c.id = ?
       GROUP BY c.id
     `;
@@ -76,7 +76,7 @@ class Category {
   // 删除分类
   static async delete(id) {
     // 检查是否有关联的商品
-    const checkSql = 'SELECT COUNT(*) as count FROM products WHERE category_id = ?';
+    const checkSql = 'SELECT COUNT(*) as count FROM menu_items WHERE category_id = ?';
     const checkResult = await db.query(checkSql, [id]);
     
     if (checkResult[0].count > 0) {

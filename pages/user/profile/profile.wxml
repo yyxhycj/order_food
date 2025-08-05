@@ -1,0 +1,149 @@
+<!--pages/user/profile/profile.wxml-->
+<view class="user-profile">
+  <!-- 用户头部信息 -->
+  <view class="profile-header">
+    <view class="avatar-section">
+      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill" bindtap="changeAvatar"></image>
+      <view class="avatar-edit" bindtap="changeAvatar">
+        <text class="edit-text">点击更换头像</text>
+      </view>
+    </view>
+    <view class="user-info">
+      <text class="user-name">{{userInfo.nickname || '未设置昵称'}}</text>
+      <text class="user-level">{{levelMap[userInfo.cooking_level] || '初学者'}}</text>
+      <text class="user-bio">{{userInfo.bio || '这个人很懒，什么都没有留下~'}}</text>
+    </view>
+    <view class="edit-btn" bindtap="editProfile">
+      <text class="edit-text">编辑</text>
+    </view>
+  </view>
+
+  <!-- 用户统计 -->
+  <view class="stats-section">
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-number">{{userInfo.recipe_count || 0}}</text>
+        <text class="stat-label">创建菜谱</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{userInfo.follower_count || 0}}</text>
+        <text class="stat-label">关注者</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{userInfo.following_count || 0}}</text>
+        <text class="stat-label">关注</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{userInfo.total_likes || 0}}</text>
+        <text class="stat-label">获赞</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用户认证 -->
+  <view class="verification-section" wx:if="{{userInfo.is_verified}}">
+    <view class="verification-badge">
+      <image class="badge-icon" src="/images/verified.png"></image>
+      <text class="badge-text">{{verificationMap[userInfo.verification_type] || '已认证'}}</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goToTags">
+      <image class="menu-icon" src="/images/tags.png"></image>
+      <text class="menu-text">我的标签</text>
+      <text class="menu-count">{{tagCount}}</text>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToTasteProfile">
+      <image class="menu-icon" src="/images/taste.png"></image>
+      <text class="menu-text">口味档案</text>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToCollections">
+      <image class="menu-icon" src="/images/collections.png"></image>
+      <text class="menu-text">我的收藏</text>
+      <text class="menu-count">{{collectionCount}}</text>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToRecipes">
+      <image class="menu-icon" src="/images/recipes.png"></image>
+      <text class="menu-text">我的菜谱</text>
+      <text class="menu-count">{{recipeCount}}</text>
+      <view class="menu-arrow">></view>
+    </view>
+    <view class="menu-item" bindtap="goToReviews">
+      <image class="menu-icon" src="/images/reviews.png"></image>
+      <text class="menu-text">我的评价</text>
+      <text class="menu-count">{{reviewCount}}</text>
+      <view class="menu-arrow">></view>
+    </view>
+  </view>
+
+  <!-- 个性化设置 -->
+  <view class="settings-section">
+    <view class="section-title">个性化设置</view>
+    <view class="setting-item" bindtap="goToHomepageConfig">
+      <image class="setting-icon" src="/images/homepage.png"></image>
+      <text class="setting-text">主页装扮</text>
+      <view class="setting-arrow">></view>
+    </view>
+    <view class="setting-item">
+      <image class="setting-icon" src="/images/notification.png"></image>
+      <text class="setting-text">消息通知</text>
+      <switch class="setting-switch" checked="{{notificationEnabled}}" bindchange="toggleNotification"/>
+    </view>
+    <view class="setting-item">
+      <image class="setting-icon" src="/images/privacy.png"></image>
+      <text class="setting-text">隐私设置</text>
+      <view class="setting-arrow">></view>
+    </view>
+  </view>
+
+  <!-- 最近活动 -->
+  <view class="activity-section">
+    <view class="section-title">最近活动</view>
+    <view class="activity-list">
+      <block wx:for="{{recentActivities}}" wx:key="id">
+        <view class="activity-item">
+          <image class="activity-icon" src="{{item.icon}}"></image>
+          <view class="activity-content">
+            <text class="activity-text">{{item.description}}</text>
+            <text class="activity-time">{{item.time}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 编辑资料弹窗 -->
+  <view class="modal-overlay" wx:if="{{showEditModal}}" bindtap="hideEditModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">编辑资料</text>
+        <text class="modal-close" bindtap="hideEditModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">昵称</text>
+          <input class="form-input" placeholder="请输入昵称" value="{{editForm.nickname}}" bindinput="onNicknameInput"/>
+        </view>
+        <view class="form-item">
+          <text class="form-label">个人简介</text>
+          <textarea class="form-textarea" placeholder="介绍一下自己吧..." value="{{editForm.bio}}" bindinput="onBioInput" maxlength="200"></textarea>
+        </view>
+        <view class="form-item">
+          <text class="form-label">烹饪等级</text>
+          <picker class="form-picker" value="{{editForm.cooking_level_index}}" range="{{cookingLevels}}" bindchange="onCookingLevelChange">
+            <text class="picker-text">{{cookingLevels[editForm.cooking_level_index]}}</text>
+          </picker>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel" bindtap="hideEditModal">取消</button>
+        <button class="modal-btn confirm" bindtap="saveProfile">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

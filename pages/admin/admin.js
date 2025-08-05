@@ -144,10 +144,10 @@ Page({
     })
   },
 
-  // 跳转到分类管理 (现在已合并到菜单管理)
-  goToCategories: function () {
+  // 跳转到店铺配置
+  goToStoreConfig: function () {
     wx.navigateTo({
-      url: '/pages/admin/menu/menu'
+      url: '/pages/admin/store-config/store-config'
     })
   },
 

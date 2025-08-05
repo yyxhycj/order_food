@@ -41,9 +41,6 @@ class OrderController {
       const parsedPage = parseInt(page) || 1;
       const offset = (parsedPage - 1) * parsedLimit;
       
-      // 调试输出
-      console.log('获取订单列表参数:', { status, parsedLimit, offset });
-      
       const orders = await Order.findAll(status, parsedLimit, offset);
       
       res.json({

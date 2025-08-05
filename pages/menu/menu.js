@@ -8,15 +8,11 @@ Page({
     storeSubtitle: '(示例店铺)',
     storeRating: '4.6',
     monthSales: '2123',
-    deliveryTime: '30',
-    distance: '0.65',
-    promotionMin: '20',
-    promotionSave: '5',
     itemCount: 0,
     categoryCount: 0,
     ratingPercent: '94',
-    
-
+    bannerImage: '',
+    bannerColor: '#ff6b6b',
     
     // 分类和商品
     currentCategory: 0,
@@ -38,12 +34,36 @@ Page({
       })
     }
     
+    this.loadStoreConfig()
     this.loadCategories()
     this.loadProducts()
   },
 
   onShow() {
     this.updateCartInfo()
+  },
+
+  // 加载店铺配置
+  loadStoreConfig() {
+    app.request({
+      url: '/store-config',
+      method: 'GET'
+    }).then(res => {
+      if (res.success && res.data) {
+        this.setData({
+          storeName: res.data.store_name,
+          storeSubtitle: res.data.store_subtitle,
+          storeRating: res.data.store_rating.toString(),
+          monthSales: res.data.month_sales.toString(),
+          ratingPercent: res.data.rating_percent.toString(),
+          bannerImage: res.data.banner_image || '',
+          bannerColor: res.data.banner_color || '#ff6b6b'
+        })
+      }
+    }).catch(error => {
+      console.error('加载店铺配置失败:', error)
+      // 使用默认配置，无需显示错误提示
+    })
   },
 
   // 加载分类

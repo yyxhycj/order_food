@@ -6,11 +6,9 @@ class Order {
   // 获取所有订单
   static async findAll(status = null, limit = null, offset = null) {
     let sql = `
-      SELECT o.*, 
-             COUNT(oi.id) as item_count,
-             SUM(oi.quantity) as total_quantity
+      SELECT o.id, o.order_no, o.user_id, o.user_name, o.user_phone, 
+             o.status, o.pickup_time, o.remark, o.created_at, o.updated_at
       FROM orders o 
-      LEFT JOIN order_items oi ON o.id = oi.order_id
       WHERE 1=1
     `;
     const params = [];
@@ -20,14 +18,13 @@ class Order {
       params.push(status);
     }
 
-    sql += ' GROUP BY o.id ORDER BY o.created_at DESC';
+    sql += ' ORDER BY o.created_at DESC';
 
-    if (limit !== null && limit !== undefined) {
-      sql += ' LIMIT ?';
-      params.push(limit);
-      if (offset !== null && offset !== undefined) {
-        sql += ' OFFSET ?';
-        params.push(offset);
+    if (limit !== null && limit !== undefined && Number.isInteger(limit) && limit > 0) {
+      if (offset !== null && offset !== undefined && Number.isInteger(offset) && offset >= 0) {
+        sql += ` LIMIT ${offset}, ${limit}`;
+      } else {
+        sql += ` LIMIT ${limit}`;
       }
     }
 
@@ -49,7 +46,7 @@ class Order {
     const itemsSql = `
       SELECT oi.*, p.image as product_image
       FROM order_items oi
-      LEFT JOIN products p ON oi.product_id = p.id
+      LEFT JOIN menu_items p ON oi.product_id = p.id
       WHERE oi.order_id = ?
     `;
     const items = await db.query(itemsSql, [id]);
@@ -75,7 +72,7 @@ class Order {
     const itemsSql = `
       SELECT oi.*, p.image as product_image
       FROM order_items oi
-      LEFT JOIN products p ON oi.product_id = p.id
+      LEFT JOIN menu_items p ON oi.product_id = p.id
       WHERE oi.order_id = ?
     `;
     const items = await db.query(itemsSql, [order.id]);

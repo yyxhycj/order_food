@@ -1,0 +1,231 @@
+<view class="user-tags">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="header-info">
+      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-details">
+        <text class="user-name">{{userInfo.nickname || '用户'}}</text>
+        <text class="user-level">{{userInfo.cooking_level || '初学者'}}</text>
+      </view>
+    </view>
+    <view class="header-stats">
+      <view class="stat-item">
+        <text class="stat-number">{{userTags.length}}</text>
+        <text class="stat-label">我的标签</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{autoTagsCount}}</text>
+        <text class="stat-label">自动生成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签云展示 -->
+  <view class="tags-cloud-section">
+    <view class="section-header">
+      <text class="section-title">我的标签云</text>
+      <button class="refresh-btn" bindtap="refreshTags">
+        <image class="refresh-icon" src="/images/refresh.png"></image>
+      </button>
+    </view>
+    
+    <view class="tags-cloud">
+      <block wx:for="{{userTags}}" wx:key="id">
+        <view class="tag-item {{item.tag_type}}" style="font-size: {{item.fontSize}}rpx; opacity: {{item.opacity}}" bindtap="selectTag" data-tag="{{item}}">
+          <text class="tag-text">{{item.tag_name}}</text>
+          <view class="tag-score">{{item.confidence_score}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 标签分类管理 -->
+  <view class="tag-categories">
+    <view class="category-tabs">
+      <block wx:for="{{tagCategories}}" wx:key="value">
+        <view class="category-tab {{selectedCategory === item.value ? 'active' : ''}}" bindtap="switchCategory" data-category="{{item.value}}">
+          <text class="tab-text">{{item.label}}</text>
+        </view>
+      </block>
+    </view>
+    
+    <view class="category-content">
+      <view class="category-tags">
+        <block wx:for="{{filteredTags}}" wx:key="id">
+          <view class="category-tag-item">
+            <view class="tag-info">
+              <text class="tag-name">{{item.tag_name}}</text>
+              <view class="tag-meta">
+                <text class="tag-type-label">{{item.tag_type === 'auto' ? '自动' : '手动'}}</text>
+                <text class="tag-confidence">置信度: {{item.confidence_score}}</text>
+              </view>
+            </view>
+            <view class="tag-actions">
+              <button class="action-btn edit" bindtap="editTag" data-tag="{{item}}">编辑</button>
+              <button class="action-btn delete" bindtap="deleteTag" data-tag="{{item}}">删除</button>
+            </view>
+          </view>
+        </block>
+      </view>
+      
+      <!-- 添加新标签 -->
+      <view class="add-tag-section">
+        <view class="add-tag-input">
+          <input class="tag-input" placeholder="添加新标签" value="{{newTagName}}" bindinput="onTagInput" bindconfirm="addTag"/>
+          <button class="add-btn" bindtap="addTag">添加</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 智能标签生成 -->
+  <view class="smart-generation">
+    <view class="generation-header">
+      <text class="generation-title">智能标签生成</text>
+      <text class="generation-subtitle">基于您的行为自动生成个性化标签</text>
+    </view>
+    
+    <view class="generation-options">
+      <view class="option-item" bindtap="generateFromRecipes">
+        <image class="option-icon" src="/images/recipes.png"></image>
+        <view class="option-content">
+          <text class="option-title">从菜谱分析</text>
+          <text class="option-desc">基于您创建的菜谱生成标签</text>
+        </view>
+        <view class="option-arrow">></view>
+      </view>
+      
+      <view class="option-item" bindtap="generateFromOrders">
+        <image class="option-icon" src="/images/orders.png"></image>
+        <view class="option-content">
+          <text class="option-title">从订单分析</text>
+          <text class="option-desc">基于您的点餐历史生成标签</text>
+        </view>
+        <view class="option-arrow">></view>
+      </view>
+      
+      <view class="option-item" bindtap="generateFromReviews">
+        <image class="option-icon" src="/images/reviews.png"></image>
+        <view class="option-content">
+          <text class="option-title">从评价分析</text>
+          <text class="option-desc">基于您的评价内容生成标签</text>
+        </view>
+        <view class="option-arrow">></view>
+      </view>
+    </view>
+    
+    <button class="generate-all-btn" bindtap="generateAllTags" loading="{{isGenerating}}">
+      <text class="generate-text">{{isGenerating ? '生成中...' : '一键生成所有标签'}}</text>
+    </button>
+  </view>
+
+  <!-- 标签推荐 -->
+  <view class="tag-recommendations" wx:if="{{recommendedTags.length > 0}}">
+    <view class="recommendations-header">
+      <text class="recommendations-title">推荐标签</text>
+      <text class="recommendations-subtitle">根据相似用户推荐</text>
+    </view>
+    
+    <view class="recommended-tags">
+      <block wx:for="{{recommendedTags}}" wx:key="tag_name">
+        <view class="recommended-tag" bindtap="addRecommendedTag" data-tag="{{item}}">
+          <text class="recommended-tag-name">{{item.tag_name}}</text>
+          <text class="recommended-tag-reason">{{item.reason}}</text>
+          <view class="recommended-tag-add">+</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 标签统计 -->
+  <view class="tag-statistics">
+    <view class="statistics-header">
+      <text class="statistics-title">标签统计</text>
+    </view>
+    
+    <view class="statistics-content">
+      <view class="stats-grid">
+        <view class="stats-item">
+          <text class="stats-label">菜系偏好</text>
+          <text class="stats-value">{{cuisineStats.dominant || '未知'}}</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-label">口味偏好</text>
+          <text class="stats-value">{{tasteStats.dominant || '未知'}}</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-label">烹饪风格</text>
+          <text class="stats-value">{{styleStats.dominant || '未知'}}</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-label">技能水平</text>
+          <text class="stats-value">{{skillStats.level || '初学者'}}</text>
+        </view>
+      </view>
+      
+      <view class="stats-chart">
+        <canvas class="chart-canvas" canvas-id="tagChart" disable-scroll="true"></canvas>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签历史 -->
+  <view class="tag-history" wx:if="{{tagHistory.length > 0}}">
+    <view class="history-header">
+      <text class="history-title">标签变化历史</text>
+    </view>
+    
+    <view class="history-timeline">
+      <block wx:for="{{tagHistory}}" wx:key="id">
+        <view class="history-item">
+          <view class="history-dot {{item.action}}"></view>
+          <view class="history-content">
+            <text class="history-action">{{item.action === 'add' ? '添加' : '删除'}}标签</text>
+            <text class="history-tag">{{item.tag_name}}</text>
+            <text class="history-time">{{item.time}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 标签详情弹窗 -->
+  <view class="tag-detail-modal" wx:if="{{selectedTag}}" bindtap="closeTagDetail">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">标签详情</text>
+        <button class="close-btn" bindtap="closeTagDetail">×</button>
+      </view>
+      
+      <view class="modal-body">
+        <view class="tag-detail-info">
+          <text class="detail-tag-name">{{selectedTag.tag_name}}</text>
+          <view class="detail-meta">
+            <text class="detail-type">{{selectedTag.tag_type === 'auto' ? '自动生成' : '手动添加'}}</text>
+            <text class="detail-confidence">置信度: {{selectedTag.confidence_score}}</text>
+          </view>
+        </view>
+        
+        <view class="tag-detail-stats">
+          <view class="detail-stat">
+            <text class="stat-label">获得时间</text>
+            <text class="stat-value">{{selectedTag.created_at}}</text>
+          </view>
+          <view class="detail-stat">
+            <text class="stat-label">相关菜谱</text>
+            <text class="stat-value">{{selectedTag.related_recipes || 0}}个</text>
+          </view>
+          <view class="detail-stat">
+            <text class="stat-label">使用次数</text>
+            <text class="stat-value">{{selectedTag.usage_count || 0}}次</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="modal-footer">
+        <button class="modal-btn secondary" bindtap="closeTagDetail">取消</button>
+        <button class="modal-btn primary" bindtap="saveTagChanges">保存</button>
+      </view>
+    </view>
+  </view>
+</view> 

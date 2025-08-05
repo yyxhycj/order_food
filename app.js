@@ -20,7 +20,7 @@ App({
     }
 
     // 初始化API基础URL
-    this.globalData.apiBase = 'http://192.168.110.82:3000/api'
+    this.globalData.apiBase = 'http://localhost:3000/api'
   },
 
   globalData: {
