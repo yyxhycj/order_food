@@ -13,23 +13,13 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const storeConfigRoutes = require('./routes/storeConfigRoutes');
 const userRoutes = require('./routes/user');
 
-// 导入新的路由
+// 导入保留的路由
 const recipeRoutes = require('./routes/recipes');
-const userTagRoutes = require('./routes/user-tags');
-const recipePlanRoutes = require('./routes/recipe-plans');
-const userInteractionRoutes = require('./routes/user-interactions');
-const userPlanFollowRoutes = require('./routes/user-plan-follows');
 
 // 导入特色功能路由
 const blindBoxRoutes = require('./routes/blind-box');
 const reminderRoutes = require('./routes/reminders');
-const homepageRoutes = require('./routes/homepage');
 const gameRoutes = require('./routes/game');
-
-// 导入商家功能升级路由
-const inventoryRoutes = require('./routes/inventory');
-const tasteAnalyticsRoutes = require('./routes/taste-analytics');
-const customOrderRoutes = require('./routes/custom-orders');
 
 const app = express();
 
@@ -50,23 +40,13 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/platform-config', storeConfigRoutes);  // 平台配置
 app.use('/api/user', userRoutes);
 
-// 新的API路由
+// 菜谱API路由
 app.use('/api/recipes', recipeRoutes);
-app.use('/api/user-tags', userTagRoutes);
-app.use('/api/recipe-plans', recipePlanRoutes);
-app.use('/api/interactions', userInteractionRoutes);
-app.use('/api/plan-follows', userPlanFollowRoutes);
 
 // 特色功能API路由
 app.use('/api/blind-box', blindBoxRoutes);
 app.use('/api/reminders', reminderRoutes);
-app.use('/api/homepage', homepageRoutes);
 app.use('/api/game', gameRoutes);
-
-// 商家功能升级API路由
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/taste-analytics', tasteAnalyticsRoutes);
-app.use('/api/custom-orders', customOrderRoutes);
 
 // 根路径
 app.get('/', (req, res) => {
@@ -75,23 +55,16 @@ app.get('/', (req, res) => {
     version: '2.0.0',
     timestamp: new Date().toISOString(),
     endpoints: {
-      products: '/api/products',
-      orders: '/api/orders',
+      dishes: '/api/dishes',
+      requests: '/api/requests',
       categories: '/api/categories',
       uploads: '/api/uploads',
-      storeConfig: '/api/store-config',
+      platformConfig: '/api/platform-config',
+      user: '/api/user',
       recipes: '/api/recipes',
-      userTags: '/api/user-tags',
-      recipePlans: '/api/recipe-plans',
-      interactions: '/api/interactions',
-      planFollows: '/api/plan-follows',
       blindBox: '/api/blind-box',
       reminders: '/api/reminders',
-      homepage: '/api/homepage',
-      game: '/api/game',
-      inventory: '/api/inventory',
-      tasteAnalytics: '/api/taste-analytics',
-      customOrders: '/api/custom-orders'
+      game: '/api/game'
     }
   });
 });
