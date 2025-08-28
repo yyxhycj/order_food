@@ -32,6 +32,48 @@ class SmartReminder {
   }
 
   /**
+   * 创建订单提醒
+   * @param {Object} orderData - 订单数据
+   * @returns {Promise<Object>} 创建的提醒信息
+   */
+  static async createOrderReminder(orderData) {
+    try {
+      const { order_id, customer_nickname, customer_id, order_items } = orderData;
+      
+      // 创建给管理员的新订单提醒
+      const reminderData = {
+        user_id: null, // 管理员提醒，不关联特定用户
+        recipe_id: null,
+        plan_id: null,
+        reminder_type: 'new_order',
+        reminder_time: new Date(),
+        message: `收到新的请求！客户：${customer_nickname}，订单号：${order_id}`
+      };
+      
+      const query = `
+        INSERT INTO smart_reminders (user_id, recipe_id, plan_id, reminder_type, reminder_time, message, order_id, is_admin_reminder)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      
+      const result = await db.query(query, [
+        reminderData.user_id,
+        reminderData.recipe_id,
+        reminderData.plan_id,
+        reminderData.reminder_type,
+        reminderData.reminder_time,
+        reminderData.message,
+        order_id,
+        true
+      ]);
+      
+      return await this.findById(result.insertId);
+    } catch (error) {
+      console.error('Error creating order reminder:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 根据ID查找提醒
    * @param {number} id - 提醒ID
    * @returns {Promise<Object|null>} 提醒信息
@@ -477,6 +519,101 @@ class SmartReminder {
       return result.affectedRows;
     } catch (error) {
       console.error('Error cleaning up expired reminders:', error);
+      throw error;
+    }
+  }
+  /**
+   * 获取管理员待处理提醒
+   * @param {number} limit - 限制数量
+   * @param {number} offset - 偏移量
+   * @returns {Promise<Array>} 提醒列表
+   */
+  static async getAdminReminders(limit = 20, offset = 0) {
+    try {
+      const query = `
+        SELECT sr.*, o.request_no, o.user_name, o.user_phone, o.preferred_time
+        FROM smart_reminders sr
+        LEFT JOIN orders o ON sr.order_id = o.id
+        WHERE sr.is_admin_reminder = 1 AND sr.status != 'read'
+        ORDER BY sr.created_at DESC
+        LIMIT ? OFFSET ?
+      `;
+      
+      const rows = await db.query(query, [limit, offset]);
+      
+      return rows;
+    } catch (error) {
+      console.error('Error getting admin reminders:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取未读管理员提醒数量
+   * @returns {Promise<number>} 未读数量
+   */
+  static async getUnreadAdminCount() {
+    try {
+      const query = `
+        SELECT COUNT(*) as count
+        FROM smart_reminders
+        WHERE is_admin_reminder = 1 AND status != 'read'
+      `;
+      
+      const rows = await db.query(query);
+      
+      return rows.length > 0 ? rows[0].count : 0;
+    } catch (error) {
+      console.error('Error getting unread admin count:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 标记提醒为已读
+   * @param {number} id - 提醒ID
+   * @returns {Promise<boolean>} 是否成功
+   */
+  static async markAsRead(id) {
+    try {
+      const query = `
+        UPDATE smart_reminders 
+        SET status = 'read', updated_at = NOW()
+        WHERE id = ?
+      `;
+      
+      const result = await db.query(query, [id]);
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error('Error marking reminder as read:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 批量标记多个提醒为已读
+   * @param {Array} ids - 提醒ID数组
+   * @returns {Promise<number>} 成功数量
+   */
+  static async markMultipleAsRead(ids) {
+    try {
+      if (!ids || ids.length === 0) {
+        return 0;
+      }
+
+      const placeholders = ids.map(() => '?').join(',');
+      const query = `
+        UPDATE smart_reminders 
+        SET status = 'read', updated_at = NOW()
+        WHERE id IN (${placeholders})
+      `;
+      
+      const result = await db.query(query, ids);
+      
+      return result.affectedRows;
+    } catch (error) {
+      console.error('Error marking multiple reminders as read:', error);
       throw error;
     }
   }

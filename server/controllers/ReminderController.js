@@ -40,6 +40,166 @@ class ReminderController {
   }
 
   /**
+   * 创建订单提醒
+   */
+  static async createOrderReminder(req, res) {
+    try {
+      const { order_id, customer_nickname, customer_id, order_items } = req.body;
+      
+      if (!order_id || !customer_nickname) {
+        return res.status(400).json({
+          success: false,
+          message: '订单ID和客户昵称不能为空'
+        });
+      }
+      
+      const reminder = await SmartReminder.createOrderReminder({
+        order_id,
+        customer_nickname,
+        customer_id,
+        order_items
+      });
+      
+      res.json({
+        success: true,
+        data: reminder,
+        message: '创建订单提醒成功'
+      });
+    } catch (error) {
+      console.error('Error creating order reminder:', error);
+      res.status(500).json({
+        success: false,
+        message: '创建订单提醒失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 获取管理员提醒列表
+   */
+  static async getAdminReminders(req, res) {
+    try {
+      const { page = 1, limit = 20 } = req.query;
+      
+      const parsedLimit = parseInt(limit) || 20;
+      const parsedPage = parseInt(page) || 1;
+      const offset = (parsedPage - 1) * parsedLimit;
+      
+      const reminders = await SmartReminder.getAdminReminders(parsedLimit, offset);
+      const unreadCount = await SmartReminder.getUnreadAdminCount();
+      
+      res.json({
+        success: true,
+        data: {
+          reminders,
+          unreadCount,
+          currentPage: parsedPage,
+          totalPages: Math.ceil(unreadCount / parsedLimit)
+        },
+        message: '获取管理员提醒列表成功'
+      });
+    } catch (error) {
+      console.error('Error getting admin reminders:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取管理员提醒列表失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 获取未读提醒数量
+   */
+  static async getUnreadCount(req, res) {
+    try {
+      const count = await SmartReminder.getUnreadAdminCount();
+      
+      res.json({
+        success: true,
+        data: { count },
+        message: '获取未读提醒数量成功'
+      });
+    } catch (error) {
+      console.error('Error getting unread count:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取未读提醒数量失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 标记提醒为已读
+   */
+  static async markAsRead(req, res) {
+    try {
+      const { id } = req.params;
+      
+      if (!id || isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的提醒ID'
+        });
+      }
+      
+      const success = await SmartReminder.markAsRead(parseInt(id));
+      
+      if (success) {
+        res.json({
+          success: true,
+          message: '标记为已读成功'
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: '提醒不存在'
+        });
+      }
+    } catch (error) {
+      console.error('Error marking reminder as read:', error);
+      res.status(500).json({
+        success: false,
+        message: '标记已读失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 批量标记为已读
+   */
+  static async markMultipleAsRead(req, res) {
+    try {
+      const { ids } = req.body;
+      
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'IDs数组不能为空'
+        });
+      }
+      
+      const count = await SmartReminder.markMultipleAsRead(ids);
+      
+      res.json({
+        success: true,
+        data: { count },
+        message: `成功标记${count}条提醒为已读`
+      });
+    } catch (error) {
+      console.error('Error marking multiple reminders as read:', error);
+      res.status(500).json({
+        success: false,
+        message: '批量标记已读失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
    * 获取用户提醒列表
    */
   static async getUserReminders(req, res) {
