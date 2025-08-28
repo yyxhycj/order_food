@@ -1,5 +1,6 @@
 // controllers/requestController.js - 请求控制器
 const Request = require('../models/Request');
+const SmartReminder = require('../models/SmartReminder');
 const Joi = require('joi');
 
 // 验证规则
@@ -156,6 +157,19 @@ class RequestController {
       };
 
       const requestId = await Request.create(requestData);
+      
+      // 创建管理员提醒
+      try {
+        await SmartReminder.createOrderReminder({
+          order_id: requestId,
+          customer_nickname: value.user_name,
+          customer_id: value.user_id,
+          order_items: value.items
+        });
+      } catch (reminderError) {
+        console.error('创建订单提醒失败:', reminderError);
+        // 不要因为提醒创建失败而影响订单创建
+      }
       
       res.status(201).json({
         success: true,

@@ -24,7 +24,181 @@ class BlindBoxController {
   }
 
   /**
-   * 生成智能盲盒
+   * 生成基于食材的盲盒
+   */
+  static async generateIngredientBlindBox(req, res) {
+    try {
+      const { user_id, ingredients, box_size, match_mode } = req.body;
+      
+      if (!user_id) {
+        return res.status(400).json({
+          success: false,
+          message: '用户ID不能为空'
+        });
+      }
+
+      if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '必须选择至少一种食材'
+        });
+      }
+      
+      // 生成基于食材的盲盒
+      const recipeIds = await RecipeBlindBox.generateIngredientBasedBlindBox({
+        user_id,
+        ingredients,
+        box_size: box_size || 5,
+        match_mode: match_mode || 'any'
+      });
+      
+      if (recipeIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '根据选择的食材没有找到合适的菜谱，请尝试其他食材组合'
+        });
+      }
+      
+      // 创建盲盒记录
+      const blindBox = await RecipeBlindBox.create({
+        user_id,
+        theme: `食材盲盒: ${ingredients.slice(0, 3).join(', ')}`,
+        dietary_restrictions: [],
+        budget_range: 'medium',
+        recipe_ids: recipeIds,
+        generation_type: 'ingredient_based',
+        selected_ingredients: ingredients
+      });
+      
+      res.json({
+        success: true,
+        data: blindBox,
+        message: '食材盲盒生成成功'
+      });
+    } catch (error) {
+      console.error('Error generating ingredient blind box:', error);
+      res.status(500).json({
+        success: false,
+        message: '生成食材盲盒失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 获取常用食材列表
+   */
+  static async getIngredients(req, res) {
+    try {
+      const ingredients = await RecipeBlindBox.getCommonIngredients();
+      
+      res.json({
+        success: true,
+        data: ingredients,
+        message: '获取食材列表成功'
+      });
+    } catch (error) {
+      console.error('Error getting ingredients:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取食材列表失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 预览基于食材的盲盒
+   */
+  static async previewIngredientBlindBox(req, res) {
+    try {
+      const { user_id, ingredients, box_size, match_mode } = req.body;
+      
+      if (!user_id) {
+        return res.status(400).json({
+          success: false,
+          message: '用户ID不能为空'
+        });
+      }
+
+      if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '必须选择至少一种食材'
+        });
+      }
+      
+      // 生成预览结果，但不保存
+      const recipeIds = await RecipeBlindBox.generateIngredientBasedBlindBox({
+        user_id,
+        ingredients,
+        box_size: box_size || 5,
+        match_mode: match_mode || 'any'
+      });
+      
+      if (recipeIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '根据选择的食材没有找到合适的菜谱，请尝试其他食材组合'
+        });
+      }
+      
+      // 获取菜谱基本信息用于预览
+      const db = require('../database/connection');
+      const query = `
+        SELECT id, name, main_image, difficulty, cooking_time, average_rating, ingredients
+        FROM recipes
+        WHERE id IN (${recipeIds.map(() => '?').join(', ')})
+      `;
+      
+      const recipes = await db.query(query, recipeIds);
+      
+      res.json({
+        success: true,
+        data: {
+          selected_ingredients: ingredients,
+          match_mode,
+          box_size: recipeIds.length,
+          recipe_preview: recipes.map(recipe => ({
+            id: recipe.id,
+            name: recipe.name,
+            image: recipe.main_image,
+            difficulty: recipe.difficulty,
+            cooking_time: recipe.cooking_time,
+            rating: recipe.average_rating,
+            matched_ingredients: this.findMatchedIngredients(recipe.ingredients, ingredients)
+          }))
+        },
+        message: '食材盲盒预览生成成功'
+      });
+    } catch (error) {
+      console.error('Error previewing ingredient blind box:', error);
+      res.status(500).json({
+        success: false,
+        message: '预览食材盲盒失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 辅助方法：找出菜谱中匹配的食材
+   */
+  static findMatchedIngredients(recipeIngredients, selectedIngredients) {
+    try {
+      const ingredients = JSON.parse(recipeIngredients || '[]');
+      return selectedIngredients.filter(selected => 
+        ingredients.some(ingredient => 
+          ingredient.toLowerCase().includes(selected.toLowerCase())
+        )
+      );
+    } catch (error) {
+      return [];
+    }
+  }
+
+  /**
+   * 生成智能盲盒（菜谱模式）
    */
   static async generateBlindBox(req, res) {
     try {
@@ -39,6 +213,43 @@ class BlindBoxController {
       
       // 生成智能盲盒
       const recipeIds = await RecipeBlindBox.generateSmartBlindBox({
+        user_id,
+        theme,
+        dietary_restrictions,
+        budget_range,
+        box_size: box_size || 5
+      });
+      
+      if (recipeIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '根据您的条件没有找到合适的菜谱，请调整筛选条件'
+        });
+      }
+      
+      // 创建盲盒记录
+      const blindBox = await RecipeBlindBox.create({
+        user_id,
+        theme,
+        dietary_restrictions,
+        budget_range,
+        recipe_ids: recipeIds
+      });
+      
+      res.json({
+        success: true,
+        data: blindBox,
+        message: '盲盒生成成功'
+      });
+    } catch (error) {
+      console.error('Error generating blind box:', error);
+      res.status(500).json({
+        success: false,
+        message: '生成盲盒失败',
+        error: error.message
+      });
+    }
+  }
         user_id,
         theme,
         dietary_restrictions,

@@ -92,7 +92,69 @@ class RecipeBlindBox {
   }
 
   /**
-   * 生成智能盲盒
+   * 生成基于食材的盲盒
+   * @param {Object} preferences - 用户偏好
+   * @returns {Promise<Array>} 推荐菜谱ID列表
+   */
+  static async generateIngredientBasedBlindBox(preferences) {
+    try {
+      const { user_id, ingredients, box_size = 5, match_mode = 'any' } = preferences;
+      
+      if (!ingredients || ingredients.length === 0) {
+        throw new Error('必须选择至少一种食材');
+      }
+      
+      // 构建食材匹配查询
+      let ingredientConditions = [];
+      let queryParams = [];
+      
+      if (match_mode === 'all') {
+        // 包含所有选定食材的菜谱
+        ingredients.forEach(ingredient => {
+          ingredientConditions.push(`JSON_CONTAINS(r.ingredients, ?, '$')`);
+          queryParams.push(`"${ingredient}"`);
+        });
+      } else {
+        // 包含任一选定食材的菜谱（默认模式）
+        const ingredientPlaceholders = ingredients.map(() => `JSON_CONTAINS(r.ingredients, ?, '$')`).join(' OR ');
+        ingredientConditions.push(`(${ingredientPlaceholders})`);
+        ingredients.forEach(ingredient => {
+          queryParams.push(`"${ingredient}"`);
+        });
+      }
+      
+      const query = `
+        SELECT DISTINCT r.id, r.name, r.difficulty, r.cooking_time, r.average_rating,
+               r.seasonal_tags, r.ingredients, r.view_count, r.like_count,
+               r.description, r.image_url
+        FROM recipes r
+        WHERE r.status = 'active' 
+          AND (${ingredientConditions.join(' AND ')})
+        ORDER BY r.average_rating DESC, r.view_count DESC, RAND()
+        LIMIT ?
+      `;
+      
+      queryParams.push(box_size * 2); // 获取更多候选
+      
+      const recipes = await db.query(query, queryParams);
+      
+      if (recipes.length === 0) {
+        // 如果没有找到匹配的菜谱，降低要求重新搜索
+        return await this.generateFallbackRecipes(ingredients, box_size);
+      }
+      
+      // 应用多样性算法
+      const diversifiedRecipes = this.applyDiversityAlgorithm(recipes, box_size);
+      
+      return diversifiedRecipes.map(recipe => recipe.id);
+    } catch (error) {
+      console.error('Error generating ingredient-based blind box:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 生成智能盲盒（菜谱模式）
    * @param {Object} preferences - 用户偏好
    * @returns {Promise<Array>} 推荐菜谱ID列表
    */
@@ -387,6 +449,142 @@ class RecipeBlindBox {
       console.error('Error deleting blind box:', error);
       throw error;
     }
+  }
+  /**
+   * 降级搜索菜谱（当食材匹配失败时）
+   * @param {Array} ingredients - 食材列表
+   * @param {number} boxSize - 盲盒大小
+   * @returns {Promise<Array>} 菜谱ID列表
+   */
+  static async generateFallbackRecipes(ingredients, boxSize) {
+    try {
+      // 逐个减少食材要求，直到找到足够的菜谱
+      for (let i = ingredients.length - 1; i > 0; i--) {
+        const partialIngredients = ingredients.slice(0, i);
+        const placeholders = partialIngredients.map(() => `JSON_CONTAINS(r.ingredients, ?, '$')`).join(' OR ');
+        
+        const query = `
+          SELECT DISTINCT r.id, r.name, r.difficulty, r.cooking_time, r.average_rating,
+                 r.seasonal_tags, r.ingredients, r.view_count, r.like_count
+          FROM recipes r
+          WHERE r.status = 'active' AND (${placeholders})
+          ORDER BY r.average_rating DESC, RAND()
+          LIMIT ?
+        `;
+        
+        const queryParams = [];
+        partialIngredients.forEach(ingredient => {
+          queryParams.push(`"${ingredient}"`);
+        });
+        queryParams.push(boxSize);
+        
+        const recipes = await db.query(query, queryParams);
+        
+        if (recipes.length >= boxSize) {
+          return recipes.slice(0, boxSize).map(recipe => recipe.id);
+        }
+      }
+      
+      // 如果仍然找不到，返回随机菜谱
+      return await this.getRandomRecipes(boxSize);
+    } catch (error) {
+      console.error('Error generating fallback recipes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取随机菜谱
+   * @param {number} limit - 限制数量
+   * @returns {Promise<Array>} 菜谱ID列表
+   */
+  static async getRandomRecipes(limit) {
+    try {
+      const query = `
+        SELECT id FROM recipes 
+        WHERE status = 'active'
+        ORDER BY RAND()
+        LIMIT ?
+      `;
+      
+      const recipes = await db.query(query, [limit]);
+      return recipes.map(recipe => recipe.id);
+    } catch (error) {
+      console.error('Error getting random recipes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取常用食材列表
+   * @returns {Promise<Array>} 食材列表
+   */
+  static async getCommonIngredients() {
+    try {
+      // 从菜谱中统计最常用的食材
+      const query = `
+        SELECT 
+          JSON_UNQUOTE(JSON_EXTRACT(r.ingredients, CONCAT('$[', numbers.n, ']'))) as ingredient,
+          COUNT(*) as usage_count
+        FROM recipes r
+        CROSS JOIN (
+          SELECT 0 as n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 
+          UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9
+        ) numbers
+        WHERE r.status = 'active'
+          AND JSON_EXTRACT(r.ingredients, CONCAT('$[', numbers.n, ']')) IS NOT NULL
+          AND JSON_UNQUOTE(JSON_EXTRACT(r.ingredients, CONCAT('$[', numbers.n, ']'))) != 'null'
+        GROUP BY ingredient
+        HAVING ingredient IS NOT NULL AND ingredient != ''
+        ORDER BY usage_count DESC, ingredient
+        LIMIT 50
+      `;
+      
+      const results = await db.query(query);
+      
+      // 如果查询结果为空，返回预设的常用食材
+      if (results.length === 0) {
+        return this.getPresetIngredients();
+      }
+      
+      return results.map(row => ({
+        name: row.ingredient,
+        count: row.usage_count
+      }));
+    } catch (error) {
+      console.error('Error getting common ingredients:', error);
+      // 出错时返回预设食材
+      return this.getPresetIngredients();
+    }
+  }
+
+  /**
+   * 获取预设的常用食材
+   * @returns {Array} 预设食材列表
+   */
+  static getPresetIngredients() {
+    return [
+      { name: '鸡蛋', count: 0 },
+      { name: '大米', count: 0 },
+      { name: '面粉', count: 0 },
+      { name: '猪肉', count: 0 },
+      { name: '鸡肉', count: 0 },
+      { name: '牛肉', count: 0 },
+      { name: '鱼肉', count: 0 },
+      { name: '土豆', count: 0 },
+      { name: '胡萝卜', count: 0 },
+      { name: '白菜', count: 0 },
+      { name: '青菜', count: 0 },
+      { name: '豆腐', count: 0 },
+      { name: '西红柿', count: 0 },
+      { name: '洋葱', count: 0 },
+      { name: '大蒜', count: 0 },
+      { name: '生姜', count: 0 },
+      { name: '香菇', count: 0 },
+      { name: '青椒', count: 0 },
+      { name: '茄子', count: 0 },
+      { name: '黄瓜', count: 0 }
+    ];
   }
 }
 

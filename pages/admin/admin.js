@@ -9,7 +9,9 @@ Page({
       productCount: 0,
       pendingCount: 0
     },
-    recentOrders: []
+    recentOrders: [],
+    unreadReminders: 0,
+    showReminderBadge: false
   },
 
   onLoad: function (options) {
@@ -39,6 +41,24 @@ Page({
   loadData: function () {
     this.loadTodayStats()
     this.loadRecentOrders()
+    this.loadUnreadReminders()
+  },
+
+  // 加载未读提醒数量
+  loadUnreadReminders: function () {
+    app.request({
+      url: '/reminders/admin/unread',
+      method: 'GET'
+    }).then(res => {
+      if (res.success && res.data) {
+        this.setData({
+          unreadReminders: res.data.count,
+          showReminderBadge: res.data.count > 0
+        })
+      }
+    }).catch(error => {
+      console.error('获取未读提醒数量失败:', error)
+    })
   },
 
   // 加载今日统计
@@ -134,6 +154,13 @@ Page({
   goToOrders: function () {
     wx.navigateTo({
       url: '/pages/admin/orders/orders'
+    })
+  },
+
+  // 跳转到提醒列表
+  goToReminders: function () {
+    wx.navigateTo({
+      url: '/pages/reminders/list/list'
     })
   },
 

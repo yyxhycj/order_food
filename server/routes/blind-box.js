@@ -5,11 +5,20 @@ const BlindBoxController = require('../controllers/BlindBoxController');
 // 获取盲盒主题列表
 router.get('/themes', BlindBoxController.getThemes);
 
-// 生成智能盲盒
+// 生成智能盲盒（菜谱模式）
 router.post('/generate', BlindBoxController.generateBlindBox);
 
-// 预览盲盒生成结果
+// 生成基于食材的盲盒
+router.post('/generate/ingredient', BlindBoxController.generateIngredientBlindBox);
+
+// 获取常用食材列表
+router.get('/ingredients', BlindBoxController.getIngredients);
+
+// 预览盲盒生成结果（菜谱模式）
 router.post('/preview', BlindBoxController.previewBlindBox);
+
+// 预览基于食材的盲盒
+router.post('/preview/ingredient', BlindBoxController.previewIngredientBlindBox);
 
 // 获取用户盲盒列表
 router.get('/user/:user_id', BlindBoxController.getUserBlindBoxes);
