@@ -51,11 +51,11 @@ Page({
     }).then(res => {
       if (res.success && res.data) {
         this.setData({
-          storeName: res.data.store_name,
-          storeSubtitle: res.data.store_subtitle,
-          storeRating: res.data.store_rating.toString(),
-          monthSales: res.data.month_sales.toString(),
-          ratingPercent: res.data.rating_percent.toString(),
+          storeName: res.data.store_name || '菜谱分享平台',
+          storeSubtitle: res.data.store_subtitle || '(分享美食，传递心意)',
+          storeRating: (res.data.store_rating || 4.6).toString(),
+          monthSales: (res.data.month_sales || 0).toString(),
+          ratingPercent: (res.data.rating_percent || 0).toString(),
           bannerImage: res.data.banner_image || '',
           bannerColor: res.data.banner_color || '#ff6b6b'
         })

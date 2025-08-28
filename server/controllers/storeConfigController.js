@@ -4,25 +4,24 @@ const Joi = require('joi');
 
 // 验证规则
 const storeConfigSchema = Joi.object({
-  store_name: Joi.string().required().min(1).max(100).messages({
-    'string.empty': '店铺名称不能为空',
-    'string.min': '店铺名称至少1个字符',
-    'string.max': '店铺名称最多100个字符',
-    'any.required': '店铺名称是必填项'
+  platform_name: Joi.string().required().min(1).max(100).messages({
+    'string.empty': '平台名称不能为空',
+    'string.min': '平台名称至少1个字符',
+    'string.max': '平台名称最多100个字符',
+    'any.required': '平台名称是必填项'
   }),
-  store_subtitle: Joi.string().allow('').max(100).messages({
-    'string.max': '店铺副标题最多100个字符'
+  platform_subtitle: Joi.string().allow('').max(100).messages({
+    'string.max': '平台副标题最多100个字符'
   }),
-  store_rating: Joi.number().min(0).max(5).precision(1).messages({
-    'number.min': '店铺评分最少0分',
-    'number.max': '店铺评分最多5分'
+  platform_rating: Joi.number().min(0).max(5).precision(1).messages({
+    'number.min': '平台评分最少0分',
+    'number.max': '平台评分最多5分'
   }),
-  month_sales: Joi.number().integer().min(0).messages({
-    'number.min': '月销量不能为负数'
+  total_requests: Joi.number().integer().min(0).messages({
+    'number.min': '总请求数不能为负数'
   }),
-  rating_percent: Joi.number().integer().min(0).max(100).messages({
-    'number.min': '好评率不能小于0%',
-    'number.max': '好评率不能大于100%'
+  active_users: Joi.number().integer().min(0).messages({
+    'number.min': '活跃用户数不能为负数'
   }),
   banner_image: Joi.string().allow('').max(255).messages({
     'string.max': '横幅图片路径最多255个字符'
@@ -44,15 +43,15 @@ class StoreConfigController {
         return res.json({
           success: true,
           data: {
-            store_name: '点单小程序',
-            store_subtitle: '(示例店铺)',
+            store_name: '菜谱分享平台',
+            store_subtitle: '(分享美食，传递心意)',
             store_rating: 4.6,
             month_sales: 2123,
             rating_percent: 94,
             banner_image: '',
             banner_color: '#ff6b6b'
           },
-          message: '获取店铺配置成功（默认配置）'
+          message: '获取平台配置成功（默认配置）'
         });
       }
       
@@ -60,21 +59,21 @@ class StoreConfigController {
       res.json({
         success: true,
         data: {
-          store_name: config.store_name,
-          store_subtitle: config.store_subtitle,
-          store_rating: config.store_rating,
-          month_sales: config.month_sales,
-          rating_percent: config.rating_percent,
-          banner_image: config.banner_image,
-          banner_color: config.banner_color
+          store_name: config.platform_name || '菜谱分享平台',
+          store_subtitle: config.platform_subtitle || '(分享美食，传递心意)',
+          store_rating: Number(config.platform_rating) || 4.6,
+          month_sales: Number(config.total_requests) || 0,
+          rating_percent: Number(config.active_users) || 0,
+          banner_image: config.banner_image || '',
+          banner_color: config.banner_color || '#ff6b6b'
         },
-        message: '获取店铺配置成功'
+        message: '获取平台配置成功'
       });
     } catch (error) {
-      console.error('获取店铺配置失败:', error);
+      console.error('获取平台配置失败:', error);
       res.status(500).json({
         success: false,
-        message: '获取店铺配置失败',
+        message: '获取平台配置失败',
         error: error.message
       });
     }
@@ -94,11 +93,11 @@ class StoreConfigController {
       }
 
       const {
-        store_name,
-        store_subtitle,
-        store_rating,
-        month_sales,
-        rating_percent,
+        platform_name,
+        platform_subtitle,
+        platform_rating,
+        total_requests,
+        active_users,
         banner_image,
         banner_color
       } = value;
@@ -111,15 +110,15 @@ class StoreConfigController {
         // 插入新配置
         const insertSql = `
           INSERT INTO store_config 
-          (store_name, store_subtitle, store_rating, month_sales, rating_percent, banner_image, banner_color, status) 
+          (platform_name, platform_subtitle, platform_rating, total_requests, active_users, banner_image, banner_color, status) 
           VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
         `;
         await db.query(insertSql, [
-          store_name,
-          store_subtitle,
-          store_rating,
-          month_sales,
-          rating_percent,
+          platform_name,
+          platform_subtitle,
+          platform_rating,
+          total_requests,
+          active_users,
           banner_image,
           banner_color
         ]);
@@ -127,16 +126,16 @@ class StoreConfigController {
         // 更新现有配置
         const updateSql = `
           UPDATE store_config 
-          SET store_name = ?, store_subtitle = ?, store_rating = ?, month_sales = ?, 
-              rating_percent = ?, banner_image = ?, banner_color = ?, updated_at = CURRENT_TIMESTAMP
+          SET platform_name = ?, platform_subtitle = ?, platform_rating = ?, total_requests = ?, 
+              active_users = ?, banner_image = ?, banner_color = ?, updated_at = CURRENT_TIMESTAMP
           WHERE status = 'active'
         `;
         await db.query(updateSql, [
-          store_name,
-          store_subtitle,
-          store_rating,
-          month_sales,
-          rating_percent,
+          platform_name,
+          platform_subtitle,
+          platform_rating,
+          total_requests,
+          active_users,
           banner_image,
           banner_color
         ]);
@@ -145,21 +144,21 @@ class StoreConfigController {
       res.json({
         success: true,
         data: {
-          store_name,
-          store_subtitle,
-          store_rating,
-          month_sales,
-          rating_percent,
+          store_name: platform_name,
+          store_subtitle: platform_subtitle,
+          store_rating: platform_rating,
+          month_sales: total_requests,
+          rating_percent: active_users,
           banner_image,
           banner_color
         },
-        message: '更新店铺配置成功'
+        message: '更新平台配置成功'
       });
     } catch (error) {
-      console.error('更新店铺配置失败:', error);
+      console.error('更新平台配置失败:', error);
       res.status(500).json({
         success: false,
-        message: '更新店铺配置失败',
+        message: '更新平台配置失败',
         error: error.message
       });
     }
