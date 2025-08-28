@@ -1,86 +1,86 @@
 // pages/orders/orders.js
 Page({
   data: {
-    orders: [],
+    requests: [],
     statusText: {
       'pending': '待处理',
-      'processing': '制作中',
+      'processing': '处理中',
       'completed': '已完成',
       'cancelled': '已取消'
     }
   },
 
   onShow() {
-    this.loadOrders()
+    this.loadRequests()
   },
 
-  // 加载订单列表
-  loadOrders() {
+  // 加载请求列表
+  loadRequests() {
     wx.showLoading({
       title: '加载中...'
     })
 
     const app = getApp()
     
-    // 使用API调用获取订单数据
+    // 使用API调用获取请求数据
     app.request({
-      url: '/orders',
+      url: '/requests',
       method: 'GET'
     }).then(res => {
       wx.hideLoading()
       if (res.success) {
-        // 处理订单数据，添加总数量和格式化时间
-        const processedOrders = res.data.map(order => {
-          const totalQuantity = order.items ? order.items.reduce((total, item) => total + item.quantity, 0) : 0
-          const createTime = this.formatTime(order.created_at || order.createTime)
+        // 处理请求数据，添加总数量和格式化时间
+        const processedRequests = res.data.map(request => {
+          const totalQuantity = request.items ? request.items.reduce((total, item) => total + item.quantity, 0) : 0
+          const createTime = this.formatTime(request.created_at || request.createTime)
           
           return {
-            ...order,
+            ...request,
             totalQuantity,
             createTime: createTime
           }
         })
 
         this.setData({
-          orders: processedOrders
+          requests: processedRequests
         })
       } else {
         wx.showToast({
-          title: res.message || '加载订单失败',
+          title: res.message || '加载请求失败',
           icon: 'none'
         })
       }
     }).catch(err => {
       wx.hideLoading()
-      console.error('加载订单失败', err)
+      console.error('加载请求失败', err)
       wx.showToast({
         title: '网络错误，请检查网络连接',
         icon: 'none'
       })
       
       // 如果API调用失败，尝试使用本地存储作为后备
-      this.loadLocalOrders()
+      this.loadLocalRequests()
     })
   },
 
-  // 加载本地订单（后备方案）
-  loadLocalOrders() {
-    const orders = wx.getStorageSync('orders') || []
+  // 加载本地请求（后备方案）
+  loadLocalRequests() {
+    const requests = wx.getStorageSync('requests') || []
     
-    // 处理订单数据，添加总数量和格式化时间
-    const processedOrders = orders.map(order => {
-      const totalQuantity = order.items.reduce((total, item) => total + item.quantity, 0)
-      const createTime = this.formatTime(order.createTime)
+    // 处理请求数据，添加总数量和格式化时间
+    const processedRequests = requests.map(request => {
+      const totalQuantity = request.items.reduce((total, item) => total + item.quantity, 0)
+      const createTime = this.formatTime(request.createTime)
       
       return {
-        ...order,
+        ...request,
         totalQuantity,
         createTime
       }
     })
 
     this.setData({
-      orders: processedOrders
+      requests: processedRequests
     })
   },
 
@@ -95,11 +95,11 @@ Page({
     return `${month}-${day} ${hours}:${minutes}`
   },
 
-  // 跳转到订单详情
-  goToOrderDetail(e) {
-    const orderNo = e.currentTarget.dataset.orderNo
+  // 跳转到请求详情
+  goToRequestDetail(e) {
+    const requestNo = e.currentTarget.dataset.requestNo
     wx.navigateTo({
-      url: `/pages/order-detail/order-detail?orderNo=${orderNo}`
+      url: `/pages/order-detail/order-detail?requestNo=${requestNo}`
     })
   },
 
