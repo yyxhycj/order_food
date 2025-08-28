@@ -46,7 +46,7 @@ Page({
   // 加载店铺配置
   loadStoreConfig() {
     app.request({
-      url: '/store-config',
+      url: '/platform-config',
       method: 'GET'
     }).then(res => {
       if (res.success && res.data) {
@@ -103,7 +103,7 @@ Page({
   // 加载商品
   loadProducts() {
     app.request({
-      url: '/products',
+      url: '/dishes',
       method: 'GET'
     }).then(res => {
       if (res.success && res.data) {

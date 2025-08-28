@@ -3,9 +3,9 @@ const app = getApp()
 
 Page({
   data: {
-    cartItems: [],
-    totalAmount: 0,
-    remark: ''
+    wishListItems: [],
+    requestReason: '',
+    urgency: 'normal'
   },
 
   onLoad() {
@@ -14,14 +14,13 @@ Page({
 
 
 
-  // 加载购物车商品
+  // 加载愿望清单菜品
   loadCartItems() {
-    const cartItems = app.getCart()
-    const totalAmount = app.getCartTotal()
+    const wishListItems = app.getCart()
 
-    if (cartItems.length === 0) {
+    if (wishListItems.length === 0) {
       wx.showToast({
-        title: '购物车是空的',
+        title: '愿望清单是空的',
         icon: 'none'
       })
       
@@ -34,44 +33,50 @@ Page({
     }
 
     this.setData({
-      cartItems,
-      totalAmount
+      wishListItems
     })
   },
 
 
 
-  // 备注输入
-  onRemarkInput(e) {
+  // 请求原因输入
+  onReasonInput(e) {
     this.setData({
-      remark: e.detail.value
+      requestReason: e.detail.value
+    })
+  },
+
+  // 紧急程度选择
+  onUrgencyChange(e) {
+    this.setData({
+      urgency: e.detail.value
     })
   },
 
 
 
-  // 提交订单
-  submitOrder() {
+  // 提交请求
+  submitRequest() {
     wx.showLoading({
       title: '提交中...'
     })
 
-    // 生成订单数据，适配API格式
-    const orderData = {
-      remark: this.data.remark,
-      items: this.data.cartItems.map(item => ({
-        product_id: item.id,
-        product_name: item.name,
-        price: item.price,
+    // 生成请求数据，适配API格式
+    const requestData = {
+      request_reason: this.data.requestReason,
+      urgency: this.data.urgency,
+      items: this.data.wishListItems.map(item => ({
+        dish_id: item.id,
+        dish_name: item.dish_name || item.name,
         quantity: item.quantity
       }))
     }
 
-    // 使用API调用提交订单
+    // 使用API调用提交请求
     app.request({
-      url: '/orders',
+      url: '/requests',
       method: 'POST',
-      data: orderData
+      data: requestData
     }).then(res => {
       wx.hideLoading()
       if (res.success) {
@@ -79,13 +84,13 @@ Page({
         app.setCart([])
         
         wx.showToast({
-          title: '订单提交成功',
+          title: '请求提交成功',
           icon: 'success'
         })
 
         setTimeout(() => {
           wx.redirectTo({
-            url: `/pages/order-detail/order-detail?orderNo=${res.data.order_no}`
+            url: `/pages/order-detail/order-detail?requestNo=${res.data.request_no}`
           })
         }, 1500)
       } else {
@@ -96,34 +101,32 @@ Page({
       }
     }).catch(err => {
       wx.hideLoading()
-      console.error('提交订单失败', err)
+      console.error('提交请求失败', err)
       wx.showToast({
         title: '网络错误，请重试',
         icon: 'none'
       })
       
       // 如果API调用失败，使用本地存储作为后备
-      this.submitOrderLocally()
+      this.submitRequestLocally()
     })
   },
 
-  // 本地提交订单（后备方案）
-  submitOrderLocally() {
+  // 本地提交请求（后备方案）
+  submitRequestLocally() {
     wx.showLoading({
       title: '本地保存中...'
     })
 
-    const orderData = {
-      orderNo: this.generateOrderNo(),
-      items: this.data.cartItems.map(item => ({
-        productId: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        subtotal: item.price * item.quantity
+    const requestData = {
+      requestNo: this.generateRequestNo(),
+      items: this.data.wishListItems.map(item => ({
+        dishId: item.id,
+        name: item.dish_name || item.name,
+        quantity: item.quantity
       })),
-      totalAmount: this.data.totalAmount,
-      remark: this.data.remark,
+      requestReason: this.data.requestReason,
+      urgency: this.data.urgency,
       status: 'pending',
       createTime: new Date().toISOString()
     }
@@ -131,27 +134,27 @@ Page({
     setTimeout(() => {
       wx.hideLoading()
       
-      // 保存订单到本地
-      this.saveOrderToLocal(orderData)
+      // 保存请求到本地
+      this.saveRequestToLocal(requestData)
       
       // 清空购物车
       app.setCart([])
       
       wx.showToast({
-        title: '订单已本地保存',
+        title: '请求已本地保存',
         icon: 'success'
       })
 
       setTimeout(() => {
         wx.redirectTo({
-          url: `/pages/order-detail/order-detail?orderNo=${orderData.orderNo}`
+          url: `/pages/order-detail/order-detail?requestNo=${requestData.requestNo}`
         })
       }, 1500)
     }, 1000)
   },
 
-  // 生成订单号
-  generateOrderNo() {
+  // 生成请求号
+  generateRequestNo() {
     const now = new Date()
     const year = now.getFullYear()
     const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -164,10 +167,10 @@ Page({
     return `${year}${month}${day}${hour}${minute}${second}${random}`
   },
 
-  // 保存订单到本地存储
-  saveOrderToLocal(orderData) {
-    let orders = wx.getStorageSync('orders') || []
-    orders.unshift(orderData)
-    wx.setStorageSync('orders', orders)
+  // 保存请求到本地存储
+  saveRequestToLocal(requestData) {
+    let requests = wx.getStorageSync('requests') || []
+    requests.unshift(requestData)
+    wx.setStorageSync('requests', requests)
   }
 }) 
