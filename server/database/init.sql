@@ -40,12 +40,12 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 商品表改为菜单项目表（扩展后）
+-- 菜品表（去商业化后）
 CREATE TABLE IF NOT EXISTS menu_items (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL COMMENT '商品名称',
-  description TEXT COMMENT '商品描述',
-  image VARCHAR(255) COMMENT '商品图片',
+  dish_name VARCHAR(100) NOT NULL COMMENT '菜品名称',
+  description TEXT COMMENT '菜品描述',
+  image VARCHAR(255) COMMENT '菜品图片',
   category_id INT NOT NULL COMMENT '分类ID',
   recipe_id INT COMMENT '关联菜谱ID',
   ingredients TEXT COMMENT '食材列表',
@@ -64,15 +64,18 @@ CREATE TABLE IF NOT EXISTS menu_items (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
--- 订单表（扩展后）
+-- 请求表（去商业化后）
 CREATE TABLE IF NOT EXISTS orders (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  order_no VARCHAR(50) UNIQUE NOT NULL COMMENT '订单编号',
+  request_no VARCHAR(50) UNIQUE NOT NULL COMMENT '请求编号',
   user_id VARCHAR(50) COMMENT '用户ID',
   user_name VARCHAR(50) NOT NULL COMMENT '用户姓名',
   user_phone VARCHAR(20) NOT NULL COMMENT '用户电话',
-  status ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending' COMMENT '订单状态',
-  pickup_time DATETIME COMMENT '取餐时间',
+  request_status ENUM('pending', 'accepted', 'preparing', 'ready', 'declined') DEFAULT 'pending' COMMENT '请求状态',
+  preferred_time DATETIME COMMENT '希望用餐时间',
+  request_reason TEXT COMMENT '请求原因',
+  urgency ENUM('low', 'medium', 'high') DEFAULT 'medium' COMMENT '紧急程度',
+  occasion VARCHAR(100) COMMENT '用餐场合',
   remark TEXT COMMENT '备注',
   customization_info TEXT COMMENT '定制信息（JSON格式）',
   dietary_notes TEXT COMMENT '饮食备注',
@@ -80,21 +83,20 @@ CREATE TABLE IF NOT EXISTS orders (
   actual_prep_time INT COMMENT '实际准备时间',
   customer_rating DECIMAL(3,2) COMMENT '客户评分',
   customer_review TEXT COMMENT '客户评价',
-  is_repeat_order BOOLEAN DEFAULT FALSE COMMENT '是否重复订单',
-  original_order_id INT COMMENT '原始订单ID',
+  is_repeat_request BOOLEAN DEFAULT FALSE COMMENT '是否重复请求',
+  original_request_id INT COMMENT '原始请求ID',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 订单详情表（扩展后）
+-- 请求项目表（去商业化后）
 CREATE TABLE IF NOT EXISTS order_items (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  order_id INT NOT NULL COMMENT '订单ID',
-  product_id INT NOT NULL COMMENT '商品ID',
-  product_name VARCHAR(100) NOT NULL COMMENT '商品名称',
+  order_id INT NOT NULL COMMENT '请求ID',
+  product_id INT NOT NULL COMMENT '菜品ID',
+  product_name VARCHAR(100) NOT NULL COMMENT '菜品名称',
   quantity INT NOT NULL COMMENT '数量',
   customization_details TEXT COMMENT '定制化详情（JSON格式）',
-  custom_price DECIMAL(10,2) DEFAULT 0.00 COMMENT '定制价格',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
   FOREIGN KEY (product_id) REFERENCES menu_items(id) ON DELETE CASCADE
@@ -111,14 +113,14 @@ CREATE TABLE IF NOT EXISTS admins (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- 店铺配置表
+-- 平台配置表（去商业化后）
 CREATE TABLE IF NOT EXISTS store_config (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  store_name VARCHAR(100) NOT NULL DEFAULT '明星厨师show' COMMENT '店铺名称',
-  store_subtitle VARCHAR(100) DEFAULT '(菜谱共享点餐)' COMMENT '店铺副标题',
-  store_rating DECIMAL(2,1) DEFAULT 4.6 COMMENT '店铺评分',
-  month_sales INT DEFAULT 2123 COMMENT '月销量',
-  rating_percent INT DEFAULT 94 COMMENT '好评率',
+  platform_name VARCHAR(100) NOT NULL DEFAULT '菜谱分享平台' COMMENT '平台名称',
+  platform_subtitle VARCHAR(100) DEFAULT '(分享美食，传递心意)' COMMENT '平台副标题',
+  platform_rating DECIMAL(2,1) DEFAULT 4.6 COMMENT '平台评分',
+  total_requests INT DEFAULT 0 COMMENT '总请求数',
+  active_users INT DEFAULT 0 COMMENT '活跃用户数',
   banner_image VARCHAR(255) COMMENT '横幅图片',
   banner_color VARCHAR(20) DEFAULT '#ff6b6b' COMMENT '横幅背景色',
   status ENUM('active', 'inactive') DEFAULT 'active' COMMENT '状态',
@@ -448,7 +450,7 @@ INSERT INTO categories (name, description, icon, sort) VALUES
 ('家常菜', '家常菜谱', '/images/category-homecook.png', 6);
 
 -- 插入默认菜单商品数据
-INSERT INTO menu_items (name, description, image, category_id, sort) VALUES
+INSERT INTO menu_items (dish_name, description, image, category_id, sort) VALUES
 ('珍珠奶茶', '香浓奶茶配Q弹珍珠，经典口味', '/images/product1.jpg', 1, 1),
 ('芝士蛋糕', '浓郁芝士香味，入口即化', '/images/product2.jpg', 3, 1),
 ('鸡肉汉堡', '新鲜鸡肉配生菜，营养美味', '/images/product3.jpg', 2, 1),
@@ -460,9 +462,9 @@ INSERT INTO menu_items (name, description, image, category_id, sort) VALUES
 INSERT INTO admins (username, password, name) VALUES
 ('admin', '$2a$10$9XqzWyGqrQNJJYjQJrJJKuEVQbUJYHJLGqJVJLGqJVJLGqJVJLGqJV', '管理员');
 
--- 插入默认店铺配置
-INSERT INTO store_config (store_name, store_subtitle, store_rating, month_sales, rating_percent, banner_color) VALUES
-('明星厨师show', '(菜谱共享点餐)', 4.6, 2123, 94, '#ff6b6b');
+-- 插入默认平台配置
+INSERT INTO store_config (platform_name, platform_subtitle, platform_rating, total_requests, active_users, banner_color) VALUES
+('菜谱分享平台', '(分享美食，传递心意)', 4.6, 0, 0, '#ff6b6b');
 
 -- 插入示例用户数据
 INSERT INTO users (id, nickname, avatar, bio, cooking_level) VALUES

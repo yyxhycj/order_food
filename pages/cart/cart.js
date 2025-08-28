@@ -3,46 +3,43 @@ const app = getApp()
 
 Page({
   data: {
-    cartItems: [],
-    totalQuantity: 0,
-    totalAmount: 0
+    wishList: [],
+    totalQuantity: 0
   },
 
   onShow() {
-    this.loadCartItems()
+    this.loadWishList()
   },
 
-  // 加载购物车商品
-  loadCartItems() {
-    const cartItems = app.getCart()
+  // 加载愿望清单
+  loadWishList() {
+    const wishList = app.getCart()
     const totalQuantity = app.getCartCount()
-    const totalAmount = app.getCartTotal()
 
     this.setData({
-      cartItems,
-      totalQuantity,
-      totalAmount
+      wishList,
+      totalQuantity
     })
   },
 
-  // 增加商品数量
+  // 增加菜品数量
   increaseQuantity(e) {
-    const productId = e.currentTarget.dataset.id
-    const cartItems = this.data.cartItems
-    const item = cartItems.find(item => item.id === productId)
+    const dishId = e.currentTarget.dataset.id
+    const wishList = this.data.wishList
+    const item = wishList.find(item => item.id === dishId)
     
     if (item) {
       app.addToCart(item)
-      this.loadCartItems()
+      this.loadWishList()
     }
   },
 
-  // 减少商品数量
+  // 减少菜品数量
   decreaseQuantity(e) {
-    const productId = e.currentTarget.dataset.id
+    const dishId = e.currentTarget.dataset.id
     let cart = app.getCart()
     
-    const itemIndex = cart.findIndex(item => item.id === productId)
+    const itemIndex = cart.findIndex(item => item.id === dishId)
     if (itemIndex >= 0) {
       if (cart[itemIndex].quantity > 1) {
         cart[itemIndex].quantity -= 1
@@ -51,23 +48,23 @@ Page({
       }
       
       app.setCart(cart)
-      this.loadCartItems()
+      this.loadWishList()
     }
   },
 
-  // 移除商品
+  // 移除菜品
   removeItem(e) {
-    const productId = e.currentTarget.dataset.id
+    const dishId = e.currentTarget.dataset.id
     
     wx.showModal({
       title: '确认删除',
-      content: '确定要从购物车中移除这个商品吗？',
+      content: '确定要从愿望清单中移除这个菜品吗？',
       success: (res) => {
         if (res.confirm) {
           let cart = app.getCart()
-          cart = cart.filter(item => item.id !== productId)
+          cart = cart.filter(item => item.id !== dishId)
           app.setCart(cart)
-          this.loadCartItems()
+          this.loadWishList()
           
           wx.showToast({
             title: '已移除',
@@ -78,18 +75,18 @@ Page({
     })
   },
 
-  // 跳转到菜单页面
+  // 跳转到菜品页面
   goToMenu() {
     wx.switchTab({
       url: '/pages/menu/menu'
     })
   },
 
-  // 跳转到下单页面
-  goToOrder() {
-    if (this.data.cartItems.length === 0) {
+  // 提交请求
+  goToRequest() {
+    if (this.data.wishList.length === 0) {
       wx.showToast({
-        title: '购物车是空的',
+        title: '愿望清单是空的',
         icon: 'none'
       })
       return

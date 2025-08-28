@@ -7,7 +7,7 @@ const db = require('./database/connection');
 
 // 导入路由
 const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+const requestRoutes = require('./routes/orderRoutes'); // 重命名为请求路由
 const categoryRoutes = require('./routes/categoryRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const storeConfigRoutes = require('./routes/storeConfigRoutes');
@@ -42,12 +42,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/images', express.static(path.join(__dirname, '../images')));
 
-// API路由
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
+// API路由 - 核心功能（去商业化）
+app.use('/api/dishes', productRoutes);  // 菜品路由
+app.use('/api/requests', requestRoutes);  // 请求路由（原订单路由）
 app.use('/api/categories', categoryRoutes);
 app.use('/api/uploads', uploadRoutes);
-app.use('/api/store-config', storeConfigRoutes);
+app.use('/api/platform-config', storeConfigRoutes);  // 平台配置
 app.use('/api/user', userRoutes);
 
 // 新的API路由

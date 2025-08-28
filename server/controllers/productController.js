@@ -1,22 +1,22 @@
-// controllers/productController.js - 商品控制器
+// controllers/dishController.js - 菜品控制器
 const Product = require('../models/Product');
 const Joi = require('joi');
 
 // 验证规则
-const productSchema = Joi.object({
-  name: Joi.string().required().min(1).max(100).messages({
-    'string.empty': '商品名称不能为空',
-    'string.min': '商品名称至少1个字符',
-    'string.max': '商品名称最多100个字符',
-    'any.required': '商品名称是必填项'
+const dishSchema = Joi.object({
+  dish_name: Joi.string().required().min(1).max(100).messages({
+    'string.empty': '菜品名称不能为空',
+    'string.min': '菜品名称至少1个字符',
+    'string.max': '菜品名称最多100个字符',
+    'any.required': '菜品名称是必填项'
   }),
   description: Joi.string().allow('').max(500).messages({
-    'string.max': '商品描述最多500个字符'
+    'string.max': '菜品描述最多500个字符'
   }),
   category_id: Joi.number().integer().positive().required().messages({
     'number.integer': '分类ID必须是整数',
     'number.positive': '分类ID必须大于0',
-    'any.required': '商品分类是必填项'
+    'any.required': '菜品分类是必填项'
   }),
   image: Joi.string().allow('').max(255).messages({
     'string.max': '图片路径最多255个字符'
@@ -25,24 +25,24 @@ const productSchema = Joi.object({
   sort: Joi.number().integer().min(0).default(0)
 });
 
-class ProductController {
-  // 获取商品列表
-  static async getProducts(req, res) {
+class DishController {
+  // 获取菜品列表
+  static async getDishes(req, res) {
     try {
       const { category_id, status } = req.query;
       
-      const products = await Product.findAll(category_id, status);
+      const dishes = await Product.findAll(category_id, status);
       
       res.json({
         success: true,
-        data: products,
-        message: '获取商品列表成功'
+        data: dishes,
+        message: '获取菜品列表成功'
       });
     } catch (error) {
-      console.error('获取商品列表失败:', error);
+      console.error('获取菜品列表失败:', error);
       res.status(500).json({
         success: false,
-        message: '获取商品列表失败',
+        message: '获取菜品列表失败',
         error: error.message
       });
     }

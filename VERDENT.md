@@ -12,15 +12,22 @@ This file provides guidance to Verdent when working with code in this repository
 - `cd server && npm run dev` - 启动开发服务器 (nodemon)
 - `cd server && npm start` - 启动生产服务器
 - `mysql -u root -p < server/database/init.sql` - 初始化数据库
+- `mysql -u root -p < server/database/migrate_decommercialize.sql` - 执行去商业化迁移
 - 微信开发者工具 - 直接打开项目根目录运行前端
 
 ## Architecture
 
+### 项目定位
+去商业化的菜谱分享平台
+- 用户可以上传和分享菜谱
+- 其他用户可以浏览菜谱并提交"想吃"请求
+- 通过请求-响应机制促进分享交流
+- 完全免费，无商业交易概念
+
 ### Major Subsystems & Responsibilities
 - **微信小程序前端** (`pages/`, `app.js`, `app.json`)
-  - 用户端：菜单浏览、购物车、下单、订单管理
-  - 管理端：商品管理、订单管理、分类管理、店铺配置
-  - 特色功能：菜谱分享、计划制定、盲盒、游戏化、提醒系统
+  - 用户端：菜品浏览、愿望清单、请求提交、请求记录
+  - 管理端：菜品管理、请求管理、分类管理、平台配置
 
 - **Node.js/Express后端API** (`server/`)
   - RESTful API服务 (端口: 3000)
@@ -29,13 +36,20 @@ This file provides guidance to Verdent when working with code in this repository
   - 数据验证 (Joi)
 
 - **MySQL数据库** (`server/database/`)
-  - 6个核心表：categories, products, orders, order_items, users, admins
-  - 扩展表：recipes, recipe_plans, user_tags, blind_boxes, reminders 等
+  - 核心表：categories, menu_items, orders, order_items, users, admins
+  - 菜谱功能表：recipes, recipe_reviews (如果需要)
 
 ### Key Data Flows
 ```
 小程序页面 → app.js全局方法 → HTTP请求 → Express路由 → 控制器 → 数据模型 → MySQL
 ```
+
+### 核心概念转换
+- 商品 → 菜品
+- 购物车 → 愿望清单
+- 订单 → 请求
+- 付款 → 请求原因
+- 发货 → 准备制作
 
 ### External Dependencies
 - **前端**: 微信小程序原生框架 + 本地存储
@@ -54,19 +68,17 @@ graph TB
     B --> C[MySQL数据库]
     
     A1[pages/menu] --> A
-    A2[pages/cart] --> A
-    A3[pages/admin] --> A
-    A4[pages/recipes] --> A
-    A5[pages/plans] --> A
+    A2[pages/cart 愿望清单] --> A
+    A3[pages/orders 请求记录] --> A
+    A4[pages/admin] --> A
     
-    B1[productRoutes] --> B
-    B2[orderRoutes] --> B
-    B3[recipeRoutes] --> B
+    B1[dishRoutes 菜品] --> B
+    B2[requestRoutes 请求] --> B
+    B3[categoryRoutes] --> B
     B4[uploadRoutes] --> B
     
     C1[基础业务表] --> C
-    C2[菜谱功能表] --> C
-    C3[用户扩展表] --> C
+    C2[去商业化设计] --> C
 ```
 
 ## Key Rules & Constraints
@@ -75,7 +87,7 @@ graph TB
 - 必须使用微信开发者工具开发和调试
 - 所有页面路径必须在 `app.json` 的 `pages` 数组中注册
 - 图片资源统一放在 `images/` 目录
-- 使用本地存储管理购物车状态 (`wx.getStorageSync/setStorageSync`)
+- 使用本地存储管理愿望清单状态 (`wx.getStorageSync/setStorageSync`)
 - API base URL配置在 `app.js` 的 `globalData.apiBase`
 
 ### 后端API约束
@@ -83,15 +95,22 @@ graph TB
 - 使用Joi验证所有输入数据
 - 文件上传限制：5MB，仅支持图片格式 (jpeg, png, gif, webp)
 - 数据库连接池配置在 `server/config.js`
-- 统一错误响应格式：`{error: true, message: "错误信息"}`
+- 统一错误响应格式：`{success: false, message: "错误信息"}`
 
 ### 数据库约束
 - 必须使用 `utf8mb4` 字符集和 `utf8mb4_unicode_ci` 排序规则
 - 所有表包含 `created_at` 和 `updated_at` 时间戳
-- 外键约束：order_items → products, orders → users
-- 订单创建必须使用事务保证数据一致性
+- 外键约束：order_items → menu_items, orders → users
+- 请求创建必须使用事务保证数据一致性
+- **重要**: 已去除所有价格相关字段
 
-### 代码规范 [inferred]
+### 去商业化约束
+- 菜品表 (menu_items) 使用 `dish_name` 字段，无价格字段
+- 订单表 (orders) 改为请求语义，使用 `request_no`, `request_status`
+- 请求状态：pending, accepted, preparing, ready, declined
+- API路由：`/api/dishes`, `/api/requests`, `/api/platform-config`
+
+### 代码规范
 - 微信小程序：使用2空格缩进 (project.config.json中配置)
 - 变量命名：小驼峰命名法
 - 数据库字段：snake_case命名
@@ -114,19 +133,25 @@ graph TB
 
 ### 修改数据库结构
 1. 编辑 `server/database/init.sql` 添加/修改表结构
-2. 更新对应的 `server/models/` 文件
-3. 重新运行数据库初始化脚本
-4. 更新相关的控制器和API文档
+2. 如需迁移现有数据，使用 `server/database/migrate_decommercialize.sql`
+3. 更新对应的 `server/models/` 文件
+4. 重新运行数据库初始化脚本
+5. 更新相关的控制器和API文档
 
-### 扩展现有功能模块
-- **菜谱功能**: 基于 `pages/recipes/` 和 `server/routes/recipes.js`
-- **计划功能**: 基于 `pages/plans/` 和 `server/routes/recipe-plans.js`
-- **用户功能**: 基于 `pages/user/` 和 `server/routes/user.js`
-- **盲盒功能**: 基于 `pages/blind-box/` 和 `server/routes/blind-box.js`
-- **游戏化**: 基于 `pages/game/` 和 `server/routes/game.js`
+### 核心功能模块
+- **菜品浏览**: `pages/menu/menu` - 浏览菜品，添加到愿望清单
+- **愿望清单**: `pages/cart/cart` - 管理想吃的菜品，提交请求
+- **请求记录**: `pages/orders/orders` - 查看请求历史和状态
+- **请求管理**: `pages/admin/orders/orders` - 管理员处理用户请求
 
 ### 调试和测试
 - **前端调试**: 微信开发者工具控制台
 - **后端调试**: 启动dev模式查看nodemon输出
 - **API测试**: 直接访问 `http://localhost:3000/api/...` 端点
 - **数据库调试**: 检查 `server/config.js` 连接配置
+
+### 去商业化特点
+- **零成本使用**: 没有价格概念，完全免费
+- **降低心理门槛**: 请求比下单更轻松
+- **增强分享意愿**: 没有金钱压力，促进交流
+- **专注体验**: 简化界面，专注菜品分享和需求表达

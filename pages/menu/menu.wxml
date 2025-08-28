@@ -54,15 +54,14 @@
                 <text class="rating-score">{{product.rating}}</text>
                 <text class="rating-count">好评率{{product.ratingPercent}}%</text>
               </view>
-              <view class="product-bottom">
-                <text class="product-price">¥{{product.price}}</text>
+              <view class="dish-bottom">
                 <view class="quantity-control" wx:if="{{product.cartQuantity > 0}}">
                   <view class="quantity-btn" bindtap="decreaseQuantity" data-id="{{product.id}}" catchtap="true">-</view>
                   <text class="quantity-text">{{product.cartQuantity}}</text>
                   <view class="quantity-btn" bindtap="increaseQuantity" data-id="{{product.id}}" catchtap="true">+</view>
                 </view>
-                <view class="add-btn" wx:else bindtap="addToCart" data-product="{{product}}" catchtap="true">
-                  <text class="add-icon">+</text>
+                <view class="add-btn" wx:else bindtap="addToWishList" data-product="{{product}}" catchtap="true">
+                  <text class="add-text">想吃</text>
                 </view>
               </view>
             </view>
@@ -78,20 +77,19 @@
     </scroll-view>
   </view>
 
-  <!-- 购物车栏 -->
-  <view class="cart-bar" wx:if="{{cartCount > 0}}">
-    <view class="cart-info" bindtap="goToCart">
-      <view class="cart-icon">
-        <image src="/images/cart-white.png" class="cart-img"></image>
-        <view class="cart-badge">{{cartCount}}</view>
+  <!-- 愿望清单栏 -->
+  <view class="wishlist-bar" wx:if="{{cartCount > 0}}">
+    <view class="wishlist-info" bindtap="goToCart">
+      <view class="wishlist-icon">
+        <image src="/images/cart-white.png" class="wishlist-img"></image>
+        <view class="wishlist-badge">{{cartCount}}</view>
       </view>
-      <view class="cart-detail">
-        <text class="cart-price">¥{{cartTotal}}</text>
-        <text class="cart-desc">已选{{cartCount}}件</text>
+      <view class="wishlist-detail">
+        <text class="wishlist-desc">已选{{cartCount}}个菜品</text>
       </view>
     </view>
-    <view class="checkout-btn" bindtap="goToOrder">
-      去结算
+    <view class="request-btn" bindtap="goToOrder">
+      提交请求
     </view>
   </view>
 </view> 

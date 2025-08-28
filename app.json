@@ -41,7 +41,7 @@
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "明星厨师show",
+    "navigationBarTitleText": "菜谱分享平台",
     "navigationBarBackgroundColor": "#ffffff"
   },
   "tabBar": {
@@ -54,25 +54,19 @@
         "pagePath": "pages/menu/menu",
         "iconPath": "images/menu.png",
         "selectedIconPath": "images/menu-active.png",
-        "text": "菜单"
-      },
-      {
-        "pagePath": "pages/recipes/list/list",
-        "iconPath": "images/recipes.png",
-        "selectedIconPath": "images/recipes-active.png",
-        "text": "菜谱"
-      },
-      {
-        "pagePath": "pages/plans/list/list",
-        "iconPath": "images/plans.png",
-        "selectedIconPath": "images/plans-active.png",
-        "text": "计划"
+        "text": "菜品"
       },
       {
         "pagePath": "pages/cart/cart",
         "iconPath": "images/cart.png",
         "selectedIconPath": "images/cart-active.png",
-        "text": "购物车"
+        "text": "我想吃的"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "iconPath": "images/orders.png",
+        "selectedIconPath": "images/orders-active.png",
+        "text": "请求记录"
       },
       {
         "pagePath": "pages/user/profile/profile",

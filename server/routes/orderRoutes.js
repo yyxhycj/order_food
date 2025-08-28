@@ -1,33 +1,33 @@
-// routes/orderRoutes.js - 订单路由
+// routes/requestRoutes.js - 请求路由
 const express = require('express');
 const router = express.Router();
-const OrderController = require('../controllers/orderController');
+const RequestController = require('../controllers/orderController');
 
-// 获取订单列表
-router.get('/', OrderController.getOrders);
+// 获取请求列表
+router.get('/', RequestController.getRequests);
 
-// 获取订单统计
-router.get('/stats', OrderController.getOrderStats);
+// 获取请求统计
+router.get('/stats', RequestController.getOrderStats);
 
 // 获取今日统计
-router.get('/stats/today', OrderController.getOrderStats);
+router.get('/stats/today', RequestController.getOrderStats);
 
 // 获取状态统计
-router.get('/stats/status', OrderController.getStatusStats);
+router.get('/stats/status', RequestController.getStatusStats);
 
-// 根据订单号获取订单详情
-router.get('/order-no/:orderNo', OrderController.getOrderByOrderNo);
+// 根据请求编号获取请求详情
+router.get('/request-no/:requestNo', RequestController.getRequestByRequestNo);
 
-// 获取单个订单详情
-router.get('/:id', OrderController.getOrder);
+// 获取单个请求详情
+router.get('/:id', RequestController.getRequest);
 
-// 创建订单
-router.post('/', OrderController.createOrder);
+// 创建请求
+router.post('/', RequestController.createRequest);
 
-// 更新订单状态
-router.patch('/:id/status', OrderController.updateOrderStatus);
+// 更新请求状态
+router.patch('/:id/status', RequestController.updateRequestStatus);
 
-// 删除订单
-router.delete('/:id', OrderController.deleteOrder);
+// 删除请求
+router.delete('/:id', RequestController.deleteOrder);
 
 module.exports = router; 

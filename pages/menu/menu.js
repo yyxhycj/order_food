@@ -223,7 +223,7 @@ Page({
   },
 
   // 添加到购物车
-  addToCart(e) {
+  addToWishList(e) {
     const product = e.currentTarget.dataset.product
     const cart = app.globalData.cart || []
     
@@ -234,7 +234,6 @@ Page({
       cart.push({
         id: product.id,
         name: product.name,
-        price: product.price,
         image: product.image,
         quantity: 1
       })
@@ -244,7 +243,7 @@ Page({
     this.updateCartInfo()
     
     wx.showToast({
-      title: '已添加到购物车',
+      title: '已添加到愿望清单',
       icon: 'success'
     })
   },

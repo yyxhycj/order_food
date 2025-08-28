@@ -2,9 +2,9 @@
 <view class="container">
   <!-- 页面标题 -->
   <view class="page-header">
-    <text class="page-title">订单管理</text>
+    <text class="page-title">请求管理</text>
     <view class="header-actions">
-      <button class="refresh-btn" bindtap="refreshOrders">
+      <button class="refresh-btn" bindtap="refreshRequests">
         <text class="refresh-icon">↻</text>
         刷新
       </button>
@@ -25,61 +25,62 @@
     </scroll-view>
   </view>
 
-  <!-- 订单列表 -->
-  <view class="order-list">
-    <view class="order-card" wx:for="{{filteredOrders}}" wx:key="id">
-      <view class="order-header">
-        <view class="order-info">
-          <text class="order-number">订单号: {{item.orderNo}}</text>
-          <text class="order-time">{{item.createTime}}</text>
+  <!-- 请求列表 -->
+  <view class="request-list">
+    <view class="request-card" wx:for="{{filteredRequests}}" wx:key="id">
+      <view class="request-header">
+        <view class="request-info">
+          <text class="request-number">请求编号: {{item.requestNo}}</text>
+          <text class="request-time">{{item.createTime}}</text>
         </view>
-        <view class="order-status">
+        <view class="request-status">
           <text class="status-badge {{item.status}}">{{item.statusText}}</text>
         </view>
       </view>
 
-      <view class="order-customer">
+      <view class="request-customer">
         <text class="customer-name">{{item.userInfo.name}}</text>
         <text class="customer-phone">{{item.userInfo.phone}}</text>
+        <text class="request-reason" wx:if="{{item.requestReason}}">原因: {{item.requestReason}}</text>
+        <text class="urgency-level">紧急程度: {{item.urgencyText}}</text>
       </view>
 
-      <view class="order-items">
-        <view class="item-row" wx:for="{{item.items}}" wx:key="id" wx:for-item="product">
-          <text class="item-name">{{product.name}}</text>
-          <text class="item-quantity">x{{product.quantity}}</text>
-          <text class="item-price">¥{{product.subtotal}}</text>
+      <view class="request-items">
+        <view class="item-row" wx:for="{{item.items}}" wx:key="id" wx:for-item="dish">
+          <text class="item-name">{{dish.name}}</text>
+          <text class="item-quantity">x{{dish.quantity}}</text>
         </view>
       </view>
 
-      <view class="order-footer">
-        <view class="order-total">
-          <text class="total-label">总计:</text>
-          <text class="total-amount">¥{{item.totalAmount}}</text>
-        </view>
-        <view class="order-actions">
-          <button class="action-btn detail-btn" data-id="{{item.id}}" bindtap="viewOrderDetail">详情</button>
-          <button class="action-btn status-btn" 
+      <view class="request-footer">
+        <view class="request-actions">
+          <button class="action-btn detail-btn" data-id="{{item.id}}" bindtap="viewRequestDetail">详情</button>
+          <button class="action-btn accept-btn" 
                   wx:if="{{item.status === 'pending'}}"
                   data-id="{{item.id}}" 
-                  bindtap="acceptOrder">接单</button>
-          <button class="action-btn status-btn" 
-                  wx:if="{{item.status === 'processing'}}"
+                  bindtap="acceptRequest">接受请求</button>
+          <button class="action-btn prepare-btn" 
+                  wx:if="{{item.status === 'accepted'}}"
                   data-id="{{item.id}}" 
-                  bindtap="completeOrder">完成</button>
-          <button class="action-btn cancel-btn" 
-                  wx:if="{{item.status === 'pending' || item.status === 'processing'}}"
+                  bindtap="startPreparing">开始准备</button>
+          <button class="action-btn complete-btn" 
+                  wx:if="{{item.status === 'preparing'}}"
                   data-id="{{item.id}}" 
-                  bindtap="cancelOrder">取消</button>
+                  bindtap="completeRequest">准备完成</button>
+          <button class="action-btn decline-btn" 
+                  wx:if="{{item.status === 'pending'}}"
+                  data-id="{{item.id}}" 
+                  bindtap="declineRequest">拒绝</button>
         </view>
       </view>
     </view>
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{filteredOrders.length === 0}}">
+  <view class="empty-state" wx:if="{{filteredRequests.length === 0}}">
     <image class="empty-image" src="/images/empty-orders.png"></image>
-    <text class="empty-text">暂无订单</text>
-    <text class="empty-desc">等待客户下单...</text>
+    <text class="empty-text">暂无请求</text>
+    <text class="empty-desc">等待用户提交餐食请求...</text>
   </view>
 
   <!-- 订单详情弹窗 -->

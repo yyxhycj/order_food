@@ -1,9 +1,9 @@
-// controllers/orderController.js - 订单控制器
+// controllers/requestController.js - 请求控制器
 const Order = require('../models/Order');
 const Joi = require('joi');
 
 // 验证规则
-const orderSchema = Joi.object({
+const requestSchema = Joi.object({
   user_id: Joi.string().allow('').max(50),
   user_name: Joi.string().required().min(1).max(50).messages({
     'string.empty': '用户姓名不能为空',
@@ -16,7 +16,10 @@ const orderSchema = Joi.object({
     'string.pattern.base': '请输入正确的手机号码',
     'any.required': '用户电话是必填项'
   }),
-  pickup_time: Joi.string().allow('').max(50),
+  preferred_time: Joi.string().allow('').max(50),
+  request_reason: Joi.string().allow('').max(500),
+  urgency: Joi.string().valid('low', 'medium', 'high').default('medium'),
+  occasion: Joi.string().allow('').max(100),
   remark: Joi.string().allow('').max(500),
   items: Joi.array().items(
     Joi.object({
@@ -25,14 +28,14 @@ const orderSchema = Joi.object({
       quantity: Joi.number().integer().positive().required()
     })
   ).min(1).required().messages({
-    'array.min': '订单必须包含至少一个商品',
-    'any.required': '订单商品是必填项'
+    'array.min': '请求必须包含至少一个菜品',
+    'any.required': '请求菜品是必填项'
   })
 });
 
-class OrderController {
-  // 获取订单列表
-  static async getOrders(req, res) {
+class RequestController {
+  // 获取请求列表
+  static async getRequests(req, res) {
     try {
       const { status, page = 1, limit = 20 } = req.query;
       
@@ -41,12 +44,12 @@ class OrderController {
       const parsedPage = parseInt(page) || 1;
       const offset = (parsedPage - 1) * parsedLimit;
       
-      const orders = await Order.findAll(status, parsedLimit, offset);
+      const requests = await Order.findAll(status, parsedLimit, offset);
       
       res.json({
         success: true,
-        data: orders,
-        message: '获取订单列表成功'
+        data: requests,
+        message: '获取请求列表成功'
       });
     } catch (error) {
       console.error('获取订单列表失败:', error);
@@ -58,83 +61,83 @@ class OrderController {
     }
   }
 
-  // 获取单个订单详情
-  static async getOrder(req, res) {
+  // 获取单个请求详情
+  static async getRequest(req, res) {
     try {
       const { id } = req.params;
       
       if (!id || isNaN(id)) {
         return res.status(400).json({
           success: false,
-          message: '订单ID无效'
+          message: '请求ID无效'
         });
       }
 
-      const order = await Order.findById(id);
+      const request = await Order.findById(id);
       
-      if (!order) {
+      if (!request) {
         return res.status(404).json({
           success: false,
-          message: '订单不存在'
+          message: '请求不存在'
         });
       }
 
       res.json({
         success: true,
-        data: order,
-        message: '获取订单详情成功'
+        data: request,
+        message: '获取请求详情成功'
       });
     } catch (error) {
-      console.error('获取订单详情失败:', error);
+      console.error('获取请求详情失败:', error);
       res.status(500).json({
         success: false,
-        message: '获取订单详情失败',
+        message: '获取请求详情失败',
         error: error.message
       });
     }
   }
 
-  // 根据订单号获取订单详情
-  static async getOrderByOrderNo(req, res) {
+  // 根据请求编号获取请求详情
+  static async getRequestByRequestNo(req, res) {
     try {
-      const { orderNo } = req.params;
+      const { requestNo } = req.params;
       
-      if (!orderNo) {
+      if (!requestNo) {
         return res.status(400).json({
           success: false,
-          message: '订单号不能为空'
+          message: '请求编号不能为空'
         });
       }
 
-      const order = await Order.findByOrderNo(orderNo);
+      const request = await Order.findByOrderNo(requestNo);
       
-      if (!order) {
+      if (!request) {
         return res.status(404).json({
           success: false,
-          message: '订单不存在'
+          message: '请求不存在'
         });
       }
 
       res.json({
         success: true,
-        data: order,
-        message: '获取订单详情成功'
+        data: request,
+        message: '获取请求详情成功'
       });
     } catch (error) {
-      console.error('获取订单详情失败:', error);
+      console.error('获取请求详情失败:', error);
       res.status(500).json({
         success: false,
-        message: '获取订单详情失败',
+        message: '获取请求详情失败',
         error: error.message
       });
     }
   }
 
-  // 创建订单
-  static async createOrder(req, res) {
+  // 创建请求
+  static async createRequest(req, res) {
     try {
       // 验证请求数据
-      const { error, value } = orderSchema.validate(req.body);
+      const { error, value } = requestSchema.validate(req.body);
       if (error) {
         return res.status(400).json({
           success: false,
@@ -143,37 +146,37 @@ class OrderController {
         });
       }
 
-      // 生成订单号
-      const orderNo = Order.generateOrderNo();
+      // 生成请求编号
+      const requestNo = 'REQ' + Date.now() + Math.floor(Math.random() * 1000);
 
-      const orderData = {
+      const requestData = {
         ...value,
-        order_no: orderNo,
-        status: 'pending'
+        request_no: requestNo,
+        request_status: 'pending'
       };
 
-      const orderId = await Order.create(orderData);
+      const requestId = await Order.create(requestData);
       
       res.status(201).json({
         success: true,
         data: { 
-          id: orderId,
-          order_no: orderNo
+          id: requestId,
+          request_no: requestNo
         },
-        message: '创建订单成功'
+        message: '提交请求成功'
       });
     } catch (error) {
-      console.error('创建订单失败:', error);
+      console.error('创建请求失败:', error);
       res.status(500).json({
         success: false,
-        message: '创建订单失败',
+        message: '提交请求失败',
         error: error.message
       });
     }
   }
 
-  // 更新订单状态
-  static async updateOrderStatus(req, res) {
+  // 更新请求状态
+  static async updateRequestStatus(req, res) {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -181,23 +184,23 @@ class OrderController {
       if (!id || isNaN(id)) {
         return res.status(400).json({
           success: false,
-          message: '订单ID无效'
+          message: '请求ID无效'
         });
       }
 
-      if (!['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
+      if (!['pending', 'accepted', 'preparing', 'ready', 'declined'].includes(status)) {
         return res.status(400).json({
           success: false,
           message: '状态值无效'
         });
       }
 
-      // 检查订单是否存在
-      const existingOrder = await Order.findById(id);
-      if (!existingOrder) {
+      // 检查请求是否存在
+      const existingRequest = await Order.findById(id);
+      if (!existingRequest) {
         return res.status(404).json({
           success: false,
-          message: '订单不存在'
+          message: '请求不存在'
         });
       }
 
@@ -205,20 +208,21 @@ class OrderController {
       
       if (success) {
         const statusText = {
-          'pending': '待处理',
-          'processing': '制作中',
-          'completed': '已完成',
-          'cancelled': '已取消'
+          'pending': '等待响应',
+          'accepted': '已接受',
+          'preparing': '准备中',
+          'ready': '可以享用',
+          'declined': '已拒绝'
         };
         
         res.json({
           success: true,
-          message: `订单状态已更新为${statusText[status]}`
+          message: `请求状态已更新为${statusText[status]}`
         });
       } else {
         res.status(500).json({
           success: false,
-          message: '更新订单状态失败'
+          message: '更新请求状态失败'
         });
       }
     } catch (error) {
@@ -318,4 +322,4 @@ class OrderController {
   }
 }
 
-module.exports = OrderController; 
+module.exports = RequestController; 
