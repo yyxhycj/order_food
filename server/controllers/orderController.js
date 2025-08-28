@@ -1,5 +1,5 @@
 // controllers/requestController.js - 请求控制器
-const Order = require('../models/Order');
+const Request = require('../models/Request');
 const Joi = require('joi');
 
 // 验证规则
@@ -23,8 +23,8 @@ const requestSchema = Joi.object({
   remark: Joi.string().allow('').max(500),
   items: Joi.array().items(
     Joi.object({
-      product_id: Joi.number().integer().positive().required(),
-      product_name: Joi.string().required().max(100),
+      dish_id: Joi.number().integer().positive().required(),
+      dish_name: Joi.string().required().max(100),
       quantity: Joi.number().integer().positive().required()
     })
   ).min(1).required().messages({
@@ -44,7 +44,7 @@ class RequestController {
       const parsedPage = parseInt(page) || 1;
       const offset = (parsedPage - 1) * parsedLimit;
       
-      const requests = await Order.findAll(status, parsedLimit, offset);
+      const requests = await Request.findAll(status, parsedLimit, offset);
       
       res.json({
         success: true,
@@ -73,7 +73,7 @@ class RequestController {
         });
       }
 
-      const request = await Order.findById(id);
+      const request = await Request.findById(id);
       
       if (!request) {
         return res.status(404).json({
@@ -109,7 +109,7 @@ class RequestController {
         });
       }
 
-      const request = await Order.findByOrderNo(requestNo);
+      const request = await Request.findByRequestNo(requestNo);
       
       if (!request) {
         return res.status(404).json({
@@ -155,7 +155,7 @@ class RequestController {
         request_status: 'pending'
       };
 
-      const requestId = await Order.create(requestData);
+      const requestId = await Request.create(requestData);
       
       res.status(201).json({
         success: true,
@@ -196,7 +196,7 @@ class RequestController {
       }
 
       // 检查请求是否存在
-      const existingRequest = await Order.findById(id);
+      const existingRequest = await Request.findById(id);
       if (!existingRequest) {
         return res.status(404).json({
           success: false,
@@ -204,7 +204,7 @@ class RequestController {
         });
       }
 
-      const success = await Order.updateStatus(id, status);
+      const success = await Request.updateStatus(id, status);
       
       if (success) {
         const statusText = {
@@ -235,67 +235,67 @@ class RequestController {
     }
   }
 
-  // 删除订单
-  static async deleteOrder(req, res) {
+  // 删除请求
+  static async deleteRequest(req, res) {
     try {
       const { id } = req.params;
       
       if (!id || isNaN(id)) {
         return res.status(400).json({
           success: false,
-          message: '订单ID无效'
+          message: '请求ID无效'
         });
       }
 
-      // 检查订单是否存在
-      const existingOrder = await Order.findById(id);
-      if (!existingOrder) {
+      // 检查请求是否存在
+      const existingRequest = await Request.findById(id);
+      if (!existingRequest) {
         return res.status(404).json({
           success: false,
-          message: '订单不存在'
+          message: '请求不存在'
         });
       }
 
-      const success = await Order.delete(id);
+      const success = await Request.delete(id);
       
       if (success) {
         res.json({
           success: true,
-          message: '删除订单成功'
+          message: '删除请求成功'
         });
       } else {
         res.status(500).json({
           success: false,
-          message: '删除订单失败'
+          message: '删除请求失败'
         });
       }
     } catch (error) {
-      console.error('删除订单失败:', error);
+      console.error('删除请求失败:', error);
       res.status(500).json({
         success: false,
-        message: '删除订单失败',
+        message: '删除请求失败',
         error: error.message
       });
     }
   }
 
-  // 获取订单统计
-  static async getOrderStats(req, res) {
+  // 获取请求统计
+  static async getRequestStats(req, res) {
     try {
       const { date } = req.query;
       
-      const stats = date ? await Order.getStats(date) : await Order.getTodayStats();
+      const stats = date ? await Request.getStats(date) : await Request.getTodayStats();
       
       res.json({
         success: true,
         data: stats,
-        message: '获取订单统计成功'
+        message: '获取请求统计成功'
       });
     } catch (error) {
-      console.error('获取订单统计失败:', error);
+      console.error('获取请求统计失败:', error);
       res.status(500).json({
         success: false,
-        message: '获取订单统计失败',
+        message: '获取请求统计失败',
         error: error.message
       });
     }
@@ -304,7 +304,7 @@ class RequestController {
   // 获取状态统计
   static async getStatusStats(req, res) {
     try {
-      const stats = await Order.getStatusStats();
+      const stats = await Request.getStatusStats();
       
       res.json({
         success: true,

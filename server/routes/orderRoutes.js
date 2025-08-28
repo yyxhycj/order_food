@@ -7,10 +7,10 @@ const RequestController = require('../controllers/orderController');
 router.get('/', RequestController.getRequests);
 
 // 获取请求统计
-router.get('/stats', RequestController.getOrderStats);
+router.get('/stats', RequestController.getRequestStats);
 
 // 获取今日统计
-router.get('/stats/today', RequestController.getOrderStats);
+router.get('/stats/today', RequestController.getRequestStats);
 
 // 获取状态统计
 router.get('/stats/status', RequestController.getStatusStats);
@@ -28,6 +28,6 @@ router.post('/', RequestController.createRequest);
 router.patch('/:id/status', RequestController.updateRequestStatus);
 
 // 删除请求
-router.delete('/:id', RequestController.deleteOrder);
+router.delete('/:id', RequestController.deleteRequest);
 
 module.exports = router; 

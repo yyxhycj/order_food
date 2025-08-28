@@ -119,10 +119,30 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- 重命名 product_id 为 dish_id
+SET @column_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'little_order' AND TABLE_NAME = 'order_items' AND COLUMN_NAME = 'product_id');
+
+SET @sql = IF(@column_exists > 0,
+    'ALTER TABLE order_items CHANGE COLUMN product_id dish_id INT NOT NULL COMMENT ''菜品ID''',
+    'SELECT "Column product_id already renamed or does not exist" as message');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 重命名 product_name 为 dish_name
+SET @column_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_SCHEMA = 'little_order' AND TABLE_NAME = 'order_items' AND COLUMN_NAME = 'product_name');
+
+SET @sql = IF(@column_exists > 0,
+    'ALTER TABLE order_items CHANGE COLUMN product_name dish_name VARCHAR(100) NOT NULL COMMENT ''菜品名称''',
+    'SELECT "Column product_name already renamed or does not exist" as message');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- 更新注释
 ALTER TABLE order_items MODIFY COLUMN order_id INT NOT NULL COMMENT '请求ID';
-ALTER TABLE order_items MODIFY COLUMN product_id INT NOT NULL COMMENT '菜品ID';
-ALTER TABLE order_items MODIFY COLUMN product_name VARCHAR(100) NOT NULL COMMENT '菜品名称';
 
 -- 4. 修改平台配置表 (store_config)
 -- 检查并重命名字段
