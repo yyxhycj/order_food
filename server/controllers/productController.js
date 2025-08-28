@@ -88,7 +88,7 @@ class DishController {
   static async createProduct(req, res) {
     try {
       // 验证请求数据
-      const { error, value } = productSchema.validate(req.body);
+      const { error, value } = dishSchema.validate(req.body);
       if (error) {
         return res.status(400).json({
           success: false,
@@ -127,7 +127,7 @@ class DishController {
       }
 
       // 验证请求数据
-      const { error, value } = productSchema.validate(req.body);
+      const { error, value } = dishSchema.validate(req.body);
       if (error) {
         return res.status(400).json({
           success: false,
@@ -285,4 +285,4 @@ class DishController {
   }
 }
 
-module.exports = ProductController; 
+module.exports = DishController; 

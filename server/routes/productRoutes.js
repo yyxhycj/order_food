@@ -1,27 +1,27 @@
-// routes/productRoutes.js - 商品路由
+// routes/dishRoutes.js - 菜品路由
 const express = require('express');
 const router = express.Router();
-const ProductController = require('../controllers/productController');
+const DishController = require('../controllers/productController');
 
-// 获取商品列表
-router.get('/', ProductController.getProducts);
+// 获取菜品列表
+router.get('/', DishController.getDishes);
 
-// 获取商品统计
-router.get('/stats', ProductController.getProductStats);
+// 获取菜品统计
+router.get('/stats', DishController.getProductStats);
 
-// 获取单个商品详情
-router.get('/:id', ProductController.getProduct);
+// 获取单个菜品详情
+router.get('/:id', DishController.getProduct);
 
-// 创建商品
-router.post('/', ProductController.createProduct);
+// 创建菜品
+router.post('/', DishController.createProduct);
 
-// 更新商品
-router.put('/:id', ProductController.updateProduct);
+// 更新菜品
+router.put('/:id', DishController.updateProduct);
 
-// 更新商品状态
-router.patch('/:id/status', ProductController.updateProductStatus);
+// 更新菜品状态
+router.patch('/:id/status', DishController.updateProductStatus);
 
-// 删除商品
-router.delete('/:id', ProductController.deleteProduct);
+// 删除菜品
+router.delete('/:id', DishController.deleteProduct);
 
 module.exports = router; 
