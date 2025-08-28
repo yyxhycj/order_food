@@ -1,6 +1,5 @@
 const Recipe = require('../models/Recipe');
 const RecipeReview = require('../models/RecipeReview');
-const UserTag = require('../models/UserTag');
 const Joi = require('joi');
 
 class RecipeController {
