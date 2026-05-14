@@ -1,157 +1,68 @@
-# VERDENT.md
-This file provides guidance to Verdent when working with code in this repository.
+# 朋友菜谱小程序开发说明
 
-## Table of Contents
-1. Commonly Used Commands
-2. High-Level Architecture & Structure
-3. Key Rules & Constraints
-4. Development Hints
+当前项目是微信原生小程序 + 微信云开发 CloudBase，不再使用旧的 Express/MySQL 点单系统。
 
-## Commands
-- `cd server && npm install` - 安装后端依赖
-- `cd server && npm run dev` - 启动开发服务器 (nodemon)
-- `cd server && npm start` - 启动生产服务器
-- `mysql -u root -p < server/database/init.sql` - 初始化数据库
-- `mysql -u root -p < server/database/migrate_decommercialize.sql` - 执行去商业化迁移
-- 微信开发者工具 - 直接打开项目根目录运行前端
+## 项目定位
 
-## Architecture
+朋友之间私密分享菜谱、收藏菜谱、发起“想吃”请求，并由作者或管理员回应请求。
 
-### 项目定位
-去商业化的菜谱分享平台
-- 用户可以上传和分享菜谱
-- 其他用户可以浏览菜谱并提交"想吃"请求
-- 通过请求-响应机制促进分享交流
-- 完全免费，无商业交易概念
+第一版主闭环：
 
-### Major Subsystems & Responsibilities
-- **微信小程序前端** (`pages/`, `app.js`, `app.json`)
-  - 用户端：菜品浏览、愿望清单、请求提交、请求记录
-  - 管理端：菜品管理、请求管理、分类管理、平台配置
-
-- **Node.js/Express后端API** (`server/`)
-  - RESTful API服务 (端口: 3000)
-  - MVC架构：Models(`models/`) + Controllers(`controllers/`) + Routes(`routes/`)
-  - 文件上传服务 (`middleware/upload.js`)
-  - 数据验证 (Joi)
-
-- **MySQL数据库** (`server/database/`)
-  - 核心表：categories, menu_items, orders, order_items, users, admins
-  - 菜谱功能表：recipes, recipe_reviews (如果需要)
-
-### Key Data Flows
-```
-小程序页面 → app.js全局方法 → HTTP请求 → Express路由 → 控制器 → 数据模型 → MySQL
+```text
+登录 -> 浏览菜谱 -> 查看详情 -> 发布菜谱 -> 收藏/想吃/留言 -> 处理想吃请求
 ```
 
-### 核心概念转换
-- 商品 → 菜品
-- 购物车 → 愿望清单
-- 订单 → 请求
-- 付款 → 请求原因
-- 发货 → 准备制作
+## 当前结构
 
-### External Dependencies
-- **前端**: 微信小程序原生框架 + 本地存储
-- **后端**: Express + mysql2 + multer + joi + cors + moment + uuid
-- **数据库**: MySQL 5.7+ with utf8mb4编码
-
-### Development Entry Points
-- **前端开发**: 微信开发者工具打开项目根目录
-- **后端开发**: `server/app.js` 主入口文件
-- **数据库**: `server/database/init.sql` 包含完整表结构和测试数据
-
-### System Architecture
-```mermaid
-graph TB
-    A[微信小程序前端] --> B[Express API服务器]
-    B --> C[MySQL数据库]
-    
-    A1[pages/menu] --> A
-    A2[pages/cart 愿望清单] --> A
-    A3[pages/orders 请求记录] --> A
-    A4[pages/admin] --> A
-    
-    B1[dishRoutes 菜品] --> B
-    B2[requestRoutes 请求] --> B
-    B3[categoryRoutes] --> B
-    B4[uploadRoutes] --> B
-    
-    C1[基础业务表] --> C
-    C2[去商业化设计] --> C
+```text
+app.js
+app.json
+cloudfunctions/
+pages/
+components/
+services/
+constants/
+utils/
+docs/
+images/
 ```
 
-## Key Rules & Constraints
+核心目录：
 
-### 微信小程序约束
-- 必须使用微信开发者工具开发和调试
-- 所有页面路径必须在 `app.json` 的 `pages` 数组中注册
-- 图片资源统一放在 `images/` 目录
-- 使用本地存储管理愿望清单状态 (`wx.getStorageSync/setStorageSync`)
-- API base URL配置在 `app.js` 的 `globalData.apiBase`
+- `cloudfunctions/`: 登录、菜谱、想吃请求、收藏、留言、分类、统计等云函数。
+- `pages/home`: 首页菜谱浏览。
+- `pages/recipe`: 菜谱详情与发布编辑。
+- `pages/requests`: 我的想吃与收到的想吃。
+- `pages/user`: 个人资料。
+- `pages/admin`: 轻量管理。
+- `services/`: 前端统一服务层，页面不要散写 `wx.cloud.callFunction`。
 
-### 后端API约束
-- 所有API路由必须在 `server/app.js` 中注册
-- 使用Joi验证所有输入数据
-- 文件上传限制：5MB，仅支持图片格式 (jpeg, png, gif, webp)
-- 数据库连接池配置在 `server/config.js`
-- 统一错误响应格式：`{success: false, message: "错误信息"}`
+## 云开发环境
 
-### 数据库约束
-- 必须使用 `utf8mb4` 字符集和 `utf8mb4_unicode_ci` 排序规则
-- 所有表包含 `created_at` 和 `updated_at` 时间戳
-- 外键约束：order_items → menu_items, orders → users
-- 请求创建必须使用事务保证数据一致性
-- **重要**: 已去除所有价格相关字段
+当前环境 ID：
 
-### 去商业化约束
-- 菜品表 (menu_items) 使用 `dish_name` 字段，无价格字段
-- 订单表 (orders) 改为请求语义，使用 `request_no`, `request_status`
-- 请求状态：pending, accepted, preparing, ready, declined
-- API路由：`/api/dishes`, `/api/requests`, `/api/platform-config`
+```text
+cloud1-d8gnehyjub2a90508
+```
 
-### 代码规范
-- 微信小程序：使用2空格缩进 (project.config.json中配置)
-- 变量命名：小驼峰命名法
-- 数据库字段：snake_case命名
-- API路径：kebab-case命名
+本地部署云函数前，需要在微信开发者工具打开：
 
-## Development Hints
+```text
+设置 -> 安全 -> 服务端口
+```
 
-### 添加新的小程序页面
-1. 在 `pages/` 目录创建页面文件夹
-2. 创建4个文件：`.wxml`, `.js`, `.json`, `.wxss`
-3. 在 `app.json` 的 `pages` 数组中添加页面路径
-4. 如需添加到tabBar，在 `app.json` 的 `tabBar.list` 中配置
+部署完成后可以关闭服务端口。
 
-### 添加新的API端点
-1. 在 `server/models/` 创建数据模型（如果需要新表）
-2. 在 `server/controllers/` 创建控制器函数
-3. 在 `server/routes/` 创建路由文件
-4. 在 `server/app.js` 中注册新路由：`app.use('/api/endpoint', routeFile)`
-5. 确保在控制器中使用Joi验证输入数据
+## 文档入口
 
-### 修改数据库结构
-1. 编辑 `server/database/init.sql` 添加/修改表结构
-2. 如需迁移现有数据，使用 `server/database/migrate_decommercialize.sql`
-3. 更新对应的 `server/models/` 文件
-4. 重新运行数据库初始化脚本
-5. 更新相关的控制器和API文档
+- [整体方案](docs/菜谱小程序整体方案.md)
+- [文件架构整理](docs/菜谱小程序文件架构整理.md)
+- [数据集合设计](docs/数据集合设计.md)
+- [云开发迁移步骤](docs/云开发迁移步骤.md)
+- [迁移记录](docs/迁移记录.md)
 
-### 核心功能模块
-- **菜品浏览**: `pages/menu/menu` - 浏览菜品，添加到愿望清单
-- **愿望清单**: `pages/cart/cart` - 管理想吃的菜品，提交请求
-- **请求记录**: `pages/orders/orders` - 查看请求历史和状态
-- **请求管理**: `pages/admin/orders/orders` - 管理员处理用户请求
+## 约束
 
-### 调试和测试
-- **前端调试**: 微信开发者工具控制台
-- **后端调试**: 启动dev模式查看nodemon输出
-- **API测试**: 直接访问 `http://localhost:3000/api/...` 端点
-- **数据库调试**: 检查 `server/config.js` 连接配置
-
-### 去商业化特点
-- **零成本使用**: 没有价格概念，完全免费
-- **降低心理门槛**: 请求比下单更轻松
-- **增强分享意愿**: 没有金钱压力，促进交流
-- **专注体验**: 简化界面，专注菜品分享和需求表达
+- 不再引入价格、购物车、订单金额、库存、配送等商业点单语义。
+- 需要权限校验或写入保护的操作走云函数。
+- 页面只保留第一版主线需要的内容，不保留旧点单系统入口。
