@@ -1,11 +1,11 @@
 <view class="recipe-card {{compact ? 'compact' : ''}}" bindtap="handleTap">
-  <image class="cover" src="{{recipe.coverImage || '/images/recipe.png'}}" mode="aspectFill"></image>
+  <image class="cover" src="{{recipe.coverImage || '/images/dish-placeholder.png'}}" mode="aspectFill"></image>
   <view class="body">
     <view class="title-row">
       <text class="title">{{recipe.title}}</text>
       <text wx:if="{{showStatus}}" class="status status-{{recipe.status}}">{{recipe.statusText || recipe.status}}</text>
     </view>
-    <text class="desc">{{recipe.description || '朋友的私房菜谱'}}</text>
+    <text class="desc">{{recipe.description || '家里菜单里的一道菜'}}</text>
     <view class="meta">
       <text class="meta-text">{{recipe.cookingTime || 0}} 分钟</text>
       <text class="meta-text">{{recipe.difficultyText}}</text>
@@ -13,8 +13,8 @@
     </view>
     <view class="stats">
       <text class="stat-text">{{recipe.wantCount || 0}} 想吃</text>
-      <text class="stat-text">{{recipe.favoriteCount || 0}} 收藏</text>
-      <text class="stat-text">{{recipe.viewCount || 0}} 浏览</text>
+      <text class="stat-text">{{recipe.favoriteCount || 0}} 留着</text>
+      <text class="stat-text">{{recipe.viewCount || 0}} 看过</text>
     </view>
   </view>
 </view>

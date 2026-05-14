@@ -1,16 +1,16 @@
 <view class="home-page">
   <view class="top">
     <view class="brand">
-      <text class="title">朋友菜谱</text>
-      <text class="subtitle">今天想吃哪位朋友的拿手菜？</text>
+      <text class="title">烟火小馆</text>
+      <text class="subtitle">今日开饭 · {{menuSummary}}</text>
     </view>
     <button class="create-button" bindtap="goToCreate">+</button>
   </view>
 
   <view class="search">
-    <input class="search-input" placeholder="搜索菜谱名称" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="onSearch" />
+    <input class="search-input" placeholder="搜菜名、食材、口味" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="onSearch" />
     <button wx:if="{{keyword}}" class="clear" bindtap="clearSearch">×</button>
-    <button class="search-button" bindtap="onSearch">搜索</button>
+    <button class="search-button" bindtap="onSearch">找</button>
   </view>
 
   <scroll-view class="categories" scroll-x="true" show-scrollbar="false">
@@ -21,20 +21,40 @@
     </block>
   </scroll-view>
 
-  <view class="sorts">
-    <block wx:for="{{sortOptions}}" wx:key="value">
-      <view class="sort {{sortBy === item.value ? 'active' : ''}}" data-sort="{{item.value}}" bindtap="selectSort">
-        {{item.label}}
+  <loading-state wx:if="{{loading}}" text="正在打开菜单"></loading-state>
+
+  <view wx:else class="menu-list">
+    <block wx:if="{{featuredRecipe}}">
+      <view class="section-head">
+        <text class="section-title">今日推荐</text>
+        <text class="section-action" bindtap="goToPlan">去安排</text>
+      </view>
+
+      <view class="featured-card" data-id="{{featuredRecipe._id}}" bindtap="goToRecipe">
+        <image class="featured-cover" src="{{featuredRecipe.coverImage || '/images/dish-placeholder.png'}}" mode="aspectFill"></image>
+        <view class="featured-body">
+          <text class="featured-title">{{featuredRecipe.title}}</text>
+          <text class="featured-meta">{{featuredRecipe.featureLine}}</text>
+          <view class="tag-row">
+            <text wx:for="{{featuredRecipe.menuTags}}" wx:key="*this" class="food-tag {{index === 0 ? 'warm' : 'fresh'}}">{{item}}</text>
+          </view>
+          <button class="want-button" catchtap="goToRecipe" data-id="{{featuredRecipe._id}}">想吃</button>
+        </view>
+      </view>
+
+      <view class="section-head">
+        <text class="section-title">常点菜单</text>
+        <text class="section-action" bindtap="showAllRecipes">全部菜</text>
+      </view>
+
+      <view class="dish-grid">
+        <view class="dish-card" wx:for="{{menuRecipes}}" wx:key="_id" data-id="{{item._id}}" bindtap="goToRecipe">
+          <image class="dish-cover" src="{{item.coverImage || '/images/dish-placeholder.png'}}" mode="aspectFill"></image>
+          <text class="dish-title">{{item.title}}</text>
+          <text class="dish-meta">{{item.menuLine}}</text>
+        </view>
       </view>
     </block>
-  </view>
-
-  <loading-state wx:if="{{loading}}" text="正在找菜谱"></loading-state>
-
-  <view wx:else class="recipe-list">
-    <block wx:if="{{recipes.length}}">
-      <recipe-card wx:for="{{recipes}}" wx:key="_id" recipe="{{item}}" bind:recipetap="goToRecipe"></recipe-card>
-    </block>
-    <empty-state wx:else title="还没有菜谱" description="先发布一道拿手菜，让朋友来点想吃。" button-text="发布菜谱" bind:action="goToCreate"></empty-state>
+    <empty-state wx:else title="菜单还是空的" description="先放一道家里常吃的菜，之后就可以点了。" button-text="加一道菜" bind:action="goToCreate"></empty-state>
   </view>
 </view>

@@ -7,7 +7,7 @@ const { showError } = require('../../../utils/error')
 Page({
   data: {
     scope: 'admin',
-    title: '菜谱管理',
+    title: '菜单管理',
     recipes: [],
     loading: true,
     isAdmin: false
@@ -16,9 +16,9 @@ Page({
   onLoad(options) {
     const scope = options.scope || 'admin'
     const titleMap = {
-      admin: '菜谱管理',
-      mine: '我的菜谱',
-      favorites: '我的收藏'
+      admin: '菜单管理',
+      mine: '我会做的',
+      favorites: '留着下次吃'
     }
     this.setData({
       scope,
@@ -43,13 +43,14 @@ Page({
         recipes = await recipeService.getRecipeList({
           includeHidden: true,
           authorOpenid: user.openid,
-          limit: 100
+          limit: 100,
+          forceRefresh: true
         })
       } else if (this.data.scope === 'favorites') {
         const favorites = await favoriteService.getFavorites()
         const ids = favorites.map(item => item.recipeId)
         recipes = ids.length
-          ? await recipeService.getRecipeList({ ids, limit: 100 })
+          ? await recipeService.getRecipeList({ ids, limit: 100, forceRefresh: true })
           : []
         const orderMap = favorites.reduce((map, item, index) => {
           map[item.recipeId] = index
@@ -65,19 +66,19 @@ Page({
 
         recipes = await recipeService.getRecipeList({
           includeHidden: true,
-          limit: 100
+          limit: 100,
+          forceRefresh: true
         })
       }
 
       this.setData({
         isAdmin,
-        recipes: recipes.map(item => ({
-          ...item,
+        recipes: recipes.map(item => Object.assign({}, item, {
           statusText: getRecipeStatusText(item.status)
         }))
       })
     } catch (error) {
-      showError(error, '加载菜谱失败')
+      showError(error, '加载菜单失败')
     } finally {
       this.setData({ loading: false })
     }
@@ -119,8 +120,8 @@ Page({
   deleteRecipe(e) {
     const id = e.currentTarget.dataset.id
     wx.showModal({
-      title: '删除菜谱',
-      content: '删除后不会在主列表展示，确定继续吗？',
+      title: '删掉这道菜？',
+      content: '删掉后不会出现在菜单里，确定继续吗？',
       success: async res => {
         if (!res.confirm) return
 

@@ -1,6 +1,14 @@
 const userService = require('../../../services/user-service')
 const uploadService = require('../../../services/upload-service')
+const requestService = require('../../../services/request-service')
 const { showError } = require('../../../utils/error')
+
+const CHEF_MODE_KEY = 'familyMenuChefMode'
+const CHEF_MODE_TEXT = {
+  simple: '今天可以简单做',
+  rest: '今天想休息',
+  together: '想一起弄'
+}
 
 Page({
   data: {
@@ -13,6 +21,9 @@ Page({
     },
     isAdmin: false,
     loading: true,
+    chefMode: 'simple',
+    chefModeText: CHEF_MODE_TEXT.simple,
+    pendingRequests: [],
     showEditModal: false,
     editForm: {
       nickname: '',
@@ -25,16 +36,46 @@ Page({
   },
 
   async loadProfile() {
-    this.setData({ loading: true })
+    const cachedUser = userService.getCachedUser()
+    const cachedStats = cachedUser ? userService.getCachedUserStats(cachedUser.openid) : null
+    const cachedReceivedRequests = requestService.getCachedRequests('received') || []
+    const savedChefMode = wx.getStorageSync(CHEF_MODE_KEY) || 'simple'
+    const cachedChefMode = CHEF_MODE_TEXT[savedChefMode] ? savedChefMode : 'simple'
+
+    if (cachedUser) {
+      this.setData({
+        userInfo: cachedUser,
+        stats: cachedStats || this.data.stats,
+        isAdmin: userService.isAdmin(cachedUser),
+        chefMode: cachedChefMode,
+        chefModeText: CHEF_MODE_TEXT[cachedChefMode],
+        pendingRequests: this.getPendingRequests(cachedReceivedRequests),
+        editForm: {
+          nickname: cachedUser.nickname || '',
+          bio: cachedUser.bio || ''
+        },
+        loading: false
+      })
+    } else {
+      this.setData({ loading: true })
+    }
 
     try {
       const userInfo = await userService.getCurrentUser()
-      const stats = await userService.getUserStats(userInfo.openid)
+      const results = await Promise.all([
+        userService.getUserStats(userInfo.openid),
+        requestService.getReceivedRequests().catch(() => [])
+      ])
+      const stats = results[0] || this.data.stats
+      const receivedRequests = results[1] || []
 
       this.setData({
         userInfo,
         stats,
         isAdmin: userService.isAdmin(userInfo),
+        chefMode: cachedChefMode,
+        chefModeText: CHEF_MODE_TEXT[cachedChefMode],
+        pendingRequests: this.getPendingRequests(receivedRequests),
         editForm: {
           nickname: userInfo.nickname || '',
           bio: userInfo.bio || ''
@@ -45,6 +86,23 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  getPendingRequests(requests) {
+    return (requests || [])
+      .filter(item => item.status === 'pending' || item.status === 'accepted')
+      .slice(0, 2)
+  },
+
+  selectChefMode(e) {
+    const chefMode = e.currentTarget.dataset.mode
+    if (!CHEF_MODE_TEXT[chefMode]) return
+
+    wx.setStorageSync(CHEF_MODE_KEY, chefMode)
+    this.setData({
+      chefMode,
+      chefModeText: CHEF_MODE_TEXT[chefMode]
+    })
   },
 
   openEditModal() {
@@ -138,6 +196,12 @@ Page({
   goToReceivedRequests() {
     wx.navigateTo({
       url: '/pages/requests/manage/manage'
+    })
+  },
+
+  goToPlan() {
+    wx.switchTab({
+      url: '/pages/plan/plan'
     })
   },
 

@@ -1,5 +1,5 @@
 page {
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 .manage-page {
@@ -11,16 +11,16 @@ page {
 .summary {
   margin-bottom: 22rpx;
   padding: 24rpx;
-  border: 1rpx solid #ece7df;
+  border: 1rpx solid #e6dbcd;
   border-radius: 8rpx;
-  background: #fff;
+  background: #fffdf8;
 }
 
 .summary-title {
   display: block;
-  color: #2b211b;
+  color: #241f1b;
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 44rpx;
 }
 
@@ -42,7 +42,7 @@ page {
   margin-right: 14rpx;
   padding: 14rpx 24rpx;
   border: 1rpx solid #e3d9ce;
-  border-radius: 6rpx;
+  border-radius: 999rpx;
   color: #6f6259;
   background: #fffdf9;
   font-size: 26rpx;
@@ -50,6 +50,6 @@ page {
 
 .status-tab.active {
   color: #fff;
-  border-color: #9c5b37;
-  background: #9c5b37;
+  border-color: #167a66;
+  background: #167a66;
 }

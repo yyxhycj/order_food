@@ -16,6 +16,7 @@ Page({
     togglingFavorite: false,
     isOwner: false,
     isAdmin: false,
+    canEdit: false,
     comments: [],
     commentText: '',
     submittingComment: false,
@@ -27,7 +28,7 @@ Page({
 
   onLoad(options) {
     if (!options.id) {
-      wx.showToast({ title: '缺少菜谱 ID', icon: 'none' })
+      wx.showToast({ title: '没找到这道菜', icon: 'none' })
       wx.navigateBack()
       return
     }
@@ -40,14 +41,18 @@ Page({
     this.setData({ loading: true })
 
     try {
-      const [recipe, user] = await Promise.all([
+      const detailResults = await Promise.all([
         recipeService.getRecipeDetail(this.data.id),
         userService.getCurrentUser().catch(() => null)
       ])
-      const [isFavorite, comments] = await Promise.all([
+      const recipe = detailResults[0]
+      const user = detailResults[1]
+      const extraResults = await Promise.all([
         user ? favoriteService.isFavorite(this.data.id).catch(() => false) : false,
         commentService.getComments(this.data.id).catch(() => [])
       ])
+      const isFavorite = extraResults[0]
+      const comments = extraResults[1] || []
       const isAdmin = userService.isAdmin(user)
 
       this.setData({
@@ -55,14 +60,15 @@ Page({
         currentUser: user,
         isFavorite,
         comments,
-        isOwner: Boolean(user && recipe.authorOpenid === user.openid),
-        isAdmin
+        isOwner: Boolean(recipe.isOwner || (user && recipe.authorOpenid === user.openid)),
+        isAdmin,
+        canEdit: Boolean(recipe.canEdit || (user && recipe.authorOpenid === user.openid) || isAdmin)
       })
 
-      wx.setNavigationBarTitle({ title: recipe.title || '菜谱详情' })
+      wx.setNavigationBarTitle({ title: recipe.title || '这道菜' })
       recipeService.increaseViewCount(this.data.id)
     } catch (error) {
-      showError(error, '加载菜谱失败')
+      showError(error, '打开这道菜失败')
     } finally {
       this.setData({ loading: false })
     }
@@ -76,32 +82,26 @@ Page({
       const result = await favoriteService.toggleFavorite(this.data.id)
       const favorite = Boolean(result.favorite)
       const delta = favorite ? 1 : -1
-      const recipe = {
-        ...this.data.recipe,
+      const recipe = Object.assign({}, this.data.recipe, {
         favoriteCount: Math.max((this.data.recipe.favoriteCount || 0) + delta, 0)
-      }
+      })
 
       this.setData({
         isFavorite: favorite,
         recipe
       })
       wx.showToast({
-        title: favorite ? '已收藏' : '已取消收藏',
+        title: favorite ? '已留着' : '没留着了',
         icon: 'success'
       })
     } catch (error) {
-      showError(error, '收藏失败')
+      showError(error, '没留住')
     } finally {
       this.setData({ togglingFavorite: false })
     }
   },
 
   openRequestModal() {
-    if (this.data.isOwner) {
-      wx.showToast({ title: '不能对自己的菜谱发起想吃', icon: 'none' })
-      return
-    }
-
     this.setData({
       showRequestModal: true,
       requestReason: ''
@@ -137,12 +137,11 @@ Page({
       this.setData({
         showRequestModal: false,
         submittingRequest: false,
-        recipe: {
-          ...this.data.recipe,
+        recipe: Object.assign({}, this.data.recipe, {
           wantCount: (this.data.recipe.wantCount || 0) + 1
-        }
+        })
       })
-      wx.showToast({ title: '已告诉作者', icon: 'success' })
+      wx.showToast({ title: '放进想吃了', icon: 'success' })
     } catch (error) {
       this.setData({ submittingRequest: false })
       showError(error, '发起想吃失败')
@@ -175,10 +174,9 @@ Page({
       this.setData({
         commentText: '',
         comments: this.data.comments.concat(comment),
-        recipe: {
-          ...this.data.recipe,
+        recipe: Object.assign({}, this.data.recipe, {
           commentCount: (this.data.recipe.commentCount || 0) + 1
-        }
+        })
       })
       wx.showToast({ title: '已留言', icon: 'success' })
     } catch (error) {
@@ -204,10 +202,9 @@ Page({
           await commentService.deleteComment(id)
           this.setData({
             comments: this.data.comments.filter(item => item._id !== id),
-            recipe: {
-              ...this.data.recipe,
+            recipe: Object.assign({}, this.data.recipe, {
               commentCount: Math.max((this.data.recipe.commentCount || 0) - 1, 0)
-            }
+            })
           })
           wx.showToast({ title: '已删除', icon: 'success' })
         } catch (error) {

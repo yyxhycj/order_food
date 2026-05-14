@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "我的想吃",
+  "navigationBarTitleText": "今晚想吃",
   "usingComponents": {
     "request-card": "/components/request-card/request-card",
     "empty-state": "/components/empty-state/empty-state",

@@ -11,12 +11,12 @@ const ROLES = {
   ADMIN: 'admin'
 }
 const STATUS_TEXT = {
-  pending: '待回应',
-  accepted: '已接受',
-  preparing: '准备中',
-  done: '已完成',
-  declined: '已婉拒',
-  cancelled: '已取消'
+  pending: '等回应',
+  accepted: '已安排',
+  preparing: '在做了',
+  done: '吃过了',
+  declined: '改天吃',
+  cancelled: '先不吃'
 }
 const TRANSITIONS = {
   pending: ['accepted', 'declined', 'cancelled'],
@@ -46,8 +46,8 @@ exports.main = async (event = {}) => {
   const nextStatus = event.status
   const note = (event.note || '').trim()
 
-  if (!id) return fail('缺少请求 ID')
-  if (!STATUS_TEXT[nextStatus]) return fail('请求状态不合法')
+  if (!id) return fail('没找到这条点菜')
+  if (!STATUS_TEXT[nextStatus]) return fail('点菜状态不对')
 
   const [user, requestRes] = await Promise.all([
     getUser(openid),
@@ -57,18 +57,18 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const request = requestRes && requestRes.data
-  if (!request) return fail('想吃请求不存在')
+  if (!request) return fail('这条点菜不见了')
 
   const isAdmin = user.role === ROLES.ADMIN
   const isAuthor = request.authorOpenid === openid
   const isRequesterCancelling = request.requesterOpenid === openid && nextStatus === 'cancelled'
 
   if (nextStatus === 'cancelled' && !isRequesterCancelling) {
-    return fail('只有发起人可以取消想吃请求')
+    return fail('只有点菜的人可以取消')
   }
 
   if (nextStatus !== 'cancelled' && !isAdmin && !isAuthor) {
-    return fail('你没有权限处理这个请求')
+    return fail('你现在不能处理这条点菜')
   }
 
   if ((TRANSITIONS[request.status] || []).indexOf(nextStatus) < 0) {

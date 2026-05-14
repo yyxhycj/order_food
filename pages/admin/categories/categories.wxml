@@ -23,7 +23,7 @@
       <textarea class="textarea" placeholder="分类描述" value="{{form.description}}" data-field="description" bindinput="onInput"></textarea>
       <view class="switch-row">
         <text>启用分类</text>
-        <switch checked="{{form.status === 'active'}}" bindchange="onStatusChange" color="#9c5b37" />
+        <switch checked="{{form.status === 'active'}}" bindchange="onStatusChange" color="#167a66" />
       </view>
       <view class="modal-actions">
         <button class="modal-button ghost" bindtap="closeModal">取消</button>

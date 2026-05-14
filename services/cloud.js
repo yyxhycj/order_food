@@ -12,10 +12,9 @@ function initCloud(options = {}) {
   }
 
   if (!initialized) {
-    wx.cloud.init({
-      traceUser: true,
-      ...options
-    })
+    wx.cloud.init(Object.assign({
+      traceUser: true
+    }, options))
     db = wx.cloud.database()
     initialized = true
   }

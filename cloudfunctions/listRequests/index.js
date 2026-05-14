@@ -42,7 +42,7 @@ exports.main = async (event = {}) => {
 
   const query = {}
   if (mode === 'all') {
-    if (user.role !== ROLES.ADMIN) return fail('仅管理员可查看全部请求')
+    if (user.role !== ROLES.ADMIN) return fail('只有管小馆的人能看全部点菜记录')
   } else if (mode === 'received') {
     query.authorOpenid = openid
   } else {

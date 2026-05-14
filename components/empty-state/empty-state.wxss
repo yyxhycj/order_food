@@ -12,9 +12,9 @@
 
 .empty-title {
   display: block;
-  color: #40352e;
+  color: #241f1b;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 40rpx;
 }
 
@@ -31,10 +31,11 @@
   width: 260rpx;
   height: 72rpx;
   line-height: 72rpx;
-  border-radius: 6rpx;
+  border-radius: 8rpx;
   color: #fff;
-  background: #9c5b37;
+  background: #d84d35;
   font-size: 27rpx;
+  font-weight: 900;
 }
 
 .empty-button::after {

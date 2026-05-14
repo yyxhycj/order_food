@@ -15,6 +15,10 @@ function fail(message) {
   return { success: false, message }
 }
 
+function getRecipeOwnerOpenid(recipe) {
+  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
+}
+
 async function getUser(openid) {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ openid, status: 'active' })
@@ -29,7 +33,7 @@ exports.main = async (event = {}) => {
   const recipeId = event.recipeId
   const reason = (event.reason || '').trim()
 
-  if (!recipeId) return fail('缺少菜谱 ID')
+  if (!recipeId) return fail('没找到这道菜')
   if (reason.length > 120) return fail('想吃理由最多 120 个字')
 
   const [user, recipeRes] = await Promise.all([
@@ -40,8 +44,7 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const recipe = recipeRes && recipeRes.data
-  if (!recipe || recipe.status !== 'published') return fail('菜谱暂时不可请求')
-  if (recipe.authorOpenid === openid) return fail('不能对自己发布的菜谱发起想吃请求')
+  if (!recipe || recipe.status !== 'published') return fail('这道菜现在点不了')
 
   const duplicate = await db.collection(COLLECTIONS.REQUESTS)
     .where({
@@ -53,7 +56,7 @@ exports.main = async (event = {}) => {
     .get()
 
   if (duplicate.data && duplicate.data.length) {
-    return fail('已经告诉作者了，等回应就好')
+    return fail('已经放进想吃了，先等等')
   }
 
   const now = db.serverDate()
@@ -62,12 +65,12 @@ exports.main = async (event = {}) => {
     recipeTitle: recipe.title,
     recipeCoverImage: recipe.coverImage || '',
     requesterOpenid: openid,
-    requesterName: user.nickname || '朋友',
-    authorOpenid: recipe.authorOpenid,
-    authorName: recipe.authorName || '朋友',
+    requesterName: user.nickname || '家里人',
+    authorOpenid: getRecipeOwnerOpenid(recipe),
+    authorName: recipe.authorName || '家里人',
     reason,
     status: 'pending',
-    statusText: '待回应',
+    statusText: '等回应',
     note: '',
     createdAt: now,
     updatedAt: now,

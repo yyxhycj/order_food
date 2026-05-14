@@ -1,0 +1,56 @@
+<view class="plan-page">
+  <view class="top">
+    <view>
+      <text class="title">今天吃什么</text>
+      <text class="subtitle">{{todayText}} · {{plannedCount ? '先这样安排' : '还没定'}}</text>
+    </view>
+    <button class="add-button" bindtap="goHome">+</button>
+  </view>
+
+  <view class="date-strip">
+    <view wx:for="{{dates}}" wx:key="key" class="date {{item.active ? 'active' : ''}}" data-key="{{item.key}}" bindtap="selectDate">
+      <text class="date-day">{{item.day}}</text>
+      <text class="date-week">{{item.week}}</text>
+    </view>
+  </view>
+
+  <loading-state wx:if="{{loading}}" text="正在看看今天吃什么"></loading-state>
+
+  <block wx:else>
+    <view wx:if="{{dishes.length}}" class="meal-block">
+      <view class="section-head">
+        <text class="section-title">晚餐</text>
+        <text class="section-note">谁方便谁掌勺</text>
+      </view>
+
+      <view class="plan-dish" wx:for="{{dishes}}" wx:for-item="dish" wx:key="id">
+        <image class="dish-cover" src="{{dish.coverImage}}" mode="aspectFill" data-recipe-id="{{dish.recipeId}}" bindtap="openDish"></image>
+        <view class="dish-main" data-recipe-id="{{dish.recipeId}}" bindtap="openDish">
+          <view class="dish-head">
+            <text class="dish-title">{{dish.title}}</text>
+            <text class="dish-status {{dish.statusClass}}">{{dish.status}}</text>
+          </view>
+          <text class="dish-sub">{{dish.subtitle}} · 掌勺：{{dish.assigneeText}}</text>
+          <view class="assignee-row" catchtap="noop">
+            <text wx:for="{{assigneeOptions}}" wx:for-item="option" wx:key="value" class="assignee {{dish.assignee === option.value ? 'active' : ''}}" data-id="{{dish.id}}" data-assignee="{{option.value}}" bindtap="selectAssignee">{{option.label}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="shopping">
+        <view class="section-head small">
+          <text class="section-title">顺手买</text>
+          <text class="section-note">{{totalMinutes}} 分钟左右</text>
+        </view>
+        <view class="shopping-item" wx:for="{{shoppingList}}" wx:key="id">
+          <text class="checkbox"></text>
+          <text class="shopping-text">{{item.text}}</text>
+        </view>
+      </view>
+
+      <button class="save-button" bindtap="saveTodayPlan">先这么吃</button>
+    </view>
+
+    <empty-state wx:else title="今天还没想吃的" description="先去菜单里点两道，晚点再来安排。" button-text="去菜单" bind:action="goHome"></empty-state>
+  </block>
+</view>

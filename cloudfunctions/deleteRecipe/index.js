@@ -15,6 +15,10 @@ function fail(message) {
   return { success: false, message }
 }
 
+function getRecipeOwnerOpenid(recipe) {
+  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
+}
+
 async function getUser(openid) {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ openid, status: 'active' })
@@ -28,7 +32,7 @@ exports.main = async (event = {}) => {
   const openid = wxContext.OPENID
   const id = event.id
 
-  if (!id) return fail('缺少菜谱 ID')
+  if (!id) return fail('没找到这道菜')
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
@@ -38,10 +42,10 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const recipe = recipeRes && recipeRes.data
-  if (!recipe || recipe.status === 'deleted') return fail('菜谱不存在')
+  if (!recipe || recipe.status === 'deleted') return fail('这道菜不见了')
 
-  const canDelete = recipe.authorOpenid === openid || user.role === ROLES.ADMIN
-  if (!canDelete) return fail('你没有权限删除这个菜谱')
+  const canDelete = getRecipeOwnerOpenid(recipe) === openid || user.role === ROLES.ADMIN
+  if (!canDelete) return fail('你现在不能删这道菜')
 
   await db.collection(COLLECTIONS.RECIPES).doc(id).update({
     data: {

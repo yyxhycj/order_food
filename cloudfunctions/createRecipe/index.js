@@ -28,9 +28,9 @@ function validate(recipe) {
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
   const steps = Array.isArray(recipe.steps) ? recipe.steps : []
 
-  if (!trim(recipe.title)) return '请输入菜谱标题'
-  if (ALLOWED_STATUSES.indexOf(status) < 0) return '菜谱状态不合法'
-  if (status === RECIPE_STATUS.PUBLISHED && !recipe.coverImage) return '请上传菜谱主图'
+  if (!trim(recipe.title)) return '给这道菜起个名字'
+  if (ALLOWED_STATUSES.indexOf(status) < 0) return '这道菜的状态不对'
+  if (status === RECIPE_STATUS.PUBLISHED && !recipe.coverImage) return '加一张成品图吧'
   if (status === RECIPE_STATUS.PUBLISHED && !recipe.categoryId) return '请选择分类'
   if (!ingredients.filter(item => trim(item.name) && trim(item.amount)).length) return '请至少添加一个食材'
   if (!steps.filter(item => trim(item.text)).length) return '请至少添加一个步骤'
@@ -100,7 +100,7 @@ exports.main = async (event = {}) => {
     images: recipe.images,
     categoryId: recipe.categoryId,
     authorOpenid: openid,
-    authorName: user.nickname || '朋友',
+    authorName: user.nickname || '家里人',
     ingredients: recipe.ingredients,
     steps: recipe.steps,
     cookingTime: recipe.cookingTime,

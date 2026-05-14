@@ -1,11 +1,109 @@
 page {
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 .requests-page {
   min-height: 100vh;
-  padding: 24rpx;
+  padding: 30rpx 24rpx 48rpx;
   box-sizing: border-box;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.title {
+  display: block;
+  color: #241f1b;
+  font-size: 48rpx;
+  font-weight: 900;
+  line-height: 58rpx;
+}
+
+.subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: #716a61;
+  font-size: 25rpx;
+  line-height: 34rpx;
+}
+
+.plan-button {
+  margin: 0;
+  padding: 0 24rpx;
+  height: 66rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: #d84d35;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 66rpx;
+}
+
+.plan-button::after {
+  border: none;
+}
+
+.summary-card {
+  margin-bottom: 22rpx;
+  padding: 24rpx;
+  border-left: 6rpx solid #e5a72d;
+  border-radius: 8rpx;
+  background: #fff8e7;
+}
+
+.summary-title {
+  display: block;
+  color: #241f1b;
+  font-size: 32rpx;
+  font-weight: 900;
+  line-height: 40rpx;
+}
+
+.summary-text {
+  display: block;
+  margin-top: 10rpx;
+  color: #5c4a29;
+  font-size: 25rpx;
+  line-height: 38rpx;
+}
+
+.summary-stats {
+  display: flex;
+  margin-top: 18rpx;
+}
+
+.summary-stat {
+  flex: 1;
+  margin-right: 12rpx;
+  padding: 14rpx 8rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.65);
+  text-align: center;
+}
+
+.summary-stat:last-child {
+  margin-right: 0;
+}
+
+.summary-number {
+  display: block;
+  color: #d84d35;
+  font-size: 34rpx;
+  font-weight: 900;
+  line-height: 40rpx;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 4rpx;
+  color: #705d3c;
+  font-size: 23rpx;
+  font-weight: 800;
+  line-height: 30rpx;
 }
 
 .status-tabs {
@@ -18,14 +116,19 @@ page {
   margin-right: 14rpx;
   padding: 14rpx 24rpx;
   border: 1rpx solid #e3d9ce;
-  border-radius: 6rpx;
+  border-radius: 999rpx;
   color: #6f6259;
-  background: #fffdf9;
+  background: #fffdf8;
   font-size: 26rpx;
+  font-weight: 700;
 }
 
 .status-tab.active {
   color: #fff;
-  border-color: #9c5b37;
-  background: #9c5b37;
+  border-color: #167a66;
+  background: #167a66;
+}
+
+.request-list {
+  padding-bottom: 20rpx;
 }

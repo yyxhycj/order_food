@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "菜谱详情",
+  "navigationBarTitleText": "这道菜",
   "usingComponents": {
     "loading-state": "/components/loading-state/loading-state",
     "empty-state": "/components/empty-state/empty-state",

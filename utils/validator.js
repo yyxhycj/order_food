@@ -8,11 +8,11 @@ function validateRecipe(recipe, options = {}) {
   const steps = Array.isArray(data.steps) ? data.steps : []
 
   if (!trim(data.title)) {
-    return { valid: false, message: '请输入菜谱标题' }
+    return { valid: false, message: '给这道菜起个名字' }
   }
 
   if (options.requireCover && !data.coverImage) {
-    return { valid: false, message: '请上传菜谱主图' }
+    return { valid: false, message: '加一张成品图吧' }
   }
 
   if (options.requireCategory && !data.categoryId) {

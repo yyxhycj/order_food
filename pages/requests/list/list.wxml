@@ -1,4 +1,31 @@
 <view class="requests-page">
+  <view class="top">
+    <view>
+      <text class="title">今晚想吃</text>
+      <text class="subtitle">先放进来，晚点看谁有空做</text>
+    </view>
+    <button class="plan-button" bindtap="goPlan">安排</button>
+  </view>
+
+  <view class="summary-card">
+    <text class="summary-title">点菜篮</text>
+    <text class="summary-text">这里不是任务清单，只是“我想吃这个”。累了就改天，方便就安排上。</text>
+    <view class="summary-stats">
+      <view class="summary-stat">
+        <text class="summary-number">{{pendingCount}}</text>
+        <text class="summary-label">等回应</text>
+      </view>
+      <view class="summary-stat">
+        <text class="summary-number">{{arrangedCount}}</text>
+        <text class="summary-label">安排了</text>
+      </view>
+      <view class="summary-stat">
+        <text class="summary-number">{{doneCount}}</text>
+        <text class="summary-label">吃过了</text>
+      </view>
+    </view>
+  </view>
+
   <scroll-view class="status-tabs" scroll-x="true" show-scrollbar="false">
     <block wx:for="{{statusOptions}}" wx:key="value">
       <view class="status-tab {{currentStatus === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="selectStatus">
@@ -7,12 +34,12 @@
     </block>
   </scroll-view>
 
-  <loading-state wx:if="{{loading}}" text="正在加载想吃记录"></loading-state>
+  <loading-state wx:if="{{loading}}" text="正在看想吃什么"></loading-state>
 
   <view wx:else class="request-list">
     <block wx:if="{{filteredRequests.length}}">
       <request-card wx:for="{{filteredRequests}}" wx:key="_id" request="{{item}}" mode="mine" bind:requesttap="goToRecipe" bind:action="onRequestAction"></request-card>
     </block>
-    <empty-state wx:else title="还没有想吃记录" description="看到喜欢的菜谱，就点一下想吃这个。" button-text="去看菜谱" bind:action="goHome"></empty-state>
+    <empty-state wx:else title="还没点菜" description="看到想吃的菜，先点一下放进来。" button-text="去菜单" bind:action="goHome"></empty-state>
   </view>
 </view>

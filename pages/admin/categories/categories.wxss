@@ -1,5 +1,5 @@
 page {
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 .categories-page {
@@ -12,10 +12,11 @@ page {
   width: 100%;
   height: 76rpx;
   line-height: 76rpx;
-  border-radius: 6rpx;
+  border-radius: 8rpx;
   color: #fff;
-  background: #9c5b37;
+  background: #d84d35;
   font-size: 28rpx;
+  font-weight: 900;
 }
 
 .create-button::after,
@@ -25,9 +26,9 @@ page {
 
 .category-list {
   margin-top: 22rpx;
-  border: 1rpx solid #ece7df;
+  border: 1rpx solid #e6dbcd;
   border-radius: 8rpx;
-  background: #fff;
+  background: #fffdf8;
   overflow: hidden;
 }
 
@@ -49,9 +50,9 @@ page {
 
 .category-name {
   display: block;
-  color: #332822;
+  color: #241f1b;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 40rpx;
 }
 
@@ -64,9 +65,9 @@ page {
 }
 
 .category-sort {
-  color: #9c5b37;
+  color: #d84d35;
   font-size: 28rpx;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .category-side {
@@ -79,15 +80,15 @@ page {
 .category-status {
   margin-bottom: 8rpx;
   padding: 4rpx 10rpx;
-  border-radius: 6rpx;
+  border-radius: 999rpx;
   color: #77716d;
   background: #f0eeee;
   font-size: 22rpx;
 }
 
 .category-status.active {
-  color: #27784b;
-  background: #e7f4ed;
+  color: #167a66;
+  background: #d9efe8;
 }
 
 .modal-mask {
@@ -113,9 +114,9 @@ page {
 .modal-title {
   display: block;
   margin-bottom: 18rpx;
-  color: #2b211b;
+  color: #241f1b;
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .input,
@@ -123,7 +124,7 @@ page {
   width: 100%;
   box-sizing: border-box;
   border: 1rpx solid #e4dbd1;
-  border-radius: 6rpx;
+  border-radius: 8rpx;
   background: #fff;
   color: #332822;
   font-size: 28rpx;
@@ -160,17 +161,18 @@ page {
   flex: 1;
   height: 76rpx;
   line-height: 76rpx;
-  border-radius: 6rpx;
+  border-radius: 8rpx;
   font-size: 28rpx;
+  font-weight: 900;
 }
 
 .modal-button.ghost {
   margin-right: 16rpx;
-  color: #7a6558;
-  background: #f4eee8;
+  color: #167a66;
+  background: #d9efe8;
 }
 
 .modal-button.primary {
   color: #fff;
-  background: #9c5b37;
+  background: #d84d35;
 }

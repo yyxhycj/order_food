@@ -1,13 +1,13 @@
 <view class="detail-page">
-  <loading-state wx:if="{{loading}}" text="正在打开菜谱"></loading-state>
+  <loading-state wx:if="{{loading}}" text="正在打开这道菜"></loading-state>
 
   <block wx:elif="{{recipe}}">
-    <image class="hero" src="{{recipe.coverImage || '/images/recipe.png'}}" mode="aspectFill" bindtap="previewCover"></image>
+    <image class="hero" src="{{recipe.coverImage || '/images/dish-placeholder.png'}}" mode="aspectFill" bindtap="previewCover"></image>
 
     <view class="panel">
       <view class="title-row">
         <text class="title">{{recipe.title}}</text>
-        <button wx:if="{{isOwner || isAdmin}}" class="edit-button" bindtap="editRecipe">编辑</button>
+        <button wx:if="{{canEdit}}" class="edit-button" bindtap="editRecipe">编辑</button>
       </view>
       <text class="desc">{{recipe.description}}</text>
 
@@ -31,7 +31,7 @@
         </view>
         <view class="metric">
           <text class="metric-number">{{recipe.favoriteCount || 0}}</text>
-          <text class="metric-label">收藏</text>
+          <text class="metric-label">留着</text>
         </view>
       </view>
 
@@ -66,7 +66,7 @@
 
     <view class="section comments-section">
       <view class="section-head">
-        <text class="section-title inline">朋友留言</text>
+        <text class="section-title inline">饭桌留言</text>
         <text class="section-count">{{recipe.commentCount || comments.length || 0}}</text>
       </view>
 
@@ -90,21 +90,21 @@
     </view>
 
     <view class="bottom-actions">
-      <button class="action secondary" loading="{{togglingFavorite}}" bindtap="toggleFavorite">{{isFavorite ? '已收藏' : '收藏'}}</button>
-      <button class="action primary" disabled="{{isOwner}}" bindtap="openRequestModal">{{isOwner ? '这是我的菜谱' : '想吃这个'}}</button>
+      <button class="action secondary" loading="{{togglingFavorite}}" bindtap="toggleFavorite">{{isFavorite ? '已留着' : '留着'}}</button>
+      <button class="action primary" bindtap="openRequestModal">想吃这个</button>
     </view>
 
     <view class="modal-mask" wx:if="{{showRequestModal}}" bindtap="closeRequestModal">
       <view class="modal" catchtap="noop">
         <text class="modal-title">想吃这个</text>
-        <textarea class="reason-input" placeholder="可以写时间、人数或一句撒娇" value="{{requestReason}}" bindinput="onReasonInput" maxlength="120"></textarea>
+        <textarea class="reason-input" placeholder="比如：今晚想吃热乎的，或者周末一起弄" value="{{requestReason}}" bindinput="onReasonInput" maxlength="120"></textarea>
         <view class="modal-actions">
           <button class="modal-button ghost" bindtap="closeRequestModal">取消</button>
-          <button class="modal-button primary" loading="{{submittingRequest}}" bindtap="submitRequest">发送</button>
+          <button class="modal-button primary" loading="{{submittingRequest}}" bindtap="submitRequest">放进想吃</button>
         </view>
       </view>
     </view>
   </block>
 
-  <empty-state wx:else title="菜谱不见了" button-text="回首页" bind:action="goHome"></empty-state>
+  <empty-state wx:else title="这道菜不见了" button-text="回首页" bind:action="goHome"></empty-state>
 </view>

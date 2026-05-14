@@ -1,7 +1,7 @@
 <view class="recipe-form">
   <view class="section">
     <text class="section-title">基础信息</text>
-    <input class="input title-input" placeholder="菜谱名称" value="{{form.title}}" data-field="title" bindinput="updateField" />
+    <input class="input title-input" placeholder="菜名" value="{{form.title}}" data-field="title" bindinput="updateField" />
     <textarea class="textarea" placeholder="写几句这道菜的来历、味道或适合的场景" value="{{form.description}}" data-field="description" bindinput="updateField" maxlength="240"></textarea>
 
     <view class="cover-picker" bindtap="chooseCover">
@@ -29,7 +29,7 @@
       </block>
     </view>
 
-    <input class="input" placeholder="标签，用逗号分隔，例如 下饭, 聚餐" value="{{form.tagsText}}" data-field="tagsText" bindinput="updateField" />
+    <input class="input" placeholder="标签，用逗号分隔，例如 下饭, 周末" value="{{form.tagsText}}" data-field="tagsText" bindinput="updateField" />
   </view>
 
   <view class="section">

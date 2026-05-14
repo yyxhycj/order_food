@@ -1,22 +1,37 @@
 const { ROLES, isAdmin } = require('../constants/roles')
 const { callFunction } = require('./cloud')
+const cache = require('../utils/cache')
 
 const STORAGE_KEY = 'currentUser'
+const STATS_CACHE_MAX_AGE = 2 * 60 * 1000
 
-function getCachedUser() {
-  return wx.getStorageSync(STORAGE_KEY) || null
+function normalizeUser(user, openid) {
+  if (!user) return null
+  const nextUser = Object.assign({}, user)
+  if (!nextUser.openid && openid) nextUser.openid = openid
+  return nextUser.openid ? nextUser : null
 }
 
-function setCachedUser(user) {
-  wx.setStorageSync(STORAGE_KEY, user)
+function getCachedUser() {
+  const user = normalizeUser(wx.getStorageSync(STORAGE_KEY) || null)
+  if (!user) {
+    wx.removeStorageSync(STORAGE_KEY)
+    return null
+  }
+  return user
+}
+
+function setCachedUser(user, openid) {
+  const nextUser = normalizeUser(user, openid)
+  if (nextUser) wx.setStorageSync(STORAGE_KEY, nextUser)
 }
 
 async function login(profile = {}) {
   const result = await callFunction('login', { profile })
-  const user = result.user || null
+  const user = normalizeUser(result.user || null, result.openid)
 
   if (user) {
-    setCachedUser(user)
+    setCachedUser(user, result.openid)
   }
 
   return {
@@ -36,7 +51,7 @@ async function getCurrentUser(options = {}) {
 
 async function updateUserProfile(profile) {
   const result = await callFunction('updateUserProfile', { profile })
-  const nextUser = result.user
+  const nextUser = normalizeUser(result.user)
 
   setCachedUser(nextUser)
 
@@ -44,13 +59,27 @@ async function updateUserProfile(profile) {
 }
 
 async function getUserStats(openid) {
+  const cacheKey = `cache:v2:userStats:${openid || 'me'}`
+  const cached = cache.get(cacheKey, STATS_CACHE_MAX_AGE)
+  if (cached) return cached
+
   const result = await callFunction('getUserStats', { openid })
-  return result.stats || {
+  const stats = result.stats || {
     recipeCount: 0,
     favoriteCount: 0,
     requestCount: 0,
     receivedRequestCount: 0
   }
+  cache.set(cacheKey, stats)
+  return stats
+}
+
+function getCachedUserStats(openid) {
+  return cache.getAny(`cache:v2:userStats:${openid || 'me'}`)
+}
+
+function clearUserStatsCache() {
+  cache.removePrefix('cache:v2:userStats:')
 }
 
 module.exports = {
@@ -59,6 +88,8 @@ module.exports = {
   getCachedUser,
   getCurrentUser,
   updateUserProfile,
+  clearUserStatsCache,
+  getCachedUserStats,
   getUserStats,
   isAdmin
 }

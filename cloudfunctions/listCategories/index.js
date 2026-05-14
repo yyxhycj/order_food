@@ -27,11 +27,11 @@ async function getUser(openid) {
 
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
-  const user = await getUser(wxContext.OPENID)
   const includeInactive = Boolean(event.includeInactive)
   const query = {}
 
   if (includeInactive) {
+    const user = await getUser(wxContext.OPENID)
     if (!user || user.role !== ROLES.ADMIN) return fail('仅管理员可查看全部分类')
   } else {
     query.status = 'active'

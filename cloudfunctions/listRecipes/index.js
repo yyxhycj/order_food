@@ -68,35 +68,55 @@ function sortRecipes(recipes, sort) {
   })
 }
 
+async function getRecipesByAuthor(query, authorOpenid) {
+  const fields = ['authorOpenid', 'creator_openid', '_openid']
+  const resultMap = {}
+
+  for (let index = 0; index < fields.length; index += 1) {
+    const field = fields[index]
+    const authorQuery = Object.assign({}, query)
+    authorQuery[field] = authorOpenid
+
+    const res = await db.collection(COLLECTIONS.RECIPES)
+      .where(authorQuery)
+      .limit(100)
+      .get()
+
+    ;(res.data || []).forEach(recipe => {
+      if (recipe && recipe._id) resultMap[recipe._id] = recipe
+    })
+  }
+
+  return Object.keys(resultMap).map(id => resultMap[id])
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
-  const user = await getUser(openid)
-  const isAdmin = Boolean(user && user.role === ROLES.ADMIN)
   const options = event.options || {}
   const query = {}
   const limit = normalizeLimit(options.limit)
   const page = Math.max(Number(options.page) || 0, 0)
   const requestedAuthor = options.authorOpenid
+  const hasCategoryFilter = options.categoryId && options.categoryId !== 'all'
+  let user = null
+  let isAdmin = false
 
   if (options.includeHidden) {
+    user = await getUser(openid)
+    isAdmin = Boolean(user && user.role === ROLES.ADMIN)
     query.status = _.neq(RECIPE_STATUS.DELETED)
 
     if (requestedAuthor) {
-      if (!isAdmin && (!user || requestedAuthor !== openid)) return fail('你没有权限查看这些菜谱')
-      query.authorOpenid = requestedAuthor
+      if (!isAdmin && (!user || requestedAuthor !== openid)) return fail('你不能看这些菜')
     } else if (!isAdmin) {
-      return fail('仅管理员可查看全部菜谱')
+      return fail('只有管小馆的人能看全部菜单')
     }
   } else {
     query.status = options.status || RECIPE_STATUS.PUBLISHED
   }
 
-  if (!options.includeHidden && requestedAuthor) {
-    query.authorOpenid = requestedAuthor
-  }
-
-  if (options.categoryId && options.categoryId !== 'all') {
+  if (hasCategoryFilter) {
     query.categoryId = options.categoryId
   }
 
@@ -121,13 +141,16 @@ exports.main = async (event = {}) => {
   const canUseDbSort = sort[0] === 'createdAt' &&
     sort[1] === 'desc' &&
     query.status === RECIPE_STATUS.PUBLISHED &&
-    !options.categoryId &&
+    !hasCategoryFilter &&
     !options.authorOpenid &&
     !options.ids &&
     !options.keyword
   let recipes = []
 
-  if (canUseDbSort) {
+  if (requestedAuthor) {
+    recipes = sortRecipes(await getRecipesByAuthor(query, requestedAuthor), sort)
+      .slice(page * limit, (page + 1) * limit)
+  } else if (canUseDbSort) {
     const res = await db.collection(COLLECTIONS.RECIPES)
       .where(query)
       .orderBy(sort[0], sort[1])

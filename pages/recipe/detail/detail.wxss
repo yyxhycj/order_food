@@ -1,25 +1,37 @@
 page {
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 .detail-page {
   min-height: 100vh;
-  padding-bottom: 140rpx;
+  padding: 24rpx 0 150rpx;
+  box-sizing: border-box;
 }
 
 .hero {
-  width: 100%;
-  height: 500rpx;
+  display: block;
+  width: calc(100% - 48rpx);
+  height: 430rpx;
+  margin: 0 24rpx;
+  border: 1rpx solid #e6dbcd;
+  border-radius: 8rpx;
   background: #eee6dc;
+  box-sizing: border-box;
 }
 
 .panel,
 .section {
   margin: 22rpx 24rpx;
   padding: 24rpx;
-  border: 1rpx solid #ece7df;
+  border: 1rpx solid #e6dbcd;
   border-radius: 8rpx;
-  background: #fff;
+  background: #fffdf8;
+}
+
+.panel {
+  position: relative;
+  margin-top: -34rpx;
+  box-shadow: 0 10rpx 26rpx rgba(55, 41, 30, 0.08);
 }
 
 .title-row {
@@ -31,9 +43,9 @@ page {
 .title {
   flex: 1;
   min-width: 0;
-  color: #2b211b;
+  color: #241f1b;
   font-size: 42rpx;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 54rpx;
 }
 
@@ -43,9 +55,10 @@ page {
   height: 60rpx;
   line-height: 60rpx;
   border-radius: 6rpx;
-  color: #8c5032;
-  background: #f4eee8;
+  color: #167a66;
+  background: #d9efe8;
   font-size: 25rpx;
+  font-weight: 800;
 }
 
 .edit-button::after,
@@ -88,9 +101,9 @@ page {
 
 .metric-number {
   display: block;
-  color: #8f4e2f;
+  color: #d84d35;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 40rpx;
 }
 
@@ -109,18 +122,19 @@ page {
   display: inline-block;
   margin: 0 10rpx 10rpx 0;
   padding: 6rpx 12rpx;
-  color: #8c5032;
-  background: #f6eee6;
-  border-radius: 6rpx;
+  color: #12594b;
+  background: #d9efe8;
+  border-radius: 999rpx;
   font-size: 23rpx;
+  font-weight: 800;
 }
 
 .section-title {
   display: block;
   margin-bottom: 18rpx;
-  color: #30251f;
+  color: #241f1b;
   font-size: 32rpx;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .section-head {
@@ -168,9 +182,9 @@ page {
   border-radius: 50%;
   text-align: center;
   color: #fff;
-  background: #9c5b37;
+  background: #d84d35;
   font-size: 26rpx;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .step-body {
@@ -238,9 +252,10 @@ page {
   height: 48rpx;
   line-height: 48rpx;
   border-radius: 6rpx;
-  color: #8c5032;
-  background: #f4eee8;
+  color: #167a66;
+  background: #d9efe8;
   font-size: 22rpx;
+  font-weight: 800;
 }
 
 .comment-delete::after,
@@ -278,8 +293,9 @@ page {
   line-height: 68rpx;
   border-radius: 6rpx;
   color: #fff;
-  background: #9c5b37;
+  background: #167a66;
   font-size: 27rpx;
+  font-weight: 800;
 }
 
 .bottom-actions {
@@ -289,7 +305,7 @@ page {
   bottom: 0;
   display: flex;
   padding: 18rpx 24rpx 30rpx;
-  background: rgba(255, 253, 249, 0.96);
+  background: rgba(255, 253, 248, 0.96);
   border-top: 1rpx solid #eadfd4;
 }
 
@@ -299,17 +315,18 @@ page {
   line-height: 78rpx;
   border-radius: 6rpx;
   font-size: 29rpx;
+  font-weight: 900;
 }
 
 .secondary {
   margin-right: 16rpx;
-  color: #7a6558;
-  background: #f4eee8;
+  color: #167a66;
+  background: #d9efe8;
 }
 
 .primary {
   color: #fff;
-  background: #9c5b37;
+  background: #d84d35;
 }
 
 .action[disabled] {

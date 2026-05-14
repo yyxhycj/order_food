@@ -1,5 +1,5 @@
 page {
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 .admin-page {
@@ -13,7 +13,7 @@ page {
 .menu {
   border: 1rpx solid #ece7df;
   border-radius: 8rpx;
-  background: #fff;
+  background: #fffdf8;
 }
 
 .header {
@@ -22,9 +22,9 @@ page {
 
 .title {
   display: block;
-  color: #2b211b;
+  color: #241f1b;
   font-size: 40rpx;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 52rpx;
 }
 
@@ -49,9 +49,9 @@ page {
 
 .stat-number {
   display: block;
-  color: #8f4e2f;
+  color: #d84d35;
   font-size: 34rpx;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 42rpx;
 }
 
@@ -77,9 +77,9 @@ page {
 
 .menu-main {
   display: block;
-  color: #332822;
+  color: #241f1b;
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 40rpx;
 }
 

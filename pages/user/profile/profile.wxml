@@ -1,68 +1,101 @@
 <view class="profile-page">
+  <view class="top">
+    <view>
+      <text class="title">我的小馆</text>
+      <text class="subtitle">想吃、会做、等我确认，都在这里</text>
+    </view>
+    <button class="edit-round" bindtap="openEditModal">改</button>
+  </view>
+
   <view class="profile-card">
     <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" bindtap="changeAvatar"></image>
     <view class="profile-info">
-      <text class="name">{{userInfo.nickname || '新朋友'}}</text>
-      <text class="bio">{{userInfo.bio || '还没有写简介'}}</text>
-      <text class="role">{{isAdmin ? '管理员' : '朋友'}}</text>
+      <text class="name">{{chefModeText}}</text>
+      <text class="bio">{{userInfo.bio || '少辣、爱热汤，最近想吃清淡点'}}</text>
     </view>
-    <button class="edit-button" bindtap="openEditModal">编辑</button>
+    <text class="role">{{isAdmin ? '管小馆' : '家里人'}}</text>
   </view>
 
   <view class="stats">
-    <view class="stat">
+    <view class="stat" bindtap="goToMyRecipes">
       <text class="stat-number">{{stats.recipeCount}}</text>
-      <text class="stat-label">菜谱</text>
+      <text class="stat-label">会做</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="goToFavorites">
       <text class="stat-number">{{stats.favoriteCount}}</text>
-      <text class="stat-label">收藏</text>
+      <text class="stat-label">留着</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="goToMyRequests">
       <text class="stat-number">{{stats.requestCount}}</text>
       <text class="stat-label">想吃</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="goToReceivedRequests">
       <text class="stat-number">{{stats.receivedRequestCount}}</text>
-      <text class="stat-label">收到</text>
+      <text class="stat-label">等我</text>
     </view>
   </view>
 
-  <view class="menu">
-    <view class="menu-item" bindtap="goToCreate">
-      <text class="menu-main">发布菜谱</text>
-      <text class="menu-sub">把拿手菜分享给朋友</text>
+  <view class="chef-card">
+    <text class="section-title">今晚谁掌勺？</text>
+    <text class="section-sub">不是固定角色，只是这一餐怎么安排。</text>
+    <view class="chef-options">
+      <text class="chef-option {{chefMode === 'simple' ? 'active' : ''}}" data-mode="simple" bindtap="selectChefMode">我来做</text>
+      <text class="chef-option {{chefMode === 'rest' ? 'active' : ''}}" data-mode="rest" bindtap="selectChefMode">今天休息</text>
+      <text class="chef-option {{chefMode === 'together' ? 'active' : ''}}" data-mode="together" bindtap="selectChefMode">一起弄</text>
     </view>
-    <view class="menu-item" bindtap="goToMyRecipes">
-      <text class="menu-main">我的菜谱</text>
-      <text class="menu-sub">查看和编辑我发布的菜谱</text>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">等我确认</text>
+      <text class="section-action" bindtap="goToReceivedRequests">全部</text>
     </view>
-    <view class="menu-item" bindtap="goToFavorites">
-      <text class="menu-main">我的收藏</text>
-      <text class="menu-sub">留着下次想吃</text>
+
+    <block wx:if="{{pendingRequests.length}}">
+      <view class="pending-item" wx:for="{{pendingRequests}}" wx:key="_id" data-request-id="{{item._id}}" bindtap="goToReceivedRequests">
+        <image class="pending-cover" src="{{item.recipeCoverImage || '/images/dish-placeholder.png'}}" mode="aspectFill"></image>
+        <view class="pending-body">
+          <text class="pending-title">{{item.recipeTitle}}</text>
+          <text class="pending-sub">{{item.requesterName || '家里人'}}想吃 · {{item.statusText}}</text>
+        </view>
+        <text class="pending-status">{{item.statusText}}</text>
+      </view>
+    </block>
+
+    <view wx:else class="empty-line">现在没人催饭。</view>
+  </view>
+
+  <view class="menu-grid">
+    <view class="menu-tile" bindtap="goToCreate">
+      <text class="menu-main">加一道菜</text>
+      <text class="menu-sub">做过的、想复刻的都行</text>
     </view>
-    <view class="menu-item" bindtap="goToMyRequests">
-      <text class="menu-main">我的想吃</text>
-      <text class="menu-sub">查看请求状态</text>
+    <view class="menu-tile" bindtap="goToPlan">
+      <text class="menu-main">今天吃什么</text>
+      <text class="menu-sub">排一下今晚谁来做</text>
     </view>
-    <view class="menu-item" bindtap="goToReceivedRequests">
-      <text class="menu-main">收到的想吃</text>
-      <text class="menu-sub">回应朋友的请求</text>
+    <view class="menu-tile" bindtap="goToMyRequests">
+      <text class="menu-main">我想吃的</text>
+      <text class="menu-sub">看看哪些安排上了</text>
     </view>
-    <view wx:if="{{isAdmin}}" class="menu-item admin" bindtap="goToAdmin">
-      <text class="menu-main">管理入口</text>
-      <text class="menu-sub">分类、菜谱和请求</text>
+    <view class="menu-tile" bindtap="goToMyRecipes">
+      <text class="menu-main">我会做的</text>
+      <text class="menu-sub">我的菜单和记录</text>
+    </view>
+    <view wx:if="{{isAdmin}}" class="menu-tile admin" bindtap="goToAdmin">
+      <text class="menu-main">小馆后台</text>
+      <text class="menu-sub">分类、菜单、点菜</text>
     </view>
   </view>
 
   <view class="modal-mask" wx:if="{{showEditModal}}" bindtap="closeEditModal">
     <view class="modal" catchtap="noop">
-      <text class="modal-title">编辑资料</text>
-      <input class="input" placeholder="昵称" value="{{editForm.nickname}}" bindinput="onNicknameInput" />
-      <textarea class="textarea" placeholder="介绍一下自己" value="{{editForm.bio}}" bindinput="onBioInput" maxlength="120"></textarea>
+      <text class="modal-title">改一下资料</text>
+      <input class="input" placeholder="怎么称呼" value="{{editForm.nickname}}" bindinput="onNicknameInput" />
+      <textarea class="textarea" placeholder="口味、忌口、最近想吃什么" value="{{editForm.bio}}" bindinput="onBioInput" maxlength="120"></textarea>
       <view class="modal-actions">
-        <button class="modal-button ghost" bindtap="closeEditModal">取消</button>
-        <button class="modal-button primary" bindtap="saveProfile">保存</button>
+        <button class="modal-button ghost" bindtap="closeEditModal">算了</button>
+        <button class="modal-button primary" bindtap="saveProfile">好了</button>
       </view>
     </view>
   </view>

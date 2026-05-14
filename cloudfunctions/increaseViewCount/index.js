@@ -14,12 +14,12 @@ function fail(message) {
 
 exports.main = async (event = {}) => {
   const id = event.id
-  if (!id) return fail('缺少菜谱 ID')
+  if (!id) return fail('没找到这道菜')
 
   const recipeRes = await db.collection(COLLECTIONS.RECIPES).doc(id).get().catch(() => null)
   const recipe = recipeRes && recipeRes.data
 
-  if (!recipe || recipe.status === 'deleted') return fail('菜谱不存在')
+  if (!recipe || recipe.status === 'deleted') return fail('这道菜不见了')
 
   await db.collection(COLLECTIONS.RECIPES).doc(id).update({
     data: {

@@ -19,6 +19,10 @@ function fail(message) {
   return { success: false, message }
 }
 
+function getRecipeOwnerOpenid(recipe) {
+  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
+}
+
 async function getUser(openid) {
   if (!openid) return null
 
@@ -31,7 +35,7 @@ async function getUser(openid) {
 
 exports.main = async (event = {}) => {
   const id = event.id
-  if (!id) return fail('缺少菜谱 ID')
+  if (!id) return fail('没找到这道菜')
 
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -41,17 +45,20 @@ exports.main = async (event = {}) => {
   ])
   const recipe = recipeRes && recipeRes.data
 
-  if (!recipe || recipe.status === RECIPE_STATUS.DELETED) return fail('菜谱不存在')
+  if (!recipe || recipe.status === RECIPE_STATUS.DELETED) return fail('这道菜不见了')
 
   const isPublished = recipe.status === RECIPE_STATUS.PUBLISHED
-  const isOwner = Boolean(user && recipe.authorOpenid === openid)
+  const isOwner = Boolean(user && getRecipeOwnerOpenid(recipe) === openid)
   const isAdmin = Boolean(user && user.role === ROLES.ADMIN)
 
-  if (!isPublished && !isOwner && !isAdmin) return fail('你没有权限查看这个菜谱')
+  if (!isPublished && !isOwner && !isAdmin) return fail('你现在不能看这道菜')
 
   return {
     success: true,
-    recipe,
+    recipe: Object.assign({}, recipe, {
+      authorOpenid: getRecipeOwnerOpenid(recipe)
+    }),
+    isOwner,
     canEdit: isOwner || isAdmin
   }
 }

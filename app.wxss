@@ -1,11 +1,28 @@
 page {
   color: #332822;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #fbf7f1;
+  background: #f7f3ea;
 }
 
 button {
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border-radius: 8rpx;
+  font-weight: 900;
+  line-height: normal;
+}
+
+button::after {
+  border: none;
+}
+
+button[loading],
+button[disabled] {
+  opacity: 0.72;
 }
 
 image {

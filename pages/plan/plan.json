@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "今天吃什么",
+  "usingComponents": {
+    "loading-state": "/components/loading-state/loading-state",
+    "empty-state": "/components/empty-state/empty-state"
+  },
+  "enablePullDownRefresh": true
+}

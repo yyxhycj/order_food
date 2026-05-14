@@ -11,10 +11,10 @@ const ACTION_STATUS = {
 }
 
 const ACTION_NOTE = {
-  accept: '作者已接受',
-  decline: '作者暂时婉拒',
-  prepare: '正在准备',
-  done: '已经完成'
+  accept: '先安排上',
+  decline: '这次先改天',
+  prepare: '已经开做',
+  done: '已经吃上'
 }
 
 Page({
@@ -49,7 +49,7 @@ Page({
       })
       this.applyFilter()
     } catch (error) {
-      showError(error, '加载收到的请求失败')
+      showError(error, '打开点菜记录失败')
     } finally {
       this.setData({ loading: false })
     }
@@ -81,7 +81,7 @@ Page({
       wx.showToast({ title: '已更新', icon: 'success' })
       this.loadRequests()
     } catch (error) {
-      showError(error, '更新状态失败')
+      showError(error, '没改成')
     }
   },
 

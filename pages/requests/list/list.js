@@ -8,7 +8,10 @@ Page({
     filteredRequests: [],
     currentStatus: 'all',
     statusOptions: REQUEST_STATUS_OPTIONS,
-    loading: true
+    loading: true,
+    pendingCount: 0,
+    arrangedCount: 0,
+    doneCount: 0
   },
 
   onShow() {
@@ -16,11 +19,22 @@ Page({
   },
 
   async loadRequests() {
-    this.setData({ loading: true })
+    const cachedRequests = requestService.getCachedRequests('mine')
+    if (cachedRequests) {
+      this.setData({
+        requests: cachedRequests,
+        loading: false
+      })
+      this.updateSummary(cachedRequests)
+      this.applyFilter()
+    } else {
+      this.setData({ loading: true })
+    }
 
     try {
       const requests = await requestService.getMyRequests()
       this.setData({ requests })
+      this.updateSummary(requests)
       this.applyFilter()
     } catch (error) {
       showError(error, '加载想吃记录失败')
@@ -45,18 +59,27 @@ Page({
     this.setData({ filteredRequests })
   },
 
+  updateSummary(requests) {
+    const list = requests || []
+    this.setData({
+      pendingCount: list.filter(item => item.status === 'pending').length,
+      arrangedCount: list.filter(item => item.status === 'accepted' || item.status === 'preparing').length,
+      doneCount: list.filter(item => item.status === 'done').length
+    })
+  },
+
   async onRequestAction(e) {
     if (e.detail.action !== 'cancel') return
 
     wx.showModal({
-      title: '取消想吃',
-      content: '确定取消这条想吃请求吗？',
+      title: '先不吃了？',
+      content: '这条会从想吃里收起来，之后还可以再点。',
       success: async res => {
         if (!res.confirm) return
 
         try {
           await requestService.cancelRequest(e.detail.id)
-          wx.showToast({ title: '已取消', icon: 'success' })
+          wx.showToast({ title: '先放下了', icon: 'success' })
           this.loadRequests()
         } catch (error) {
           showError(error, '取消失败')
@@ -75,6 +98,12 @@ Page({
   goHome() {
     wx.switchTab({
       url: '/pages/home/home'
+    })
+  },
+
+  goPlan() {
+    wx.switchTab({
+      url: '/pages/plan/plan'
     })
   }
 })

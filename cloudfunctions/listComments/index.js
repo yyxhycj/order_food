@@ -39,7 +39,7 @@ exports.main = async (event = {}) => {
   const openid = wxContext.OPENID
   const recipeId = event.recipeId
 
-  if (!recipeId) return fail('缺少菜谱 ID')
+  if (!recipeId) return fail('没找到这道菜')
 
   const [user, commentsRes] = await Promise.all([
     getUser(openid),

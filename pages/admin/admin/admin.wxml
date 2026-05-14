@@ -1,17 +1,17 @@
 <view class="admin-page">
   <view class="header">
     <text class="title">轻量管理</text>
-    <text class="subtitle">只管理第一版需要的菜谱、分类和想吃请求。</text>
+    <text class="subtitle">管一下菜单、分类和点菜记录。</text>
   </view>
 
   <view class="stats">
     <view class="stat">
       <text class="stat-number">{{stats.recipeCount}}</text>
-      <text class="stat-label">菜谱</text>
+      <text class="stat-label">菜单</text>
     </view>
     <view class="stat">
       <text class="stat-number">{{stats.requestCount}}</text>
-      <text class="stat-label">请求</text>
+      <text class="stat-label">点菜</text>
     </view>
     <view class="stat">
       <text class="stat-number">{{stats.categoryCount}}</text>
@@ -25,12 +25,12 @@
       <text class="menu-sub">维护首页筛选分类</text>
     </view>
     <view class="menu-item" bindtap="goRecipes">
-      <text class="menu-main">菜谱管理</text>
-      <text class="menu-sub">查看、隐藏或编辑菜谱</text>
+      <text class="menu-main">菜单管理</text>
+      <text class="menu-sub">查看、隐藏或编辑家里的菜</text>
     </view>
     <view class="menu-item" bindtap="goRequests">
-      <text class="menu-main">请求管理</text>
-      <text class="menu-sub">处理朋友发来的想吃请求</text>
+      <text class="menu-main">点菜管理</text>
+      <text class="menu-sub">看看谁想吃，方便就安排</text>
     </view>
   </view>
 </view>

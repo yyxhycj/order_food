@@ -31,11 +31,14 @@ Page({
         return
       }
 
-      const [recipes, requests, categories] = await Promise.all([
+      const results = await Promise.all([
         recipeService.getRecipeList({ includeHidden: true, limit: 100 }),
         requestService.getAllRequests(),
         recipeService.getCategories()
       ])
+      const recipes = results[0] || []
+      const requests = results[1] || []
+      const categories = results[2] || []
 
       this.setData({
         isAdmin,

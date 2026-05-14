@@ -1,7 +1,7 @@
 <view class="manage-page">
   <view class="summary">
-    <text class="summary-title">{{isAdmin ? '全部想吃请求' : '朋友想吃我的菜'}}</text>
-    <text class="summary-subtitle">{{requests.length}} 条记录</text>
+    <text class="summary-title">{{isAdmin ? '大家点过的菜' : '等我确认'}}</text>
+    <text class="summary-subtitle">{{requests.length}} 条，方便就安排，不方便就改天。</text>
   </view>
 
   <scroll-view class="status-tabs" scroll-x="true" show-scrollbar="false">
@@ -12,12 +12,12 @@
     </block>
   </scroll-view>
 
-  <loading-state wx:if="{{loading}}" text="正在加载请求"></loading-state>
+  <loading-state wx:if="{{loading}}" text="正在看谁想吃"></loading-state>
 
   <view wx:else>
     <block wx:if="{{filteredRequests.length}}">
       <request-card wx:for="{{filteredRequests}}" wx:key="_id" request="{{item}}" mode="manage" bind:requesttap="goToRecipe" bind:action="onRequestAction"></request-card>
     </block>
-    <empty-state wx:else title="暂时没有请求" description="有人点想吃时，会出现在这里。" button-text="去首页" bind:action="goHome"></empty-state>
+    <empty-state wx:else title="现在没人点菜" description="有人想吃你会做的菜，会出现在这里。" button-text="去菜单" bind:action="goHome"></empty-state>
   </view>
 </view>

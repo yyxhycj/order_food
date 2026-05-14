@@ -4,17 +4,19 @@ const {
 } = require('../constants/request-status')
 const { callFunction } = require('./cloud')
 const { formatFriendlyDate } = require('../utils/date')
+const cache = require('../utils/cache')
+
+const REQUEST_CACHE_MAX_AGE = 60 * 1000
 
 function normalizeRequest(raw) {
   const request = raw || {}
   const status = request.status || REQUEST_STATUS.PENDING
 
-  return {
-    ...request,
+  return Object.assign({}, request, {
     _id: request._id || request.id,
     status,
-    statusText: request.statusText || getRequestStatusText(status),
-    recipeCoverImage: request.recipeCoverImage || '/images/recipe.png',
+    statusText: getRequestStatusText(status),
+    recipeCoverImage: request.recipeCoverImage || '/images/dish-placeholder.png',
     createdAtText: formatFriendlyDate(request.createdAt || request.created_at),
     handledAtText: formatFriendlyDate(request.handledAt || request.handled_at),
     canCancel: status === REQUEST_STATUS.PENDING,
@@ -22,33 +24,52 @@ function normalizeRequest(raw) {
     canDecline: status === REQUEST_STATUS.PENDING,
     canPrepare: status === REQUEST_STATUS.ACCEPTED,
     canDone: status === REQUEST_STATUS.PREPARING
-  }
-}
-
-async function createRequest(recipe, reason) {
-  return callFunction('createRequest', {
-    recipeId: recipe._id,
-    reason: reason || ''
   })
 }
 
+async function createRequest(recipe, reason) {
+  const result = await callFunction('createRequest', {
+    recipeId: recipe._id,
+    reason: reason || ''
+  })
+  clearRequestCaches()
+  return result
+}
+
+function getRequestCacheKey(mode) {
+  return `cache:v2:requests:${mode}`
+}
+
+function getCachedRequests(mode = 'mine') {
+  return cache.getAny(getRequestCacheKey(mode))
+}
+
+async function listRequests(mode) {
+  const cached = cache.get(getRequestCacheKey(mode), REQUEST_CACHE_MAX_AGE)
+  if (cached) return cached
+
+  const result = await callFunction('listRequests', { mode })
+  const requests = (result.requests || []).map(normalizeRequest)
+  cache.set(getRequestCacheKey(mode), requests)
+  return requests
+}
+
 async function getMyRequests() {
-  const result = await callFunction('listRequests', { mode: 'mine' })
-  return (result.requests || []).map(normalizeRequest)
+  return listRequests('mine')
 }
 
 async function getReceivedRequests() {
-  const result = await callFunction('listRequests', { mode: 'received' })
-  return (result.requests || []).map(normalizeRequest)
+  return listRequests('received')
 }
 
 async function getAllRequests() {
-  const result = await callFunction('listRequests', { mode: 'all' })
-  return (result.requests || []).map(normalizeRequest)
+  return listRequests('all')
 }
 
 async function updateRequestStatus(id, status, note = '') {
-  return callFunction('updateRequestStatus', { id, status, note })
+  const result = await callFunction('updateRequestStatus', { id, status, note })
+  clearRequestCaches()
+  return result
 }
 
 async function cancelRequest(id) {
@@ -58,10 +79,19 @@ async function cancelRequest(id) {
 module.exports = {
   REQUEST_STATUS,
   normalizeRequest,
+  getCachedRequests,
   createRequest,
   getMyRequests,
   getReceivedRequests,
   getAllRequests,
   updateRequestStatus,
   cancelRequest
+}
+
+function clearRequestCaches() {
+  ;['mine', 'received', 'all'].forEach(mode => {
+    cache.remove(getRequestCacheKey(mode))
+  })
+  cache.removePrefix('cache:v2:recipes:')
+  cache.removePrefix('cache:v2:userStats:')
 }

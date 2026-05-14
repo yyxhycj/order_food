@@ -1,7 +1,15 @@
 const { callFunction } = require('./cloud')
+const cache = require('../utils/cache')
+
+function clearFavoriteCaches() {
+  cache.removePrefix('cache:v2:recipes:')
+  cache.removePrefix('cache:v2:userStats:')
+}
 
 async function toggleFavorite(recipeId) {
-  return callFunction('toggleFavorite', { recipeId })
+  const result = await callFunction('toggleFavorite', { recipeId })
+  clearFavoriteCaches()
+  return result
 }
 
 async function isFavorite(recipeId) {

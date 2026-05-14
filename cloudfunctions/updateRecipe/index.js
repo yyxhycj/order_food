@@ -21,6 +21,10 @@ function fail(message) {
   return { success: false, message }
 }
 
+function getRecipeOwnerOpenid(recipe) {
+  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
+}
+
 function trim(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -29,9 +33,9 @@ function validate(recipe) {
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
   const steps = Array.isArray(recipe.steps) ? recipe.steps : []
 
-  if (!trim(recipe.title)) return '请输入菜谱标题'
-  if (Object.keys(RECIPE_STATUS).map(key => RECIPE_STATUS[key]).indexOf(recipe.status) < 0) return '菜谱状态不合法'
-  if (recipe.status === RECIPE_STATUS.PUBLISHED && !recipe.coverImage) return '请上传菜谱主图'
+  if (!trim(recipe.title)) return '给这道菜起个名字'
+  if (Object.keys(RECIPE_STATUS).map(key => RECIPE_STATUS[key]).indexOf(recipe.status) < 0) return '这道菜的状态不对'
+  if (recipe.status === RECIPE_STATUS.PUBLISHED && !recipe.coverImage) return '加一张成品图吧'
   if (recipe.status === RECIPE_STATUS.PUBLISHED && !recipe.categoryId) return '请选择分类'
   if (!ingredients.filter(item => trim(item.name) && trim(item.amount)).length) return '请至少添加一个食材'
   if (!steps.filter(item => trim(item.text)).length) return '请至少添加一个步骤'
@@ -89,7 +93,7 @@ exports.main = async (event = {}) => {
   const id = event.id
   const incomingRecipe = event.recipe || {}
 
-  if (!id) return fail('缺少菜谱 ID')
+  if (!id) return fail('没找到这道菜')
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
@@ -99,10 +103,10 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const existing = recipeRes && recipeRes.data
-  if (!existing || existing.status === 'deleted') return fail('菜谱不存在')
+  if (!existing || existing.status === 'deleted') return fail('这道菜不见了')
 
-  const canEdit = existing.authorOpenid === openid || user.role === ROLES.ADMIN
-  if (!canEdit) return fail('你没有权限编辑这个菜谱')
+  const canEdit = getRecipeOwnerOpenid(existing) === openid || user.role === ROLES.ADMIN
+  if (!canEdit) return fail('你现在不能改这道菜')
 
   const recipe = sanitizeRecipe(incomingRecipe, existing.status)
   const validationMessage = validate(recipe)
@@ -121,6 +125,7 @@ exports.main = async (event = {}) => {
     tags: recipe.tags,
     tips: recipe.tips,
     status: recipe.status,
+    authorOpenid: getRecipeOwnerOpenid(existing) || openid,
     updatedAt: db.serverDate()
   }
 

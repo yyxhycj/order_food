@@ -45,13 +45,12 @@ Component({
   observers: {
     value(value) {
       const nextValue = value || {}
+      const nextForm = Object.assign({}, clone(DEFAULT_FORM), clone(nextValue), {
+        ingredients: nextValue.ingredients && nextValue.ingredients.length ? nextValue.ingredients : clone(DEFAULT_FORM.ingredients),
+        steps: nextValue.steps && nextValue.steps.length ? nextValue.steps : clone(DEFAULT_FORM.steps)
+      })
       this.setData({
-        form: {
-          ...clone(DEFAULT_FORM),
-          ...clone(nextValue),
-          ingredients: nextValue.ingredients && nextValue.ingredients.length ? nextValue.ingredients : clone(DEFAULT_FORM.ingredients),
-          steps: nextValue.steps && nextValue.steps.length ? nextValue.steps : clone(DEFAULT_FORM.steps)
-        }
+        form: nextForm
       })
     }
   },
@@ -137,7 +136,7 @@ Component({
       const index = Number(e.currentTarget.dataset.index)
       const steps = this.data.form.steps
         .filter((item, itemIndex) => itemIndex !== index)
-        .map((item, itemIndex) => ({ ...item, sort: itemIndex + 1 }))
+        .map((item, itemIndex) => Object.assign({}, item, { sort: itemIndex + 1 }))
       this.setData({
         'form.steps': steps.length ? steps : clone(DEFAULT_FORM.steps)
       })
@@ -156,19 +155,17 @@ Component({
 
     saveDraft() {
       this.triggerEvent('submit', {
-        value: {
-          ...this.data.form,
+        value: Object.assign({}, this.data.form, {
           status: 'draft'
-        }
+        })
       })
     },
 
     publish() {
       this.triggerEvent('submit', {
-        value: {
-          ...this.data.form,
+        value: Object.assign({}, this.data.form, {
           status: 'published'
-        }
+        })
       })
     }
   }

@@ -3,15 +3,14 @@ const { formatFriendlyDate } = require('../utils/date')
 
 function normalizeComment(raw) {
   const comment = raw || {}
-  return {
-    ...comment,
+  return Object.assign({}, comment, {
     _id: comment._id || comment.id,
-    nickname: comment.userName || comment.nickname || '朋友',
+    nickname: comment.userName || comment.nickname || '家里人',
     avatarUrl: comment.userAvatar || comment.avatarUrl || '',
     content: comment.content || '',
     createdAtText: formatFriendlyDate(comment.createdAt || comment.created_at),
     canDelete: Boolean(comment.canDelete)
-  }
+  })
 }
 
 async function getComments(recipeId) {

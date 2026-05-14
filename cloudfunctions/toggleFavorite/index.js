@@ -27,7 +27,7 @@ exports.main = async (event = {}) => {
   const openid = wxContext.OPENID
   const recipeId = event.recipeId
 
-  if (!recipeId) return fail('缺少菜谱 ID')
+  if (!recipeId) return fail('没找到这道菜')
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
@@ -36,7 +36,7 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const recipe = recipeRes && recipeRes.data
-  if (!recipe || recipe.status !== 'published') return fail('菜谱暂时不能收藏')
+  if (!recipe || recipe.status !== 'published') return fail('这道菜暂时留不了')
 
   const existing = await db.collection(COLLECTIONS.FAVORITES)
     .where({

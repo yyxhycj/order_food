@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "朋友菜谱",
+  "navigationBarTitleText": "烟火小馆",
   "usingComponents": {
     "recipe-card": "/components/recipe-card/recipe-card",
     "empty-state": "/components/empty-state/empty-state",

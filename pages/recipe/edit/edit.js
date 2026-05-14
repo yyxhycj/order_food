@@ -21,20 +21,18 @@ function toForm(recipe) {
     }
   }
 
-  return {
-    ...recipe,
+  return Object.assign({}, recipe, {
     tagsText: (recipe.tags || []).join(', ')
-  }
+  })
 }
 
 function fromForm(form) {
-  return {
-    ...form,
+  return Object.assign({}, form, {
     tags: (form.tagsText || '')
       .split(',')
       .map(item => item.trim())
       .filter(Boolean)
-  }
+  })
 }
 
 Page({
@@ -53,7 +51,7 @@ Page({
       isEdit: Boolean(options.id)
     })
     wx.setNavigationBarTitle({
-      title: options.id ? '编辑菜谱' : '发布菜谱'
+      title: options.id ? '改这道菜' : '加一道菜'
     })
     this.loadData()
   },
@@ -67,10 +65,9 @@ Page({
       if (this.data.id) {
         const recipe = await recipeService.getRecipeDetail(this.data.id)
         const category = categories.find(item => item._id === recipe.categoryId)
-        form = {
-          ...toForm(recipe),
+        form = Object.assign({}, toForm(recipe), {
           categoryName: category ? category.name : ''
-        }
+        })
       }
 
       this.setData({

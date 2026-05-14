@@ -138,7 +138,7 @@ exports.main = async (event = {}) => {
 
   const userData = {
     openid,
-    nickname: profile.nickname || '新朋友',
+    nickname: profile.nickname || '家里人',
     avatarUrl: profile.avatarUrl || '',
     bio: '',
     role: defaultRole,

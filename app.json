@@ -4,6 +4,7 @@
     "pages/recipe/detail/detail",
     "pages/recipe/edit/edit",
     "pages/requests/list/list",
+    "pages/plan/plan",
     "pages/requests/manage/manage",
     "pages/user/profile/profile",
     "pages/admin/admin/admin",
@@ -12,27 +13,33 @@
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "朋友菜谱",
+    "navigationBarTitleText": "烟火小馆",
     "navigationBarBackgroundColor": "#fffdf9",
     "backgroundColor": "#fbf7f1"
   },
   "tabBar": {
-    "color": "#8B8179",
-    "selectedColor": "#9C5B37",
+    "color": "#7A7168",
+    "selectedColor": "#D84D35",
     "borderStyle": "black",
-    "backgroundColor": "#fffdf9",
+    "backgroundColor": "#fffdf8",
     "list": [
       {
         "pagePath": "pages/home/home",
         "iconPath": "images/recipe.png",
         "selectedIconPath": "images/recipe-active.png",
-        "text": "菜谱"
+        "text": "菜单"
       },
       {
         "pagePath": "pages/requests/list/list",
         "iconPath": "images/requests.png",
         "selectedIconPath": "images/requests-active.png",
-        "text": "想吃"
+        "text": "点菜"
+      },
+      {
+        "pagePath": "pages/plan/plan",
+        "iconPath": "images/plan.png",
+        "selectedIconPath": "images/plan-active.png",
+        "text": "安排"
       },
       {
         "pagePath": "pages/user/profile/profile",

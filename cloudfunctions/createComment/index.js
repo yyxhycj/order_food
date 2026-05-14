@@ -32,7 +32,7 @@ exports.main = async (event = {}) => {
   const recipeId = event.recipeId
   const content = trim(event.content)
 
-  if (!recipeId) return fail('缺少菜谱 ID')
+  if (!recipeId) return fail('没找到这道菜')
   if (!content) return fail('请输入留言内容')
   if (content.length > 200) return fail('留言最多 200 个字')
 
@@ -44,13 +44,13 @@ exports.main = async (event = {}) => {
   if (!user) return fail('请先登录')
 
   const recipe = recipeRes && recipeRes.data
-  if (!recipe || recipe.status !== 'published') return fail('当前菜谱暂时不能留言')
+  if (!recipe || recipe.status !== 'published') return fail('这道菜暂时不能留言')
 
   const now = db.serverDate()
   const commentData = {
     recipeId,
     userOpenid: openid,
-    userName: user.nickname || '朋友',
+    userName: user.nickname || '家里人',
     userAvatar: user.avatarUrl || '',
     content,
     status: 'visible',
