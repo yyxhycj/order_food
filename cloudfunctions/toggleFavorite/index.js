@@ -29,22 +29,29 @@ exports.main = async (event = {}) => {
 
   if (!recipeId) return fail('缺少菜谱 ID')
 
-  const user = await getUser(openid)
+  const [user, recipeRes] = await Promise.all([
+    getUser(openid),
+    db.collection(COLLECTIONS.RECIPES).doc(recipeId).get().catch(() => null)
+  ])
   if (!user) return fail('请先登录')
+
+  const recipe = recipeRes && recipeRes.data
+  if (!recipe || recipe.status !== 'published') return fail('菜谱暂时不能收藏')
 
   const existing = await db.collection(COLLECTIONS.FAVORITES)
     .where({
       recipeId,
       userOpenid: openid
     })
-    .limit(1)
     .get()
 
   if (existing.data && existing.data.length) {
-    await db.collection(COLLECTIONS.FAVORITES).doc(existing.data[0]._id).remove()
+    await Promise.all(existing.data.map(item => (
+      db.collection(COLLECTIONS.FAVORITES).doc(item._id).remove()
+    )))
     await db.collection(COLLECTIONS.RECIPES).doc(recipeId).update({
       data: {
-        favoriteCount: _.inc(-1),
+        favoriteCount: _.inc(-existing.data.length),
         updatedAt: db.serverDate()
       }
     })

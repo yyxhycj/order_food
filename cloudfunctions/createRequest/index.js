@@ -9,6 +9,7 @@ const COLLECTIONS = {
   RECIPES: 'recipes',
   REQUESTS: 'requests'
 }
+const ACTIVE_REQUEST_STATUS = ['pending', 'accepted', 'preparing']
 
 function fail(message) {
   return { success: false, message }
@@ -33,14 +34,27 @@ exports.main = async (event = {}) => {
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
-    db.collection(COLLECTIONS.RECIPES).doc(recipeId).get()
+    db.collection(COLLECTIONS.RECIPES).doc(recipeId).get().catch(() => null)
   ])
 
   if (!user) return fail('请先登录')
 
-  const recipe = recipeRes.data
+  const recipe = recipeRes && recipeRes.data
   if (!recipe || recipe.status !== 'published') return fail('菜谱暂时不可请求')
   if (recipe.authorOpenid === openid) return fail('不能对自己发布的菜谱发起想吃请求')
+
+  const duplicate = await db.collection(COLLECTIONS.REQUESTS)
+    .where({
+      recipeId,
+      requesterOpenid: openid,
+      status: _.in(ACTIVE_REQUEST_STATUS)
+    })
+    .limit(1)
+    .get()
+
+  if (duplicate.data && duplicate.data.length) {
+    return fail('已经告诉作者了，等回应就好')
+  }
 
   const now = db.serverDate()
   const requestData = {

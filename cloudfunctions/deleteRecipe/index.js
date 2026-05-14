@@ -32,12 +32,14 @@ exports.main = async (event = {}) => {
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
-    db.collection(COLLECTIONS.RECIPES).doc(id).get()
+    db.collection(COLLECTIONS.RECIPES).doc(id).get().catch(() => null)
   ])
 
   if (!user) return fail('请先登录')
 
-  const recipe = recipeRes.data
+  const recipe = recipeRes && recipeRes.data
+  if (!recipe || recipe.status === 'deleted') return fail('菜谱不存在')
+
   const canDelete = recipe.authorOpenid === openid || user.role === ROLES.ADMIN
   if (!canDelete) return fail('你没有权限删除这个菜谱')
 

@@ -1,11 +1,9 @@
-const COLLECTIONS = require('../constants/collections')
 const {
   REQUEST_STATUS,
   getRequestStatusText
 } = require('../constants/request-status')
-const { getDb, callFunction } = require('./cloud')
+const { callFunction } = require('./cloud')
 const { formatFriendlyDate } = require('../utils/date')
-const userService = require('./user-service')
 
 function normalizeRequest(raw) {
   const request = raw || {}
@@ -35,35 +33,18 @@ async function createRequest(recipe, reason) {
 }
 
 async function getMyRequests() {
-  const db = getDb()
-  const user = await userService.getCurrentUser()
-  const res = await db.collection(COLLECTIONS.REQUESTS)
-    .where({ requesterOpenid: user.openid })
-    .orderBy('createdAt', 'desc')
-    .get()
-
-  return (res.data || []).map(normalizeRequest)
+  const result = await callFunction('listRequests', { mode: 'mine' })
+  return (result.requests || []).map(normalizeRequest)
 }
 
 async function getReceivedRequests() {
-  const db = getDb()
-  const user = await userService.getCurrentUser()
-  const res = await db.collection(COLLECTIONS.REQUESTS)
-    .where({ authorOpenid: user.openid })
-    .orderBy('createdAt', 'desc')
-    .get()
-
-  return (res.data || []).map(normalizeRequest)
+  const result = await callFunction('listRequests', { mode: 'received' })
+  return (result.requests || []).map(normalizeRequest)
 }
 
 async function getAllRequests() {
-  const db = getDb()
-  const res = await db.collection(COLLECTIONS.REQUESTS)
-    .orderBy('createdAt', 'desc')
-    .limit(100)
-    .get()
-
-  return (res.data || []).map(normalizeRequest)
+  const result = await callFunction('listRequests', { mode: 'all' })
+  return (result.requests || []).map(normalizeRequest)
 }
 
 async function updateRequestStatus(id, status, note = '') {

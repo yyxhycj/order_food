@@ -10,6 +10,12 @@ const COLLECTIONS = {
 const ROLES = {
   ADMIN: 'admin'
 }
+const RECIPE_STATUS = {
+  DRAFT: 'draft',
+  PUBLISHED: 'published',
+  HIDDEN: 'hidden'
+}
+const DIFFICULTIES = ['easy', 'medium', 'hard']
 
 function fail(message) {
   return { success: false, message }
@@ -17,6 +23,56 @@ function fail(message) {
 
 function trim(value) {
   return typeof value === 'string' ? value.trim() : ''
+}
+
+function validate(recipe) {
+  const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
+  const steps = Array.isArray(recipe.steps) ? recipe.steps : []
+
+  if (!trim(recipe.title)) return '请输入菜谱标题'
+  if (Object.keys(RECIPE_STATUS).map(key => RECIPE_STATUS[key]).indexOf(recipe.status) < 0) return '菜谱状态不合法'
+  if (recipe.status === RECIPE_STATUS.PUBLISHED && !recipe.coverImage) return '请上传菜谱主图'
+  if (recipe.status === RECIPE_STATUS.PUBLISHED && !recipe.categoryId) return '请选择分类'
+  if (!ingredients.filter(item => trim(item.name) && trim(item.amount)).length) return '请至少添加一个食材'
+  if (!steps.filter(item => trim(item.text)).length) return '请至少添加一个步骤'
+  return ''
+}
+
+function sanitizeRecipe(recipe, fallbackStatus) {
+  const allowedStatuses = Object.keys(RECIPE_STATUS).map(key => RECIPE_STATUS[key])
+  const status = allowedStatuses.indexOf(recipe.status) >= 0 ? recipe.status : fallbackStatus || RECIPE_STATUS.DRAFT
+  const difficulty = DIFFICULTIES.indexOf(recipe.difficulty) >= 0 ? recipe.difficulty : 'medium'
+
+  return {
+    title: trim(recipe.title).slice(0, 60),
+    description: trim(recipe.description).slice(0, 240),
+    coverImage: recipe.coverImage || '',
+    images: Array.isArray(recipe.images) ? recipe.images.slice(0, 9) : [],
+    categoryId: recipe.categoryId || '',
+    ingredients: (Array.isArray(recipe.ingredients) ? recipe.ingredients : [])
+      .filter(item => trim(item.name) && trim(item.amount))
+      .slice(0, 40)
+      .map(item => ({
+        name: trim(item.name).slice(0, 40),
+        amount: trim(item.amount).slice(0, 40)
+      })),
+    steps: (Array.isArray(recipe.steps) ? recipe.steps : [])
+      .filter(item => trim(item.text))
+      .slice(0, 30)
+      .map((item, index) => ({
+        text: trim(item.text).slice(0, 500),
+        image: item.image || '',
+        sort: index + 1
+      })),
+    cookingTime: Math.max(Number(recipe.cookingTime) || 0, 0),
+    difficulty,
+    tags: (Array.isArray(recipe.tags) ? recipe.tags : [])
+      .map(item => trim(item))
+      .filter(Boolean)
+      .slice(0, 12),
+    tips: trim(recipe.tips).slice(0, 240),
+    status
+  }
 }
 
 async function getUser(openid) {
@@ -31,35 +87,40 @@ exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
   const id = event.id
-  const recipe = event.recipe || {}
+  const incomingRecipe = event.recipe || {}
 
   if (!id) return fail('缺少菜谱 ID')
-  if (!trim(recipe.title)) return fail('请输入菜谱标题')
 
   const [user, recipeRes] = await Promise.all([
     getUser(openid),
-    db.collection(COLLECTIONS.RECIPES).doc(id).get()
+    db.collection(COLLECTIONS.RECIPES).doc(id).get().catch(() => null)
   ])
 
   if (!user) return fail('请先登录')
 
-  const existing = recipeRes.data
+  const existing = recipeRes && recipeRes.data
+  if (!existing || existing.status === 'deleted') return fail('菜谱不存在')
+
   const canEdit = existing.authorOpenid === openid || user.role === ROLES.ADMIN
   if (!canEdit) return fail('你没有权限编辑这个菜谱')
 
+  const recipe = sanitizeRecipe(incomingRecipe, existing.status)
+  const validationMessage = validate(recipe)
+  if (validationMessage) return fail(validationMessage)
+
   const data = {
-    title: trim(recipe.title),
-    description: trim(recipe.description),
-    coverImage: recipe.coverImage || '',
-    images: Array.isArray(recipe.images) ? recipe.images : [],
-    categoryId: recipe.categoryId || '',
-    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
-    steps: Array.isArray(recipe.steps) ? recipe.steps : [],
-    cookingTime: Number(recipe.cookingTime) || 0,
-    difficulty: recipe.difficulty || 'medium',
-    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
-    tips: trim(recipe.tips),
-    status: recipe.status || existing.status || 'draft',
+    title: recipe.title,
+    description: recipe.description,
+    coverImage: recipe.coverImage,
+    images: recipe.images,
+    categoryId: recipe.categoryId,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps,
+    cookingTime: recipe.cookingTime,
+    difficulty: recipe.difficulty,
+    tags: recipe.tags,
+    tips: recipe.tips,
+    status: recipe.status,
     updatedAt: db.serverDate()
   }
 

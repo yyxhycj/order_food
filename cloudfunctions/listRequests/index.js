@@ -1,0 +1,62 @@
+const cloud = require('wx-server-sdk')
+
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+
+const db = cloud.database()
+const COLLECTIONS = {
+  USERS: 'users',
+  REQUESTS: 'requests'
+}
+const ROLES = {
+  ADMIN: 'admin'
+}
+
+function fail(message) {
+  return { success: false, message }
+}
+
+function toTime(value) {
+  if (!value) return 0
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') return new Date(value).getTime() || 0
+  if (value.$date) return new Date(value.$date).getTime() || 0
+  return 0
+}
+
+async function getUser(openid) {
+  const res = await db.collection(COLLECTIONS.USERS)
+    .where({ openid, status: 'active' })
+    .limit(1)
+    .get()
+  return res.data[0]
+}
+
+exports.main = async (event = {}) => {
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID
+  const mode = event.mode || 'mine'
+  const user = await getUser(openid)
+
+  if (!user) return fail('请先登录')
+
+  const query = {}
+  if (mode === 'all') {
+    if (user.role !== ROLES.ADMIN) return fail('仅管理员可查看全部请求')
+  } else if (mode === 'received') {
+    query.authorOpenid = openid
+  } else {
+    query.requesterOpenid = openid
+  }
+
+  const res = await db.collection(COLLECTIONS.REQUESTS)
+    .where(query)
+    .limit(100)
+    .get()
+  const requests = (res.data || []).sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt))
+
+  return {
+    success: true,
+    requests
+  }
+}

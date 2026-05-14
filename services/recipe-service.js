@@ -41,7 +41,26 @@ function sanitizeRecipe(recipe) {
   }
 }
 
-async function getCategories() {
+function sanitizeCategory(category) {
+  const data = category || {}
+  return {
+    name: (data.name || '').trim(),
+    description: data.description || '',
+    icon: data.icon || '',
+    sort: Number(data.sort) || 0,
+    status: data.status || 'active'
+  }
+}
+
+async function getCategories(options = {}) {
+  const result = await callFunction('listCategories', {
+    includeInactive: Boolean(options.includeInactive)
+  }).catch(() => null)
+  const categories = result && result.categories
+
+  if (categories && categories.length) return categories
+  if (options.includeInactive) return []
+
   const db = getDb()
   const res = await db.collection(COLLECTIONS.CATEGORIES)
     .where({ status: 'active' })
@@ -52,61 +71,13 @@ async function getCategories() {
 }
 
 async function getRecipeList(options = {}) {
-  const db = getDb()
-  const _ = db.command
-  const limit = options.limit || 20
-  const page = options.page || 0
-  const query = {}
-
-  if (!options.includeHidden) {
-    query.status = options.status || RECIPE_STATUS.PUBLISHED
-  } else if (options.status) {
-    query.status = options.status
-  } else {
-    query.status = _.neq(RECIPE_STATUS.DELETED)
-  }
-
-  if (options.categoryId && options.categoryId !== 'all') {
-    query.categoryId = options.categoryId
-  }
-
-  if (options.authorOpenid) {
-    query.authorOpenid = options.authorOpenid
-  }
-
-  if (options.ids && options.ids.length) {
-    query._id = _.in(options.ids)
-  }
-
-  if (options.keyword) {
-    query.title = db.RegExp({
-      regexp: options.keyword.trim(),
-      options: 'i'
-    })
-  }
-
-  const sortMap = {
-    latest: ['createdAt', 'desc'],
-    popular: ['wantCount', 'desc'],
-    favorite: ['favoriteCount', 'desc'],
-    view: ['viewCount', 'desc']
-  }
-  const sort = sortMap[options.sortBy || 'latest'] || sortMap.latest
-
-  const res = await db.collection(COLLECTIONS.RECIPES)
-    .where(query)
-    .orderBy(sort[0], sort[1])
-    .skip(page * limit)
-    .limit(limit)
-    .get()
-
-  return (res.data || []).map(normalizeRecipe)
+  const result = await callFunction('listRecipes', { options })
+  return (result.recipes || []).map(normalizeRecipe)
 }
 
 async function getRecipeDetail(id) {
-  const db = getDb()
-  const res = await db.collection(COLLECTIONS.RECIPES).doc(id).get()
-  return normalizeRecipe(res.data)
+  const result = await callFunction('getRecipeDetail', { id })
+  return normalizeRecipe(result.recipe)
 }
 
 async function createRecipe(recipe) {
@@ -127,42 +98,21 @@ async function deleteRecipe(id) {
 }
 
 async function increaseViewCount(id) {
-  const db = getDb()
-  const _ = db.command
-  return db.collection(COLLECTIONS.RECIPES).doc(id).update({
-    data: {
-      viewCount: _.inc(1),
-      updatedAt: db.serverDate()
-    }
-  }).catch(() => null)
+  return callFunction('increaseViewCount', { id }).catch(() => null)
 }
 
 async function addCategory(category) {
-  const db = getDb()
-  return db.collection(COLLECTIONS.CATEGORIES).add({
-    data: {
-      name: (category.name || '').trim(),
-      description: category.description || '',
-      icon: category.icon || '',
-      sort: Number(category.sort) || 0,
-      status: category.status || 'active',
-      createdAt: db.serverDate(),
-      updatedAt: db.serverDate()
-    }
+  return callFunction('saveCategory', {
+    action: 'create',
+    category: sanitizeCategory(category)
   })
 }
 
 async function updateCategory(id, category) {
-  const db = getDb()
-  return db.collection(COLLECTIONS.CATEGORIES).doc(id).update({
-    data: {
-      name: (category.name || '').trim(),
-      description: category.description || '',
-      icon: category.icon || '',
-      sort: Number(category.sort) || 0,
-      status: category.status || 'active',
-      updatedAt: db.serverDate()
-    }
+  return callFunction('saveCategory', {
+    action: 'update',
+    id,
+    category: sanitizeCategory(category)
   })
 }
 

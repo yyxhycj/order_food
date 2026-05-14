@@ -51,17 +51,23 @@ exports.main = async (event = {}) => {
 
   const [user, requestRes] = await Promise.all([
     getUser(openid),
-    db.collection(COLLECTIONS.REQUESTS).doc(id).get()
+    db.collection(COLLECTIONS.REQUESTS).doc(id).get().catch(() => null)
   ])
 
   if (!user) return fail('请先登录')
 
-  const request = requestRes.data
+  const request = requestRes && requestRes.data
+  if (!request) return fail('想吃请求不存在')
+
   const isAdmin = user.role === ROLES.ADMIN
   const isAuthor = request.authorOpenid === openid
   const isRequesterCancelling = request.requesterOpenid === openid && nextStatus === 'cancelled'
 
-  if (!isAdmin && !isAuthor && !isRequesterCancelling) {
+  if (nextStatus === 'cancelled' && !isRequesterCancelling) {
+    return fail('只有发起人可以取消想吃请求')
+  }
+
+  if (nextStatus !== 'cancelled' && !isAdmin && !isAuthor) {
     return fail('你没有权限处理这个请求')
   }
 
