@@ -60,8 +60,8 @@ exports.main = async (event = {}) => {
   if (!request) return fail('这条点菜不见了')
 
   const isAdmin = user.role === ROLES.ADMIN
-  const isAuthor = request.authorOpenid === openid
-  const isRequesterCancelling = request.requesterOpenid === openid && nextStatus === 'cancelled'
+  const isAuthor = request.authorUserId === user._id
+  const isRequesterCancelling = request.requesterUserId === user._id && nextStatus === 'cancelled'
 
   if (nextStatus === 'cancelled' && !isRequesterCancelling) {
     return fail('只有点菜的人可以取消')

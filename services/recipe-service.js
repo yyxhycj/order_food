@@ -2,6 +2,7 @@ const COLLECTIONS = require('../constants/collections')
 const { RECIPE_STATUS } = require('../constants/recipe-status')
 const { getDb, callFunction } = require('./cloud')
 const { normalizeRecipe } = require('../utils/format')
+const userService = require('./user-service')
 const cache = require('../utils/cache')
 
 const CATEGORIES_CACHE_KEY = 'cache:v2:categories:active'
@@ -109,6 +110,15 @@ function clearCategoryCaches() {
   clearRecipeCaches()
 }
 
+function applyCurrentUserDisplayName(recipe) {
+  const user = userService.getCachedUser()
+  if (!recipe || !user || !user._id || recipe.authorUserId !== user._id) return recipe
+
+  return Object.assign({}, recipe, {
+    authorNickname: user.nickname || recipe.authorNickname || '家里人'
+  })
+}
+
 async function getRecipeList(options = {}) {
   const forceRefresh = Boolean(options && options.forceRefresh)
   const queryOptions = {}
@@ -120,14 +130,16 @@ async function getRecipeList(options = {}) {
   if (cached) return cached
 
   const result = await callFunction('listRecipes', { options: queryOptions })
-  const recipes = (result.recipes || []).map(normalizeRecipe)
+  const recipes = (result.recipes || [])
+    .map(normalizeRecipe)
+    .map(applyCurrentUserDisplayName)
   cache.set(cacheKey, recipes)
   return recipes
 }
 
 async function getRecipeDetail(id) {
   const result = await callFunction('getRecipeDetail', { id })
-  const recipe = normalizeRecipe(result.recipe)
+  const recipe = applyCurrentUserDisplayName(normalizeRecipe(result.recipe))
   return Object.assign({}, recipe, {
     canEdit: Boolean(result.canEdit),
     isOwner: Boolean(result.isOwner)

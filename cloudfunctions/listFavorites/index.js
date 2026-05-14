@@ -37,7 +37,7 @@ exports.main = async () => {
   if (!user) return fail('请先登录')
 
   const res = await db.collection(COLLECTIONS.FAVORITES)
-    .where({ userOpenid: openid })
+    .where({ userId: user._id })
     .limit(100)
     .get()
   const favorites = (res.data || []).sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt))

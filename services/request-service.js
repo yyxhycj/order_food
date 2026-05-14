@@ -12,11 +12,19 @@ function normalizeRequest(raw) {
   const request = raw || {}
   const status = request.status || REQUEST_STATUS.PENDING
 
-  return Object.assign({}, request, {
+  return {
     _id: request._id || request.id,
+    recipeId: request.recipeId || '',
+    recipeTitle: request.recipeTitle || '',
+    recipeCoverImage: request.recipeCoverImage || '/images/dish-placeholder.png',
+    requesterUserId: request.requesterUserId || '',
+    requesterNickname: request.requesterNickname || '家里人',
+    authorUserId: request.authorUserId || '',
+    authorNickname: request.authorNickname || '家里人',
+    reason: request.reason || '',
     status,
     statusText: getRequestStatusText(status),
-    recipeCoverImage: request.recipeCoverImage || '/images/dish-placeholder.png',
+    note: request.note || '',
     createdAtText: formatFriendlyDate(request.createdAt || request.created_at),
     handledAtText: formatFriendlyDate(request.handledAt || request.handled_at),
     canCancel: status === REQUEST_STATUS.PENDING,
@@ -24,7 +32,7 @@ function normalizeRequest(raw) {
     canDecline: status === REQUEST_STATUS.PENDING,
     canPrepare: status === REQUEST_STATUS.ACCEPTED,
     canDone: status === REQUEST_STATUS.PREPARING
-  })
+  }
 }
 
 async function createRequest(recipe, reason) {

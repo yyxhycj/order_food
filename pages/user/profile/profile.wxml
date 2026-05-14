@@ -56,7 +56,7 @@
         <image class="pending-cover" src="{{item.recipeCoverImage || '/images/dish-placeholder.png'}}" mode="aspectFill"></image>
         <view class="pending-body">
           <text class="pending-title">{{item.recipeTitle}}</text>
-          <text class="pending-sub">{{item.requesterName || '家里人'}}想吃 · {{item.statusText}}</text>
+          <text class="pending-sub">{{item.requesterNickname || '家里人'}}想吃 · {{item.statusText}}</text>
         </view>
         <text class="pending-status">{{item.statusText}}</text>
       </view>

@@ -9,7 +9,7 @@ function normalizeUser(user, openid) {
   if (!user) return null
   const nextUser = Object.assign({}, user)
   if (!nextUser.openid && openid) nextUser.openid = openid
-  return nextUser.openid ? nextUser : null
+  return nextUser.openid && nextUser._id ? nextUser : null
 }
 
 function getCachedUser() {
@@ -54,16 +54,19 @@ async function updateUserProfile(profile) {
   const nextUser = normalizeUser(result.user)
 
   setCachedUser(nextUser)
+  cache.removePrefix('cache:v2:recipes:')
+  cache.removePrefix('cache:v2:requests:')
+  cache.removePrefix('cache:v2:userStats:')
 
   return nextUser
 }
 
-async function getUserStats(openid) {
-  const cacheKey = `cache:v2:userStats:${openid || 'me'}`
+async function getUserStats(userId) {
+  const cacheKey = `cache:v2:userStats:${userId || 'me'}`
   const cached = cache.get(cacheKey, STATS_CACHE_MAX_AGE)
   if (cached) return cached
 
-  const result = await callFunction('getUserStats', { openid })
+  const result = await callFunction('getUserStats', { userId })
   const stats = result.stats || {
     recipeCount: 0,
     favoriteCount: 0,
@@ -74,8 +77,8 @@ async function getUserStats(openid) {
   return stats
 }
 
-function getCachedUserStats(openid) {
-  return cache.getAny(`cache:v2:userStats:${openid || 'me'}`)
+function getCachedUserStats(userId) {
+  return cache.getAny(`cache:v2:userStats:${userId || 'me'}`)
 }
 
 function clearUserStatsCache() {

@@ -21,10 +21,6 @@ function fail(message) {
   return { success: false, message }
 }
 
-function getRecipeOwnerOpenid(recipe) {
-  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
-}
-
 function trim(value) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -105,7 +101,7 @@ exports.main = async (event = {}) => {
   const existing = recipeRes && recipeRes.data
   if (!existing || existing.status === 'deleted') return fail('这道菜不见了')
 
-  const canEdit = getRecipeOwnerOpenid(existing) === openid || user.role === ROLES.ADMIN
+  const canEdit = existing.authorUserId === user._id || user.role === ROLES.ADMIN
   if (!canEdit) return fail('你现在不能改这道菜')
 
   const recipe = sanitizeRecipe(incomingRecipe, existing.status)
@@ -125,7 +121,6 @@ exports.main = async (event = {}) => {
     tags: recipe.tags,
     tips: recipe.tips,
     status: recipe.status,
-    authorOpenid: getRecipeOwnerOpenid(existing) || openid,
     updatedAt: db.serverDate()
   }
 

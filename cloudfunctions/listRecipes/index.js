@@ -68,26 +68,33 @@ function sortRecipes(recipes, sort) {
   })
 }
 
-async function getRecipesByAuthor(query, authorOpenid) {
-  const fields = ['authorOpenid', 'creator_openid', '_openid']
-  const resultMap = {}
+async function getUsersByIds(ids) {
+  const uniqueIds = Array.from(new Set((ids || []).filter(Boolean)))
+  if (!uniqueIds.length) return {}
 
-  for (let index = 0; index < fields.length; index += 1) {
-    const field = fields[index]
-    const authorQuery = Object.assign({}, query)
-    authorQuery[field] = authorOpenid
-
-    const res = await db.collection(COLLECTIONS.RECIPES)
-      .where(authorQuery)
-      .limit(100)
-      .get()
-
-    ;(res.data || []).forEach(recipe => {
-      if (recipe && recipe._id) resultMap[recipe._id] = recipe
+  const res = await db.collection(COLLECTIONS.USERS)
+    .where({
+      _id: _.in(uniqueIds)
     })
-  }
+    .limit(100)
+    .get()
 
-  return Object.keys(resultMap).map(id => resultMap[id])
+  return (res.data || []).reduce((map, user) => {
+    map[user._id] = user
+    return map
+  }, {})
+}
+
+async function hydrateRecipes(recipes) {
+  const userMap = await getUsersByIds((recipes || []).map(recipe => recipe.authorUserId))
+
+  return (recipes || []).map(recipe => {
+    const author = userMap[recipe.authorUserId] || {}
+    return Object.assign({}, recipe, {
+      authorNickname: author.nickname || '家里人',
+      authorAvatarUrl: author.avatarUrl || ''
+    })
+  })
 }
 
 exports.main = async (event = {}) => {
@@ -97,7 +104,7 @@ exports.main = async (event = {}) => {
   const query = {}
   const limit = normalizeLimit(options.limit)
   const page = Math.max(Number(options.page) || 0, 0)
-  const requestedAuthor = options.authorOpenid
+  const requestedAuthorUserId = options.authorUserId
   const hasCategoryFilter = options.categoryId && options.categoryId !== 'all'
   let user = null
   let isAdmin = false
@@ -107,13 +114,18 @@ exports.main = async (event = {}) => {
     isAdmin = Boolean(user && user.role === ROLES.ADMIN)
     query.status = _.neq(RECIPE_STATUS.DELETED)
 
-    if (requestedAuthor) {
-      if (!isAdmin && (!user || requestedAuthor !== openid)) return fail('你不能看这些菜')
+    if (requestedAuthorUserId) {
+      if (!isAdmin && (!user || requestedAuthorUserId !== user._id)) return fail('你不能看这些菜')
+      query.authorUserId = requestedAuthorUserId
     } else if (!isAdmin) {
       return fail('只有管小馆的人能看全部菜单')
     }
   } else {
     query.status = options.status || RECIPE_STATUS.PUBLISHED
+  }
+
+  if (!options.includeHidden && requestedAuthorUserId) {
+    query.authorUserId = requestedAuthorUserId
   }
 
   if (hasCategoryFilter) {
@@ -142,15 +154,12 @@ exports.main = async (event = {}) => {
     sort[1] === 'desc' &&
     query.status === RECIPE_STATUS.PUBLISHED &&
     !hasCategoryFilter &&
-    !options.authorOpenid &&
+    !options.authorUserId &&
     !options.ids &&
     !options.keyword
   let recipes = []
 
-  if (requestedAuthor) {
-    recipes = sortRecipes(await getRecipesByAuthor(query, requestedAuthor), sort)
-      .slice(page * limit, (page + 1) * limit)
-  } else if (canUseDbSort) {
+  if (canUseDbSort) {
     const res = await db.collection(COLLECTIONS.RECIPES)
       .where(query)
       .orderBy(sort[0], sort[1])
@@ -168,6 +177,6 @@ exports.main = async (event = {}) => {
 
   return {
     success: true,
-    recipes
+    recipes: await hydrateRecipes(recipes)
   }
 }

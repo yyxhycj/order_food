@@ -49,9 +49,7 @@ exports.main = async (event = {}) => {
   const now = db.serverDate()
   const commentData = {
     recipeId,
-    userOpenid: openid,
-    userName: user.nickname || '家里人',
-    userAvatar: user.avatarUrl || '',
+    userId: user._id,
     content,
     status: 'visible',
     createdAt: now,
@@ -69,10 +67,11 @@ exports.main = async (event = {}) => {
   return {
     success: true,
     id: result._id,
-    comment: {
+    comment: Object.assign({}, commentData, {
       _id: result._id,
-      ...commentData,
+      nickname: user.nickname || '家里人',
+      avatarUrl: user.avatarUrl || '',
       canDelete: true
-    }
+    })
   }
 }

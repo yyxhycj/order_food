@@ -41,7 +41,7 @@ exports.main = async (event = {}) => {
   const existing = await db.collection(COLLECTIONS.FAVORITES)
     .where({
       recipeId,
-      userOpenid: openid
+      userId: user._id
     })
     .get()
 
@@ -65,7 +65,7 @@ exports.main = async (event = {}) => {
   await db.collection(COLLECTIONS.FAVORITES).add({
     data: {
       recipeId,
-      userOpenid: openid,
+      userId: user._id,
       createdAt: db.serverDate()
     }
   })

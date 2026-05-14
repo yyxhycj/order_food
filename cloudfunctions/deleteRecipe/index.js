@@ -15,10 +15,6 @@ function fail(message) {
   return { success: false, message }
 }
 
-function getRecipeOwnerOpenid(recipe) {
-  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
-}
-
 async function getUser(openid) {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ openid, status: 'active' })
@@ -44,7 +40,7 @@ exports.main = async (event = {}) => {
   const recipe = recipeRes && recipeRes.data
   if (!recipe || recipe.status === 'deleted') return fail('这道菜不见了')
 
-  const canDelete = getRecipeOwnerOpenid(recipe) === openid || user.role === ROLES.ADMIN
+  const canDelete = recipe.authorUserId === user._id || user.role === ROLES.ADMIN
   if (!canDelete) return fail('你现在不能删这道菜')
 
   await db.collection(COLLECTIONS.RECIPES).doc(id).update({

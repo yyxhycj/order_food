@@ -51,14 +51,15 @@ function normalizeRecipe(raw) {
   const wantCount = recipe.wantCount || recipe.want_count || 0
   const viewCount = recipe.viewCount || recipe.view_count || 0
 
-  return Object.assign({}, recipe, {
+  return {
     _id: recipe._id || recipe.id,
     title: recipe.title || recipe.name || '',
     description: recipe.description || '',
     coverImage: recipe.coverImage || recipe.main_image || recipe.image || '/images/dish-placeholder.png',
     categoryId: recipe.categoryId || recipe.category_id || '',
-    authorOpenid: recipe.authorOpenid || recipe.creator_openid || recipe._openid || '',
-    authorName: recipe.authorName || recipe.creator_name || recipe.nickname || '家里人',
+    authorUserId: recipe.authorUserId || '',
+    authorNickname: recipe.authorNickname || '家里人',
+    authorAvatarUrl: recipe.authorAvatarUrl || '',
     ingredients,
     steps,
     cookingTime,
@@ -74,7 +75,7 @@ function normalizeRecipe(raw) {
     commentCount: recipe.commentCount || recipe.review_count || 0,
     createdAtText: formatFriendlyDate(recipe.createdAt || recipe.created_at),
     updatedAtText: formatFriendlyDate(recipe.updatedAt || recipe.updated_at)
-  })
+  }
 }
 
 module.exports = {

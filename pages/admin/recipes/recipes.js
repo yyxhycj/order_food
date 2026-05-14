@@ -42,7 +42,7 @@ Page({
       if (this.data.scope === 'mine') {
         recipes = await recipeService.getRecipeList({
           includeHidden: true,
-          authorOpenid: user.openid,
+          authorUserId: user._id,
           limit: 100,
           forceRefresh: true
         })

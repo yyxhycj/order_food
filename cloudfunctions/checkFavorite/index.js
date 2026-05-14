@@ -33,7 +33,7 @@ exports.main = async (event = {}) => {
   const res = await db.collection(COLLECTIONS.FAVORITES)
     .where({
       recipeId,
-      userOpenid: openid
+      userId: user._id
     })
     .limit(1)
     .get()

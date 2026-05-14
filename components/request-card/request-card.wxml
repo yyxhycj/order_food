@@ -5,8 +5,8 @@
       <text class="title">{{request.recipeTitle}}</text>
       <text class="status status-{{request.status}}">{{request.statusText}}</text>
     </view>
-    <text class="people" wx:if="{{mode === 'mine'}}">这道菜来自：{{request.authorName || '家里人'}}</text>
-    <text class="people" wx:else>谁想吃：{{request.requesterName || '家里人'}}</text>
+    <text class="people" wx:if="{{mode === 'mine'}}">这道菜来自：{{request.authorNickname || '家里人'}}</text>
+    <text class="people" wx:else>谁想吃：{{request.requesterNickname || '家里人'}}</text>
     <text class="reason" wx:if="{{request.reason}}">{{request.reason}}</text>
     <text class="reason muted" wx:else>没写原因，就是想吃。</text>
     <view class="footer">

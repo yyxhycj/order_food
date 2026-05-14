@@ -3,6 +3,7 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
 const db = cloud.database()
+const _ = db.command
 const COLLECTIONS = {
   USERS: 'users',
   CATEGORIES: 'categories',
@@ -15,6 +16,7 @@ const ROLES = {
   USER: 'user',
   ADMIN: 'admin'
 }
+const USER_LINK_SCHEMA_VERSION = 2
 const DEFAULT_CATEGORIES = [
   { _id: 'homecook', name: '家常菜', icon: 'homecook', sort: 10, status: 'active' },
   { _id: 'dessert', name: '甜品', icon: 'dessert', sort: 20, status: 'active' },
@@ -74,6 +76,67 @@ async function ensureDefaultCategories() {
   }))
 }
 
+async function updateWhere(collectionName, query, data) {
+  return db.collection(collectionName)
+    .where(query)
+    .update({ data })
+    .catch(error => {
+      console.warn(`补齐 ${collectionName} 用户关联失败`, error)
+      return null
+    })
+}
+
+// 只在登录时做一次旧数据清理；业务读写不再使用这些历史字段。
+async function migrateUserLinksAndRemoveOldFields(user, openid) {
+  const now = db.serverDate()
+  const userPatch = {
+    updatedAt: now
+  }
+  const recipePatch = Object.assign({}, userPatch, {
+    authorUserId: user._id,
+    authorOpenid: _.remove(),
+    authorName: _.remove(),
+    creator_openid: _.remove(),
+    creator_name: _.remove()
+  })
+  const requesterPatch = Object.assign({}, userPatch, {
+    requesterUserId: user._id,
+    requesterOpenid: _.remove(),
+    requesterName: _.remove()
+  })
+  const authorRequestPatch = Object.assign({}, userPatch, {
+    authorUserId: user._id,
+    authorOpenid: _.remove(),
+    authorName: _.remove()
+  })
+  const favoritePatch = {
+    userId: user._id,
+    userOpenid: _.remove()
+  }
+  const commentPatch = Object.assign({}, userPatch, {
+    userId: user._id,
+    userOpenid: _.remove(),
+    userName: _.remove(),
+    userAvatar: _.remove(),
+    userAvatarUrl: _.remove()
+  })
+
+  await Promise.all([
+    updateWhere(COLLECTIONS.RECIPES, { authorUserId: user._id }, recipePatch),
+    updateWhere(COLLECTIONS.RECIPES, { authorOpenid: openid }, recipePatch),
+    updateWhere(COLLECTIONS.RECIPES, { creator_openid: openid }, recipePatch),
+    updateWhere(COLLECTIONS.RECIPES, { _openid: openid }, recipePatch),
+    updateWhere(COLLECTIONS.REQUESTS, { requesterUserId: user._id }, requesterPatch),
+    updateWhere(COLLECTIONS.REQUESTS, { requesterOpenid: openid }, requesterPatch),
+    updateWhere(COLLECTIONS.REQUESTS, { authorUserId: user._id }, authorRequestPatch),
+    updateWhere(COLLECTIONS.REQUESTS, { authorOpenid: openid }, authorRequestPatch),
+    updateWhere(COLLECTIONS.FAVORITES, { userId: user._id }, favoritePatch),
+    updateWhere(COLLECTIONS.FAVORITES, { userOpenid: openid }, favoritePatch),
+    updateWhere(COLLECTIONS.COMMENTS, { userId: user._id }, commentPatch),
+    updateWhere(COLLECTIONS.COMMENTS, { userOpenid: openid }, commentPatch)
+  ])
+}
+
 async function hasAdmin() {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ role: ROLES.ADMIN, status: 'active' })
@@ -121,17 +184,22 @@ exports.main = async (event = {}) => {
     if (user.role !== role) patch.role = role
     if (profile.nickname) patch.nickname = profile.nickname
     if (profile.avatarUrl) patch.avatarUrl = profile.avatarUrl
+    patch.userLinkSchemaVersion = USER_LINK_SCHEMA_VERSION
 
     await db.collection(COLLECTIONS.USERS).doc(user._id).update({ data: patch })
+    const nextUser = {
+      ...user,
+      ...patch,
+      role
+    }
+    if (user.userLinkSchemaVersion !== USER_LINK_SCHEMA_VERSION) {
+      await migrateUserLinksAndRemoveOldFields(nextUser, openid)
+    }
 
     return {
       success: true,
       openid,
-      user: {
-        ...user,
-        ...patch,
-        role
-      },
+      user: nextUser,
       isAdmin: role === ROLES.ADMIN
     }
   }
@@ -145,20 +213,23 @@ exports.main = async (event = {}) => {
     status: 'active',
     recipeCount: 0,
     requestCount: 0,
+    userLinkSchemaVersion: USER_LINK_SCHEMA_VERSION,
     createdAt: now,
     updatedAt: now,
     lastLoginAt: now
   }
 
   const addResult = await db.collection(COLLECTIONS.USERS).add({ data: userData })
+  const nextUser = {
+    _id: addResult._id,
+    ...userData
+  }
+  await migrateUserLinksAndRemoveOldFields(nextUser, openid)
 
   return {
     success: true,
     openid,
-    user: {
-      _id: addResult._id,
-      ...userData
-    },
+    user: nextUser,
     isAdmin: defaultRole === ROLES.ADMIN
   }
 }

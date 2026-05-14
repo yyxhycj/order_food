@@ -9,7 +9,7 @@
     <view class="meta">
       <text class="meta-text">{{recipe.cookingTime || 0}} 分钟</text>
       <text class="meta-text">{{recipe.difficultyText}}</text>
-      <text class="meta-text">{{recipe.authorName}}</text>
+      <text class="meta-text">{{recipe.authorNickname}}</text>
     </view>
     <view class="stats">
       <text class="stat-text">{{recipe.wantCount || 0}} 想吃</text>

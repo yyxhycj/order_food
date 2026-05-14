@@ -19,10 +19,6 @@ function fail(message) {
   return { success: false, message }
 }
 
-function getRecipeOwnerOpenid(recipe) {
-  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
-}
-
 async function getUser(openid) {
   if (!openid) return null
 
@@ -31,6 +27,12 @@ async function getUser(openid) {
     .limit(1)
     .get()
   return res.data[0] || null
+}
+
+async function getUserById(id) {
+  if (!id) return null
+  const res = await db.collection(COLLECTIONS.USERS).doc(id).get().catch(() => null)
+  return res && res.data ? res.data : null
 }
 
 exports.main = async (event = {}) => {
@@ -48,15 +50,17 @@ exports.main = async (event = {}) => {
   if (!recipe || recipe.status === RECIPE_STATUS.DELETED) return fail('这道菜不见了')
 
   const isPublished = recipe.status === RECIPE_STATUS.PUBLISHED
-  const isOwner = Boolean(user && getRecipeOwnerOpenid(recipe) === openid)
+  const isOwner = Boolean(user && recipe.authorUserId === user._id)
   const isAdmin = Boolean(user && user.role === ROLES.ADMIN)
+  const author = await getUserById(recipe.authorUserId)
 
   if (!isPublished && !isOwner && !isAdmin) return fail('你现在不能看这道菜')
 
   return {
     success: true,
     recipe: Object.assign({}, recipe, {
-      authorOpenid: getRecipeOwnerOpenid(recipe)
+      authorNickname: author && author.nickname ? author.nickname : '家里人',
+      authorAvatarUrl: author && author.avatarUrl ? author.avatarUrl : ''
     }),
     isOwner,
     canEdit: isOwner || isAdmin

@@ -27,13 +27,12 @@ async function getUser(openid) {
 
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
-  const openid = wxContext.OPENID
   const id = event.id
 
   if (!id) return fail('缺少留言 ID')
 
   const [user, commentRes] = await Promise.all([
-    getUser(openid),
+    getUser(wxContext.OPENID),
     db.collection(COLLECTIONS.COMMENTS).doc(id).get().catch(() => null)
   ])
 
@@ -42,7 +41,7 @@ exports.main = async (event = {}) => {
   const comment = commentRes && commentRes.data
   if (!comment || comment.status !== 'visible') return fail('留言不存在或已删除')
 
-  const canDelete = user.role === ROLES.ADMIN || comment.userOpenid === openid
+  const canDelete = user.role === ROLES.ADMIN || comment.userId === user._id
   if (!canDelete) return fail('你没有权限删除这条留言')
 
   const now = db.serverDate()
@@ -51,7 +50,7 @@ exports.main = async (event = {}) => {
       status: 'deleted',
       updatedAt: now,
       deletedAt: now,
-      deletedBy: openid
+      deletedByUserId: user._id
     }
   })
 

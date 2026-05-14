@@ -37,7 +37,7 @@ Page({
 
   async loadProfile() {
     const cachedUser = userService.getCachedUser()
-    const cachedStats = cachedUser ? userService.getCachedUserStats(cachedUser.openid) : null
+    const cachedStats = cachedUser ? userService.getCachedUserStats(cachedUser._id) : null
     const cachedReceivedRequests = requestService.getCachedRequests('received') || []
     const savedChefMode = wx.getStorageSync(CHEF_MODE_KEY) || 'simple'
     const cachedChefMode = CHEF_MODE_TEXT[savedChefMode] ? savedChefMode : 'simple'
@@ -63,7 +63,7 @@ Page({
     try {
       const userInfo = await userService.getCurrentUser()
       const results = await Promise.all([
-        userService.getUserStats(userInfo.openid),
+        userService.getUserStats(userInfo._id),
         requestService.getReceivedRequests().catch(() => [])
       ])
       const stats = results[0] || this.data.stats

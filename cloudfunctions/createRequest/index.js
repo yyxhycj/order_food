@@ -15,10 +15,6 @@ function fail(message) {
   return { success: false, message }
 }
 
-function getRecipeOwnerOpenid(recipe) {
-  return recipe && (recipe.authorOpenid || recipe.creator_openid || recipe._openid || '')
-}
-
 async function getUser(openid) {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ openid, status: 'active' })
@@ -45,11 +41,12 @@ exports.main = async (event = {}) => {
 
   const recipe = recipeRes && recipeRes.data
   if (!recipe || recipe.status !== 'published') return fail('这道菜现在点不了')
+  if (!recipe.authorUserId) return fail('这道菜还没关联到家里人，请重新打开小程序')
 
   const duplicate = await db.collection(COLLECTIONS.REQUESTS)
     .where({
       recipeId,
-      requesterOpenid: openid,
+      requesterUserId: user._id,
       status: _.in(ACTIVE_REQUEST_STATUS)
     })
     .limit(1)
@@ -64,10 +61,8 @@ exports.main = async (event = {}) => {
     recipeId,
     recipeTitle: recipe.title,
     recipeCoverImage: recipe.coverImage || '',
-    requesterOpenid: openid,
-    requesterName: user.nickname || '家里人',
-    authorOpenid: getRecipeOwnerOpenid(recipe),
-    authorName: recipe.authorName || '家里人',
+    requesterUserId: user._id,
+    authorUserId: recipe.authorUserId,
     reason,
     status: 'pending',
     statusText: '等回应',

@@ -34,6 +34,23 @@ async function getUser(openid) {
   return res.data[0] || null
 }
 
+async function getUsersByIds(ids) {
+  const uniqueIds = Array.from(new Set((ids || []).filter(Boolean)))
+  if (!uniqueIds.length) return {}
+
+  const res = await db.collection(COLLECTIONS.USERS)
+    .where({
+      _id: db.command.in(uniqueIds)
+    })
+    .limit(100)
+    .get()
+
+  return (res.data || []).reduce((map, item) => {
+    map[item._id] = item
+    return map
+  }, {})
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -52,12 +69,18 @@ exports.main = async (event = {}) => {
       .get()
   ])
   const isAdmin = Boolean(user && user.role === ROLES.ADMIN)
-  const comments = (commentsRes.data || [])
+  const sortedComments = (commentsRes.data || [])
     .sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt))
-    .map(comment => ({
-      ...comment,
-      canDelete: isAdmin || comment.userOpenid === openid
-    }))
+  const userMap = await getUsersByIds(sortedComments.map(comment => comment.userId))
+  const comments = sortedComments
+    .map(comment => {
+      const commentUser = userMap[comment.userId] || {}
+      return Object.assign({}, comment, {
+        nickname: commentUser.nickname || '家里人',
+        avatarUrl: commentUser.avatarUrl || '',
+        canDelete: isAdmin || comment.userId === (user && user._id)
+      })
+    })
 
   return {
     success: true,

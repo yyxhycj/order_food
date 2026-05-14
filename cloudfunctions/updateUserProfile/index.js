@@ -36,12 +36,13 @@ exports.main = async (event = {}) => {
 
   const bio = trim(profile.bio)
   if (bio.length > 120) return fail('简介最多 120 个字')
+  const now = db.serverDate()
 
   const patch = {
     nickname,
     avatarUrl: profile.avatarUrl || user.avatarUrl || '',
     bio,
-    updatedAt: db.serverDate()
+    updatedAt: now
   }
 
   await db.collection(COLLECTIONS.USERS).doc(user._id).update({ data: patch })

@@ -60,9 +60,9 @@ Page({
         currentUser: user,
         isFavorite,
         comments,
-        isOwner: Boolean(recipe.isOwner || (user && recipe.authorOpenid === user.openid)),
+        isOwner: Boolean(recipe.isOwner),
         isAdmin,
-        canEdit: Boolean(recipe.canEdit || (user && recipe.authorOpenid === user.openid) || isAdmin)
+        canEdit: Boolean(recipe.canEdit || isAdmin)
       })
 
       wx.setNavigationBarTitle({ title: recipe.title || '这道菜' })
