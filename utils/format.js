@@ -42,39 +42,35 @@ function normalizeRecipe(raw) {
     amount: item.amount || ''
   }))
   const steps = normalizeArray(recipe.steps).map((item, index) => ({
-    text: item.text || item.description || '',
+    text: item.text || '',
     image: item.image || '',
     sort: typeof item.sort === 'number' ? item.sort : index + 1
   }))
-  const cookingTime = recipe.cookingTime || recipe.cooking_time || 0
-  const favoriteCount = recipe.favoriteCount || recipe.collect_count || 0
-  const wantCount = recipe.wantCount || recipe.want_count || 0
-  const viewCount = recipe.viewCount || recipe.view_count || 0
 
   return {
-    _id: recipe._id || recipe.id,
-    title: recipe.title || recipe.name || '',
+    _id: recipe._id || '',
+    title: recipe.title || '',
     description: recipe.description || '',
-    coverImage: recipe.coverImage || recipe.main_image || recipe.image || '/images/dish-placeholder.png',
-    categoryId: recipe.categoryId || recipe.category_id || '',
+    coverImage: recipe.coverImage || '/images/dish-placeholder.png',
+    categoryId: recipe.categoryId || '',
     authorUserId: recipe.authorUserId || '',
     authorNickname: recipe.authorNickname || '家里人',
     authorAvatarUrl: recipe.authorAvatarUrl || '',
     ingredients,
     steps,
-    cookingTime,
+    cookingTime: recipe.cookingTime || 0,
     difficulty: recipe.difficulty || 'medium',
     difficultyText: getDifficultyText(recipe.difficulty || 'medium'),
-    tags: normalizeTags(recipe.tags || recipe.seasonal_tags),
+    tags: normalizeTags(recipe.tags),
     tips: recipe.tips || '',
     status: recipe.status || 'published',
     statusText: getRecipeStatusText(recipe.status || 'published'),
-    viewCount,
-    favoriteCount,
-    wantCount,
-    commentCount: recipe.commentCount || recipe.review_count || 0,
-    createdAtText: formatFriendlyDate(recipe.createdAt || recipe.created_at),
-    updatedAtText: formatFriendlyDate(recipe.updatedAt || recipe.updated_at)
+    viewCount: recipe.viewCount || 0,
+    favoriteCount: recipe.favoriteCount || 0,
+    wantCount: recipe.wantCount || 0,
+    commentCount: recipe.commentCount || 0,
+    createdAtText: formatFriendlyDate(recipe.createdAt),
+    updatedAtText: formatFriendlyDate(recipe.updatedAt)
   }
 }
 

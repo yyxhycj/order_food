@@ -85,15 +85,39 @@ async function getUsersByIds(ids) {
   }, {})
 }
 
+function serializeRecipe(recipe, author) {
+  return {
+    _id: recipe._id,
+    title: recipe.title || '',
+    description: recipe.description || '',
+    coverImage: recipe.coverImage || '',
+    images: Array.isArray(recipe.images) ? recipe.images : [],
+    categoryId: recipe.categoryId || '',
+    authorUserId: recipe.authorUserId || '',
+    authorNickname: author && author.nickname ? author.nickname : '家里人',
+    authorAvatarUrl: author && author.avatarUrl ? author.avatarUrl : '',
+    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+    steps: Array.isArray(recipe.steps) ? recipe.steps : [],
+    cookingTime: Number(recipe.cookingTime) || 0,
+    difficulty: recipe.difficulty || 'medium',
+    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    tips: recipe.tips || '',
+    status: recipe.status || RECIPE_STATUS.PUBLISHED,
+    viewCount: Number(recipe.viewCount) || 0,
+    favoriteCount: Number(recipe.favoriteCount) || 0,
+    wantCount: Number(recipe.wantCount) || 0,
+    commentCount: Number(recipe.commentCount) || 0,
+    createdAt: recipe.createdAt,
+    updatedAt: recipe.updatedAt
+  }
+}
+
 async function hydrateRecipes(recipes) {
   const userMap = await getUsersByIds((recipes || []).map(recipe => recipe.authorUserId))
 
   return (recipes || []).map(recipe => {
     const author = userMap[recipe.authorUserId] || {}
-    return Object.assign({}, recipe, {
-      authorNickname: author.nickname || '家里人',
-      authorAvatarUrl: author.avatarUrl || ''
-    })
+    return serializeRecipe(recipe, author)
   })
 }
 

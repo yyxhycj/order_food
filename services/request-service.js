@@ -13,7 +13,7 @@ function normalizeRequest(raw) {
   const status = request.status || REQUEST_STATUS.PENDING
 
   return {
-    _id: request._id || request.id,
+    _id: request._id || '',
     recipeId: request.recipeId || '',
     recipeTitle: request.recipeTitle || '',
     recipeCoverImage: request.recipeCoverImage || '/images/dish-placeholder.png',
@@ -25,8 +25,8 @@ function normalizeRequest(raw) {
     status,
     statusText: getRequestStatusText(status),
     note: request.note || '',
-    createdAtText: formatFriendlyDate(request.createdAt || request.created_at),
-    handledAtText: formatFriendlyDate(request.handledAt || request.handled_at),
+    createdAtText: formatFriendlyDate(request.createdAt),
+    handledAtText: formatFriendlyDate(request.handledAt),
     canCancel: status === REQUEST_STATUS.PENDING,
     canAccept: status === REQUEST_STATUS.PENDING,
     canDecline: status === REQUEST_STATUS.PENDING,

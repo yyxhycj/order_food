@@ -137,6 +137,23 @@ async function migrateUserLinksAndRemoveOldFields(user, openid) {
   ])
 }
 
+function toPublicUser(user) {
+  return {
+    _id: user._id,
+    nickname: user.nickname || '家里人',
+    avatarUrl: user.avatarUrl || '',
+    bio: user.bio || '',
+    role: user.role || ROLES.USER,
+    status: user.status || 'active',
+    recipeCount: user.recipeCount || 0,
+    requestCount: user.requestCount || 0,
+    userLinkSchemaVersion: user.userLinkSchemaVersion || USER_LINK_SCHEMA_VERSION,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    lastLoginAt: user.lastLoginAt
+  }
+}
+
 async function hasAdmin() {
   const res = await db.collection(COLLECTIONS.USERS)
     .where({ role: ROLES.ADMIN, status: 'active' })
@@ -198,8 +215,7 @@ exports.main = async (event = {}) => {
 
     return {
       success: true,
-      openid,
-      user: nextUser,
+      user: toPublicUser(nextUser),
       isAdmin: role === ROLES.ADMIN
     }
   }
@@ -228,8 +244,7 @@ exports.main = async (event = {}) => {
 
   return {
     success: true,
-    openid,
-    user: nextUser,
+    user: toPublicUser(nextUser),
     isAdmin: defaultRole === ROLES.ADMIN
   }
 }

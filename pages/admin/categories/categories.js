@@ -66,7 +66,7 @@ Page({
     const category = this.data.categories[Number(e.currentTarget.dataset.index)]
     this.setData({
       showModal: true,
-      editingId: category._fallback ? '' : category._id,
+      editingId: category._id,
       form: {
         name: category.name || '',
         description: category.description || '',

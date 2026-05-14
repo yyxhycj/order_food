@@ -39,6 +39,24 @@ async function getUser(openid) {
   return res.data[0]
 }
 
+function serializeRequest(request) {
+  return {
+    _id: request._id,
+    recipeId: request.recipeId || '',
+    recipeTitle: request.recipeTitle || '',
+    recipeCoverImage: request.recipeCoverImage || '',
+    requesterUserId: request.requesterUserId || '',
+    authorUserId: request.authorUserId || '',
+    reason: request.reason || '',
+    status: request.status || 'pending',
+    statusText: request.statusText || STATUS_TEXT[request.status] || '等回应',
+    note: request.note || '',
+    createdAt: request.createdAt,
+    updatedAt: request.updatedAt,
+    handledAt: request.handledAt
+  }
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -88,9 +106,6 @@ exports.main = async (event = {}) => {
   return {
     success: true,
     id,
-    request: {
-      ...request,
-      ...data
-    }
+    request: serializeRequest(Object.assign({}, request, data))
   }
 }

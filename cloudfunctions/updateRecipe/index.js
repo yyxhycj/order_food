@@ -83,6 +83,31 @@ async function getUser(openid) {
   return res.data[0]
 }
 
+function serializeRecipe(recipe) {
+  return {
+    _id: recipe._id,
+    title: recipe.title || '',
+    description: recipe.description || '',
+    coverImage: recipe.coverImage || '',
+    images: Array.isArray(recipe.images) ? recipe.images : [],
+    categoryId: recipe.categoryId || '',
+    authorUserId: recipe.authorUserId || '',
+    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+    steps: Array.isArray(recipe.steps) ? recipe.steps : [],
+    cookingTime: Number(recipe.cookingTime) || 0,
+    difficulty: recipe.difficulty || 'medium',
+    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    tips: recipe.tips || '',
+    status: recipe.status || RECIPE_STATUS.DRAFT,
+    viewCount: Number(recipe.viewCount) || 0,
+    favoriteCount: Number(recipe.favoriteCount) || 0,
+    wantCount: Number(recipe.wantCount) || 0,
+    commentCount: Number(recipe.commentCount) || 0,
+    createdAt: recipe.createdAt,
+    updatedAt: recipe.updatedAt
+  }
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -129,9 +154,6 @@ exports.main = async (event = {}) => {
   return {
     success: true,
     id,
-    recipe: {
-      ...existing,
-      ...data
-    }
+    recipe: serializeRecipe(Object.assign({}, existing, data))
   }
 }

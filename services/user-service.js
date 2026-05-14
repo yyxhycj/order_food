@@ -5,11 +5,20 @@ const cache = require('../utils/cache')
 const STORAGE_KEY = 'currentUser'
 const STATS_CACHE_MAX_AGE = 2 * 60 * 1000
 
-function normalizeUser(user, openid) {
+function normalizeUser(user) {
   if (!user) return null
-  const nextUser = Object.assign({}, user)
-  if (!nextUser.openid && openid) nextUser.openid = openid
-  return nextUser.openid && nextUser._id ? nextUser : null
+  if (!user._id) return null
+
+  return {
+    _id: user._id,
+    nickname: user.nickname || '家里人',
+    avatarUrl: user.avatarUrl || '',
+    bio: user.bio || '',
+    role: user.role || ROLES.USER,
+    status: user.status || 'active',
+    recipeCount: user.recipeCount || 0,
+    requestCount: user.requestCount || 0
+  }
 }
 
 function getCachedUser() {
@@ -21,21 +30,20 @@ function getCachedUser() {
   return user
 }
 
-function setCachedUser(user, openid) {
-  const nextUser = normalizeUser(user, openid)
+function setCachedUser(user) {
+  const nextUser = normalizeUser(user)
   if (nextUser) wx.setStorageSync(STORAGE_KEY, nextUser)
 }
 
 async function login(profile = {}) {
   const result = await callFunction('login', { profile })
-  const user = normalizeUser(result.user || null, result.openid)
+  const user = normalizeUser(result.user || null)
 
   if (user) {
-    setCachedUser(user, result.openid)
+    setCachedUser(user)
   }
 
   return {
-    openid: result.openid,
     user,
     isAdmin: Boolean(result.isAdmin)
   }

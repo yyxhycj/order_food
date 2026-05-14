@@ -19,7 +19,6 @@ App({
   },
 
   globalData: {
-    openid: '',
     userInfo: null,
     isAdmin: false
   },
@@ -27,7 +26,6 @@ App({
   async login(profile = {}) {
     const result = await userService.login(profile)
 
-    this.globalData.openid = result.openid
     this.globalData.userInfo = result.user
     this.globalData.isAdmin = result.isAdmin
 

@@ -29,6 +29,15 @@ async function getUser(openid) {
   return res.data[0]
 }
 
+function serializeFavorite(favorite) {
+  return {
+    _id: favorite._id,
+    recipeId: favorite.recipeId || '',
+    userId: favorite.userId || '',
+    createdAt: favorite.createdAt
+  }
+}
+
 exports.main = async () => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -40,7 +49,9 @@ exports.main = async () => {
     .where({ userId: user._id })
     .limit(100)
     .get()
-  const favorites = (res.data || []).sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt))
+  const favorites = (res.data || [])
+    .sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt))
+    .map(serializeFavorite)
 
   return {
     success: true,

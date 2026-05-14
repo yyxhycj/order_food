@@ -49,6 +49,26 @@ async function getUsersByIds(ids) {
   }, {})
 }
 
+function serializeRequest(request, requester, author) {
+  return {
+    _id: request._id,
+    recipeId: request.recipeId || '',
+    recipeTitle: request.recipeTitle || '',
+    recipeCoverImage: request.recipeCoverImage || '',
+    requesterUserId: request.requesterUserId || '',
+    requesterNickname: requester && requester.nickname ? requester.nickname : '家里人',
+    authorUserId: request.authorUserId || '',
+    authorNickname: author && author.nickname ? author.nickname : '家里人',
+    reason: request.reason || '',
+    status: request.status || 'pending',
+    statusText: request.statusText || '等回应',
+    note: request.note || '',
+    createdAt: request.createdAt,
+    updatedAt: request.updatedAt,
+    handledAt: request.handledAt
+  }
+}
+
 async function hydrateRequests(requests) {
   const ids = []
   ;(requests || []).forEach(request => {
@@ -61,10 +81,7 @@ async function hydrateRequests(requests) {
   return (requests || []).map(request => {
     const requester = userMap[request.requesterUserId] || {}
     const author = userMap[request.authorUserId] || {}
-    return Object.assign({}, request, {
-      requesterNickname: requester.nickname || '家里人',
-      authorNickname: author.nickname || '家里人'
-    })
+    return serializeRequest(request, requester, author)
   })
 }
 

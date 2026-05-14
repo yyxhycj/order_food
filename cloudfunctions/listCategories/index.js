@@ -25,6 +25,17 @@ async function getUser(openid) {
   return res.data[0] || null
 }
 
+function serializeCategory(category) {
+  return {
+    _id: category._id,
+    name: category.name || '',
+    description: category.description || '',
+    icon: category.icon || '',
+    sort: Number(category.sort) || 0,
+    status: category.status || 'active'
+  }
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const includeInactive = Boolean(event.includeInactive)
@@ -40,7 +51,9 @@ exports.main = async (event = {}) => {
   const res = await db.collection(COLLECTIONS.CATEGORIES)
     .where(query)
     .get()
-  const categories = (res.data || []).sort((a, b) => (Number(a.sort) || 0) - (Number(b.sort) || 0))
+  const categories = (res.data || [])
+    .sort((a, b) => (Number(a.sort) || 0) - (Number(b.sort) || 0))
+    .map(serializeCategory)
 
   return {
     success: true,

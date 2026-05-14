@@ -51,6 +51,21 @@ async function getUsersByIds(ids) {
   }, {})
 }
 
+function serializeComment(comment, commentUser, canDelete) {
+  return {
+    _id: comment._id,
+    recipeId: comment.recipeId || '',
+    userId: comment.userId || '',
+    nickname: commentUser && commentUser.nickname ? commentUser.nickname : '家里人',
+    avatarUrl: commentUser && commentUser.avatarUrl ? commentUser.avatarUrl : '',
+    content: comment.content || '',
+    status: comment.status || 'visible',
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    canDelete
+  }
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID
@@ -75,11 +90,7 @@ exports.main = async (event = {}) => {
   const comments = sortedComments
     .map(comment => {
       const commentUser = userMap[comment.userId] || {}
-      return Object.assign({}, comment, {
-        nickname: commentUser.nickname || '家里人',
-        avatarUrl: commentUser.avatarUrl || '',
-        canDelete: isAdmin || comment.userId === (user && user._id)
-      })
+      return serializeComment(comment, commentUser, isAdmin || comment.userId === (user && user._id))
     })
 
   return {

@@ -23,6 +23,20 @@ async function getUser(openid) {
   return res.data[0]
 }
 
+function toPublicUser(user) {
+  return {
+    _id: user._id,
+    nickname: user.nickname || '家里人',
+    avatarUrl: user.avatarUrl || '',
+    bio: user.bio || '',
+    role: user.role || 'user',
+    status: user.status || 'active',
+    recipeCount: user.recipeCount || 0,
+    requestCount: user.requestCount || 0,
+    updatedAt: user.updatedAt
+  }
+}
+
 exports.main = async (event = {}) => {
   const wxContext = cloud.getWXContext()
   const user = await getUser(wxContext.OPENID)
@@ -49,10 +63,8 @@ exports.main = async (event = {}) => {
 
   return {
     success: true,
-    user: {
-      ...user,
-      ...patch,
+    user: toPublicUser(Object.assign({}, user, patch, {
       updatedAt: new Date()
-    }
+    }))
   }
 }

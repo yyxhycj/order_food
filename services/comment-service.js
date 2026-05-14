@@ -4,12 +4,12 @@ const { formatFriendlyDate } = require('../utils/date')
 function normalizeComment(raw) {
   const comment = raw || {}
   return {
-    _id: comment._id || comment.id,
+    _id: comment._id || '',
     userId: comment.userId || '',
     nickname: comment.nickname || '家里人',
     avatarUrl: comment.avatarUrl || '',
     content: comment.content || '',
-    createdAtText: formatFriendlyDate(comment.createdAt || comment.created_at),
+    createdAtText: formatFriendlyDate(comment.createdAt),
     canDelete: Boolean(comment.canDelete)
   }
 }
