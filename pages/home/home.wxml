@@ -1,0 +1,40 @@
+<view class="home-page">
+  <view class="top">
+    <view class="brand">
+      <text class="title">朋友菜谱</text>
+      <text class="subtitle">今天想吃哪位朋友的拿手菜？</text>
+    </view>
+    <button class="create-button" bindtap="goToCreate">+</button>
+  </view>
+
+  <view class="search">
+    <input class="search-input" placeholder="搜索菜谱、食材或朋友" value="{{keyword}}" bindinput="onKeywordInput" confirm-type="search" bindconfirm="onSearch" />
+    <button wx:if="{{keyword}}" class="clear" bindtap="clearSearch">×</button>
+    <button class="search-button" bindtap="onSearch">搜索</button>
+  </view>
+
+  <scroll-view class="categories" scroll-x="true" show-scrollbar="false">
+    <block wx:for="{{categories}}" wx:key="_id">
+      <view class="category {{currentCategoryId === item._id ? 'active' : ''}}" data-id="{{item._id}}" bindtap="selectCategory">
+        {{item.name}}
+      </view>
+    </block>
+  </scroll-view>
+
+  <view class="sorts">
+    <block wx:for="{{sortOptions}}" wx:key="value">
+      <view class="sort {{sortBy === item.value ? 'active' : ''}}" data-sort="{{item.value}}" bindtap="selectSort">
+        {{item.label}}
+      </view>
+    </block>
+  </view>
+
+  <loading-state wx:if="{{loading}}" text="正在找菜谱"></loading-state>
+
+  <view wx:else class="recipe-list">
+    <block wx:if="{{recipes.length}}">
+      <recipe-card wx:for="{{recipes}}" wx:key="_id" recipe="{{item}}" bind:recipetap="goToRecipe"></recipe-card>
+    </block>
+    <empty-state wx:else title="还没有菜谱" description="先发布一道拿手菜，让朋友来点想吃。" button-text="发布菜谱" bind:action="goToCreate"></empty-state>
+  </view>
+</view>

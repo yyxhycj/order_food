@@ -1,0 +1,92 @@
+page {
+  background: #fbf7f1;
+}
+
+.admin-page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.header,
+.stats,
+.menu {
+  border: 1rpx solid #ece7df;
+  border-radius: 8rpx;
+  background: #fff;
+}
+
+.header {
+  padding: 28rpx;
+}
+
+.title {
+  display: block;
+  color: #2b211b;
+  font-size: 40rpx;
+  font-weight: 800;
+  line-height: 52rpx;
+}
+
+.subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: #7f746b;
+  font-size: 26rpx;
+  line-height: 36rpx;
+}
+
+.stats {
+  display: flex;
+  margin: 22rpx 0;
+  padding: 24rpx 0;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  color: #8f4e2f;
+  font-size: 34rpx;
+  font-weight: 800;
+  line-height: 42rpx;
+}
+
+.stat-label {
+  display: block;
+  color: #8b8179;
+  font-size: 23rpx;
+  line-height: 32rpx;
+}
+
+.menu {
+  overflow: hidden;
+}
+
+.menu-item {
+  padding: 26rpx;
+  border-bottom: 1rpx solid #f0e8df;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-main {
+  display: block;
+  color: #332822;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 40rpx;
+}
+
+.menu-sub {
+  display: block;
+  margin-top: 6rpx;
+  color: #8b8179;
+  font-size: 25rpx;
+  line-height: 34rpx;
+}

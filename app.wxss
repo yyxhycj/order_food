@@ -1,10 +1,17 @@
-/**app.wxss**/
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 200rpx 0;
+page {
+  color: #332822;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #fbf7f1;
+}
+
+button {
   box-sizing: border-box;
-} 
+}
+
+image {
+  display: block;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

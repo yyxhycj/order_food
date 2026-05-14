@@ -1,0 +1,4 @@
+<view class="user-avatar {{size}}">
+  <image class="avatar" src="{{user.avatarUrl || user.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+  <text wx:if="{{showName}}" class="name">{{user.nickname || user.authorName || '朋友'}}</text>
+</view>

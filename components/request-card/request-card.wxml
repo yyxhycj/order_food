@@ -1,0 +1,24 @@
+<view class="request-card" bindtap="handleTap">
+  <image class="cover" src="{{request.recipeCoverImage || '/images/recipe.png'}}" mode="aspectFill"></image>
+  <view class="content">
+    <view class="header">
+      <text class="title">{{request.recipeTitle}}</text>
+      <text class="status status-{{request.status}}">{{request.statusText}}</text>
+    </view>
+    <text class="people" wx:if="{{mode === 'mine'}}">作者：{{request.authorName || '朋友'}}</text>
+    <text class="people" wx:else>想吃的人：{{request.requesterName || '朋友'}}</text>
+    <text class="reason" wx:if="{{request.reason}}">{{request.reason}}</text>
+    <text class="reason muted" wx:else>没有备注，只是真的想吃。</text>
+    <view class="footer">
+      <text>{{request.createdAtText}}</text>
+      <text wx:if="{{request.note}}">{{request.note}}</text>
+    </view>
+    <view class="actions" catchtap="noop">
+      <button wx:if="{{mode === 'mine' && request.canCancel}}" class="action ghost" data-action="cancel" bindtap="emitAction">取消</button>
+      <button wx:if="{{mode !== 'mine' && request.canAccept}}" class="action primary" data-action="accept" bindtap="emitAction">接受</button>
+      <button wx:if="{{mode !== 'mine' && request.canDecline}}" class="action ghost" data-action="decline" bindtap="emitAction">婉拒</button>
+      <button wx:if="{{mode !== 'mine' && request.canPrepare}}" class="action primary" data-action="prepare" bindtap="emitAction">开始准备</button>
+      <button wx:if="{{mode !== 'mine' && request.canDone}}" class="action primary" data-action="done" bindtap="emitAction">完成</button>
+    </view>
+  </view>
+</view>

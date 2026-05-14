@@ -1,0 +1,133 @@
+.request-card {
+  display: flex;
+  background: #fff;
+  border: 1rpx solid #ece7df;
+  border-radius: 8rpx;
+  margin-bottom: 18rpx;
+  overflow: hidden;
+}
+
+.cover {
+  width: 174rpx;
+  min-width: 174rpx;
+  height: 174rpx;
+  background: #f1ece5;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 16rpx 18rpx;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  color: #30251f;
+  font-size: 30rpx;
+  font-weight: 700;
+  line-height: 38rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  margin-left: 12rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+  color: #715f54;
+  background: #f1ece5;
+  font-size: 22rpx;
+}
+
+.status-pending {
+  color: #9b6412;
+  background: #fff4de;
+}
+
+.status-accepted,
+.status-preparing {
+  color: #235f8c;
+  background: #e6f2fb;
+}
+
+.status-done {
+  color: #27784b;
+  background: #e7f4ed;
+}
+
+.status-declined,
+.status-cancelled {
+  color: #77716d;
+  background: #f0eeee;
+}
+
+.people,
+.reason,
+.footer text {
+  display: block;
+  color: #81786f;
+  font-size: 25rpx;
+  line-height: 34rpx;
+}
+
+.people {
+  margin-top: 8rpx;
+}
+
+.reason {
+  margin-top: 4rpx;
+}
+
+.muted {
+  color: #aaa29a;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.footer text {
+  margin-right: 16rpx;
+  font-size: 23rpx;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 10rpx;
+}
+
+.action {
+  margin: 0 0 0 12rpx;
+  padding: 0 18rpx;
+  min-width: 108rpx;
+  height: 54rpx;
+  line-height: 54rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+}
+
+.action::after {
+  border: none;
+}
+
+.primary {
+  color: #fff;
+  background: #9c5b37;
+}
+
+.ghost {
+  color: #7a6558;
+  background: #f4eee8;
+}

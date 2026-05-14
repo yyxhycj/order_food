@@ -1,0 +1,18 @@
+<view class="requests-page">
+  <scroll-view class="status-tabs" scroll-x="true" show-scrollbar="false">
+    <block wx:for="{{statusOptions}}" wx:key="value">
+      <view class="status-tab {{currentStatus === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="selectStatus">
+        {{item.label}}
+      </view>
+    </block>
+  </scroll-view>
+
+  <loading-state wx:if="{{loading}}" text="正在加载想吃记录"></loading-state>
+
+  <view wx:else class="request-list">
+    <block wx:if="{{filteredRequests.length}}">
+      <request-card wx:for="{{filteredRequests}}" wx:key="_id" request="{{item}}" mode="mine" bind:requesttap="goToRecipe" bind:action="onRequestAction"></request-card>
+    </block>
+    <empty-state wx:else title="还没有想吃记录" description="看到喜欢的菜谱，就点一下想吃这个。" button-text="去看菜谱" bind:action="goHome"></empty-state>
+  </view>
+</view>

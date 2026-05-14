@@ -1,0 +1,23 @@
+<view class="manage-page">
+  <view class="summary">
+    <text class="summary-title">{{isAdmin ? '全部想吃请求' : '朋友想吃我的菜'}}</text>
+    <text class="summary-subtitle">{{requests.length}} 条记录</text>
+  </view>
+
+  <scroll-view class="status-tabs" scroll-x="true" show-scrollbar="false">
+    <block wx:for="{{statusOptions}}" wx:key="value">
+      <view class="status-tab {{currentStatus === item.value ? 'active' : ''}}" data-status="{{item.value}}" bindtap="selectStatus">
+        {{item.label}}
+      </view>
+    </block>
+  </scroll-view>
+
+  <loading-state wx:if="{{loading}}" text="正在加载请求"></loading-state>
+
+  <view wx:else>
+    <block wx:if="{{filteredRequests.length}}">
+      <request-card wx:for="{{filteredRequests}}" wx:key="_id" request="{{item}}" mode="manage" bind:requesttap="goToRecipe" bind:action="onRequestAction"></request-card>
+    </block>
+    <empty-state wx:else title="暂时没有请求" description="有人点想吃时，会出现在这里。" button-text="去首页" bind:action="goHome"></empty-state>
+  </view>
+</view>

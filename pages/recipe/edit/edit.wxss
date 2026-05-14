@@ -1,0 +1,7 @@
+page {
+  background: #fbf7f1;
+}
+
+.edit-page {
+  min-height: 100vh;
+}

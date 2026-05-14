@@ -1,0 +1,31 @@
+page {
+  background: #fbf7f1;
+}
+
+.requests-page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.status-tabs {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.status-tab {
+  display: inline-block;
+  margin-right: 14rpx;
+  padding: 14rpx 24rpx;
+  border: 1rpx solid #e3d9ce;
+  border-radius: 6rpx;
+  color: #6f6259;
+  background: #fffdf9;
+  font-size: 26rpx;
+}
+
+.status-tab.active {
+  color: #fff;
+  border-color: #9c5b37;
+  background: #9c5b37;
+}

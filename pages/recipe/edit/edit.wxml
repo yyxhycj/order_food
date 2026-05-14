@@ -1,0 +1,4 @@
+<view class="edit-page">
+  <loading-state wx:if="{{loading}}" text="正在准备表单"></loading-state>
+  <recipe-form wx:else value="{{form}}" categories="{{categories}}" submitting="{{submitting}}" bind:change="onFormChange" bind:choosecover="onChooseCover" bind:choosestepimage="onChooseStepImage" bind:submit="onSubmit"></recipe-form>
+</view>

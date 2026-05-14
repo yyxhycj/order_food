@@ -1,0 +1,28 @@
+.user-avatar {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #eee8df;
+}
+
+.small .avatar {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.large .avatar {
+  width: 112rpx;
+  height: 112rpx;
+}
+
+.name {
+  margin-left: 12rpx;
+  color: #4a3a31;
+  font-size: 26rpx;
+  line-height: 34rpx;
+}

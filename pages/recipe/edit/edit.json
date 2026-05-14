@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "发布菜谱",
+  "usingComponents": {
+    "recipe-form": "/components/recipe-form/recipe-form",
+    "loading-state": "/components/loading-state/loading-state"
+  }
+}

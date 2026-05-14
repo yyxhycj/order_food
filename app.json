@@ -1,60 +1,38 @@
 {
   "pages": [
-    "pages/menu/menu",
-    "pages/product/product",
-    "pages/cart/cart",
-    "pages/order/order",
-    "pages/orders/orders",
-    "pages/order-detail/order-detail",
-    "pages/admin/admin",
-    "pages/admin/menu/menu",
-    "pages/admin/orders/orders",
-    "pages/admin/store-config/store-config",
-    "pages/recipes/list/list",
-    "pages/recipes/detail/detail",
-    "pages/recipes/create/create",
-    "pages/recipes/generator/generator",
-    "pages/recipes/review/review",
-    "pages/recipes/recommend/recommend",
+    "pages/home/home",
+    "pages/recipe/detail/detail",
+    "pages/recipe/edit/edit",
+    "pages/requests/list/list",
+    "pages/requests/manage/manage",
     "pages/user/profile/profile",
-    "pages/blind-box/themes/themes",
-    "pages/blind-box/detail/detail",
-    "pages/blind-box/history/history",
-    "pages/reminders/list/list",
-    "pages/reminders/create/create",
-    "pages/reminders/settings/settings",
-    "pages/game/achievements/achievements",
-    "pages/game/leaderboard/leaderboard",
-    "pages/game/badges/badges"
+    "pages/admin/admin/admin",
+    "pages/admin/categories/categories",
+    "pages/admin/recipes/recipes"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "菜谱分享平台",
-    "navigationBarBackgroundColor": "#ffffff"
+    "navigationBarTitleText": "朋友菜谱",
+    "navigationBarBackgroundColor": "#fffdf9",
+    "backgroundColor": "#fbf7f1"
   },
   "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#FF6B6B",
+    "color": "#8B8179",
+    "selectedColor": "#9C5B37",
     "borderStyle": "black",
-    "backgroundColor": "#ffffff",
+    "backgroundColor": "#fffdf9",
     "list": [
       {
-        "pagePath": "pages/menu/menu",
-        "iconPath": "images/menu.png",
-        "selectedIconPath": "images/menu-active.png",
-        "text": "菜品"
+        "pagePath": "pages/home/home",
+        "iconPath": "images/recipe.png",
+        "selectedIconPath": "images/recipe-active.png",
+        "text": "菜谱"
       },
       {
-        "pagePath": "pages/cart/cart",
-        "iconPath": "images/cart.png",
-        "selectedIconPath": "images/cart-active.png",
-        "text": "我想吃的"
-      },
-      {
-        "pagePath": "pages/orders/orders",
-        "iconPath": "images/orders.png",
-        "selectedIconPath": "images/orders-active.png",
-        "text": "请求记录"
+        "pagePath": "pages/requests/list/list",
+        "iconPath": "images/requests.png",
+        "selectedIconPath": "images/requests-active.png",
+        "text": "想吃"
       },
       {
         "pagePath": "pages/user/profile/profile",

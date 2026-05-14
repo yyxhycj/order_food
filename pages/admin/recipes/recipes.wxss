@@ -1,0 +1,74 @@
+page {
+  background: #fbf7f1;
+}
+
+.recipes-page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  color: #2b211b;
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 46rpx;
+}
+
+.create-button {
+  margin: 0;
+  padding: 0 24rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 6rpx;
+  color: #fff;
+  background: #9c5b37;
+  font-size: 26rpx;
+}
+
+.create-button::after,
+.row-button::after {
+  border: none;
+}
+
+.recipe-row {
+  margin-bottom: 22rpx;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8rpx;
+  padding: 0 0 10rpx;
+}
+
+.row-button {
+  margin: 0 0 0 12rpx;
+  padding: 0 18rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+}
+
+.row-button.primary {
+  color: #fff;
+  background: #9c5b37;
+}
+
+.row-button.ghost {
+  color: #7a6558;
+  background: #f4eee8;
+}
+
+.row-button.danger {
+  color: #9b392e;
+  background: #fce9e6;
+}

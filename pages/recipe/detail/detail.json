@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "菜谱详情",
+  "usingComponents": {
+    "loading-state": "/components/loading-state/loading-state",
+    "empty-state": "/components/empty-state/empty-state",
+    "user-avatar": "/components/user-avatar/user-avatar"
+  }
+}

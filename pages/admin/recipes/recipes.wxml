@@ -1,0 +1,23 @@
+<view class="recipes-page">
+  <view class="toolbar">
+    <text class="title">{{title}}</text>
+    <button wx:if="{{scope !== 'favorites'}}" class="create-button" bindtap="createRecipe">新增</button>
+  </view>
+
+  <loading-state wx:if="{{loading}}" text="正在加载菜谱"></loading-state>
+
+  <view wx:else>
+    <block wx:if="{{recipes.length}}">
+      <view class="recipe-row" wx:for="{{recipes}}" wx:key="_id">
+        <recipe-card recipe="{{item}}" show-status="{{scope !== 'favorites'}}" bind:recipetap="goToRecipe"></recipe-card>
+        <view class="actions" wx:if="{{scope !== 'favorites'}}">
+          <button class="row-button ghost" data-id="{{item._id}}" bindtap="editRecipe">编辑</button>
+          <button wx:if="{{item.status !== 'published'}}" class="row-button primary" data-id="{{item._id}}" bindtap="publishRecipe">发布</button>
+          <button wx:if="{{item.status === 'published'}}" class="row-button ghost" data-id="{{item._id}}" bindtap="hideRecipe">隐藏</button>
+          <button class="row-button danger" data-id="{{item._id}}" bindtap="deleteRecipe">删除</button>
+        </view>
+      </view>
+    </block>
+    <empty-state wx:else title="没有菜谱" description="发布后会出现在这里。" button-text="新增菜谱" bind:action="createRecipe"></empty-state>
+  </view>
+</view>

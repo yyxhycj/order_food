@@ -1,0 +1,85 @@
+<view class="detail-page">
+  <loading-state wx:if="{{loading}}" text="正在打开菜谱"></loading-state>
+
+  <block wx:elif="{{recipe}}">
+    <image class="hero" src="{{recipe.coverImage || '/images/recipe.png'}}" mode="aspectFill" bindtap="previewCover"></image>
+
+    <view class="panel">
+      <view class="title-row">
+        <text class="title">{{recipe.title}}</text>
+        <button wx:if="{{isOwner || isAdmin}}" class="edit-button" bindtap="editRecipe">编辑</button>
+      </view>
+      <text class="desc">{{recipe.description}}</text>
+
+      <view class="author-row">
+        <user-avatar user="{{recipe}}" size="small"></user-avatar>
+        <text class="time">{{recipe.createdAtText}}</text>
+      </view>
+
+      <view class="metrics">
+        <view class="metric">
+          <text class="metric-number">{{recipe.cookingTime || 0}}</text>
+          <text class="metric-label">分钟</text>
+        </view>
+        <view class="metric">
+          <text class="metric-number">{{recipe.difficultyText}}</text>
+          <text class="metric-label">难度</text>
+        </view>
+        <view class="metric">
+          <text class="metric-number">{{recipe.wantCount || 0}}</text>
+          <text class="metric-label">想吃</text>
+        </view>
+        <view class="metric">
+          <text class="metric-number">{{recipe.favoriteCount || 0}}</text>
+          <text class="metric-label">收藏</text>
+        </view>
+      </view>
+
+      <view class="tags" wx:if="{{recipe.tags.length}}">
+        <text wx:for="{{recipe.tags}}" wx:key="*this" class="tag">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">食材</text>
+      <view class="ingredient" wx:for="{{recipe.ingredients}}" wx:key="name">
+        <text>{{item.name}}</text>
+        <text>{{item.amount}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">步骤</text>
+      <view class="step" wx:for="{{recipe.steps}}" wx:key="sort">
+        <view class="step-index">{{index + 1}}</view>
+        <view class="step-body">
+          <text class="step-text">{{item.text}}</text>
+          <image wx:if="{{item.image}}" class="step-image" src="{{item.image}}" mode="aspectFill" data-image="{{item.image}}" bindtap="previewStepImage"></image>
+        </view>
+      </view>
+    </view>
+
+    <view class="section" wx:if="{{recipe.tips}}">
+      <text class="section-title">小贴士</text>
+      <text class="tips">{{recipe.tips}}</text>
+    </view>
+
+    <view class="bottom-actions">
+      <button class="action secondary" bindtap="toggleFavorite">{{isFavorite ? '已收藏' : '收藏'}}</button>
+      <button class="action primary" bindtap="openRequestModal">想吃这个</button>
+    </view>
+
+    <view class="modal-mask" wx:if="{{showRequestModal}}" bindtap="closeRequestModal">
+      <view class="modal" catchtap="noop">
+        <text class="modal-title">想吃这个</text>
+        <textarea class="reason-input" placeholder="可以写时间、人数或一句撒娇" value="{{requestReason}}" bindinput="onReasonInput" maxlength="120"></textarea>
+        <view class="modal-actions">
+          <button class="modal-button ghost" bindtap="closeRequestModal">取消</button>
+          <button class="modal-button primary" loading="{{submittingRequest}}" bindtap="submitRequest">发送</button>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <empty-state wx:else title="菜谱不见了" button-text="回首页" bind:action="goHome"></empty-state>
+</view>
