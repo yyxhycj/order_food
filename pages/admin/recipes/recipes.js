@@ -51,7 +51,18 @@ Page({
         recipes = ids.length
           ? await recipeService.getRecipeList({ ids, limit: 100 })
           : []
+        const orderMap = favorites.reduce((map, item, index) => {
+          map[item.recipeId] = index
+          return map
+        }, {})
+        recipes = recipes.sort((a, b) => (orderMap[a._id] || 0) - (orderMap[b._id] || 0))
       } else {
+        if (!isAdmin) {
+          wx.showToast({ title: '仅管理员可进入', icon: 'none' })
+          setTimeout(() => wx.navigateBack(), 600)
+          return
+        }
+
         recipes = await recipeService.getRecipeList({
           includeHidden: true,
           limit: 100
@@ -128,5 +139,16 @@ Page({
     wx.navigateTo({
       url: '/pages/recipe/edit/edit'
     })
+  },
+
+  onEmptyAction() {
+    if (this.data.scope === 'favorites') {
+      wx.switchTab({
+        url: '/pages/home/home'
+      })
+      return
+    }
+
+    this.createRecipe()
   }
 })

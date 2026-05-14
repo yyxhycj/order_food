@@ -23,11 +23,17 @@ Page({
     try {
       const user = await userService.getCurrentUser()
       const isAdmin = userService.isAdmin(user)
+
+      if (!isAdmin) {
+        this.setData({ isAdmin: false })
+        wx.showToast({ title: '仅管理员可进入', icon: 'none' })
+        setTimeout(() => wx.navigateBack(), 600)
+        return
+      }
+
       const [recipes, requests, categories] = await Promise.all([
-        isAdmin
-          ? recipeService.getRecipeList({ includeHidden: true, limit: 100 })
-          : recipeService.getRecipeList({ authorOpenid: user.openid, includeHidden: true, limit: 100 }),
-        isAdmin ? requestService.getAllRequests() : requestService.getReceivedRequests(),
+        recipeService.getRecipeList({ includeHidden: true, limit: 100 }),
+        requestService.getAllRequests(),
         recipeService.getCategories()
       ])
 

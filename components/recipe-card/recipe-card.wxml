@@ -7,14 +7,14 @@
     </view>
     <text class="desc">{{recipe.description || '朋友的私房菜谱'}}</text>
     <view class="meta">
-      <text>{{recipe.cookingTime || 0}} 分钟</text>
-      <text>{{recipe.difficultyText}}</text>
-      <text>{{recipe.authorName}}</text>
+      <text class="meta-text">{{recipe.cookingTime || 0}} 分钟</text>
+      <text class="meta-text">{{recipe.difficultyText}}</text>
+      <text class="meta-text">{{recipe.authorName}}</text>
     </view>
     <view class="stats">
-      <text>{{recipe.wantCount || 0}} 想吃</text>
-      <text>{{recipe.favoriteCount || 0}} 收藏</text>
-      <text>{{recipe.viewCount || 0}} 浏览</text>
+      <text class="stat-text">{{recipe.wantCount || 0}} 想吃</text>
+      <text class="stat-text">{{recipe.favoriteCount || 0}} 收藏</text>
+      <text class="stat-text">{{recipe.viewCount || 0}} 浏览</text>
     </view>
   </view>
 </view>

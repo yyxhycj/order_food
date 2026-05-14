@@ -18,6 +18,12 @@
         </view>
       </view>
     </block>
-    <empty-state wx:else title="没有菜谱" description="发布后会出现在这里。" button-text="新增菜谱" bind:action="createRecipe"></empty-state>
+    <empty-state
+      wx:else
+      title="{{scope === 'favorites' ? '还没有收藏' : '没有菜谱'}}"
+      description="{{scope === 'favorites' ? '收藏喜欢的菜谱后会出现在这里。' : '发布后会出现在这里。'}}"
+      button-text="{{scope === 'favorites' ? '去看菜谱' : '新增菜谱'}}"
+      bind:action="onEmptyAction"
+    ></empty-state>
   </view>
 </view>

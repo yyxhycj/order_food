@@ -64,9 +64,34 @@
       <text class="tips">{{recipe.tips}}</text>
     </view>
 
+    <view class="section comments-section">
+      <view class="section-head">
+        <text class="section-title inline">朋友留言</text>
+        <text class="section-count">{{recipe.commentCount || comments.length || 0}}</text>
+      </view>
+
+      <view wx:if="{{comments.length}}" class="comment-list">
+        <view class="comment-item" wx:for="{{comments}}" wx:key="_id">
+          <view class="comment-head">
+            <user-avatar user="{{item}}" size="small"></user-avatar>
+            <text class="comment-time">{{item.createdAtText}}</text>
+          </view>
+          <text class="comment-content">{{item.content}}</text>
+          <button wx:if="{{item.canDelete}}" class="comment-delete" data-id="{{item._id}}" loading="{{deletingCommentId === item._id}}" bindtap="deleteComment">删除</button>
+        </view>
+      </view>
+
+      <view wx:else class="comment-empty">还没有留言。</view>
+
+      <view class="comment-form">
+        <textarea class="comment-input" placeholder="给这道菜留一句话" value="{{commentText}}" bindinput="onCommentInput" maxlength="200"></textarea>
+        <button class="comment-submit" loading="{{submittingComment}}" bindtap="submitComment">发送留言</button>
+      </view>
+    </view>
+
     <view class="bottom-actions">
-      <button class="action secondary" bindtap="toggleFavorite">{{isFavorite ? '已收藏' : '收藏'}}</button>
-      <button class="action primary" bindtap="openRequestModal">想吃这个</button>
+      <button class="action secondary" loading="{{togglingFavorite}}" bindtap="toggleFavorite">{{isFavorite ? '已收藏' : '收藏'}}</button>
+      <button class="action primary" disabled="{{isOwner}}" bindtap="openRequestModal">{{isOwner ? '这是我的菜谱' : '想吃这个'}}</button>
     </view>
 
     <view class="modal-mask" wx:if="{{showRequestModal}}" bindtap="closeRequestModal">

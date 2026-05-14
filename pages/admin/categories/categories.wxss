@@ -64,10 +64,30 @@ page {
 }
 
 .category-sort {
-  margin-left: 16rpx;
   color: #9c5b37;
   font-size: 28rpx;
   font-weight: 700;
+}
+
+.category-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 16rpx;
+}
+
+.category-status {
+  margin-bottom: 8rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+  color: #77716d;
+  background: #f0eeee;
+  font-size: 22rpx;
+}
+
+.category-status.active {
+  color: #27784b;
+  background: #e7f4ed;
 }
 
 .modal-mask {
@@ -120,6 +140,15 @@ page {
   height: 150rpx;
   padding: 18rpx;
   line-height: 38rpx;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  color: #4b3b32;
+  font-size: 28rpx;
 }
 
 .modal-actions {

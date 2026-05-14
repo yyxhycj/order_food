@@ -71,7 +71,7 @@
 
 .people,
 .reason,
-.footer text {
+.footer-text {
   display: block;
   color: #81786f;
   font-size: 25rpx;
@@ -96,7 +96,7 @@
   margin-top: 8rpx;
 }
 
-.footer text {
+.footer-text {
   margin-right: 16rpx;
   font-size: 23rpx;
 }

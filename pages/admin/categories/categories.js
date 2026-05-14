@@ -41,7 +41,7 @@ Page({
 
   async loadCategories() {
     try {
-      const categories = await recipeService.getCategories()
+      const categories = await recipeService.getCategories({ includeInactive: true })
       this.setData({ categories })
     } catch (error) {
       showError(error, '加载分类失败')
@@ -85,6 +85,12 @@ Page({
     const field = e.currentTarget.dataset.field
     this.setData({
       [`form.${field}`]: e.detail.value
+    })
+  },
+
+  onStatusChange(e) {
+    this.setData({
+      'form.status': e.detail.value ? 'active' : 'inactive'
     })
   },
 

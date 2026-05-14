@@ -14,6 +14,7 @@ Page({
     categories: [{ _id: 'all', name: '全部' }],
     recipes: [],
     loading: true,
+    loadingMore: false,
     refreshing: false,
     page: 0,
     hasMore: true
@@ -47,24 +48,32 @@ Page({
   },
 
   async loadRecipes(reset = false) {
-    const page = reset ? 0 : this.data.page
-    const recipes = await recipeService.getRecipeList({
-      keyword: this.data.keyword,
-      categoryId: this.data.currentCategoryId,
-      sortBy: this.data.sortBy,
-      page,
-      limit: 20
-    })
+    if (!reset && this.data.loadingMore) return
 
-    this.setData({
-      recipes: reset ? recipes : this.data.recipes.concat(recipes),
-      page: page + 1,
-      hasMore: recipes.length === 20
-    })
+    const page = reset ? 0 : this.data.page
+    if (!reset) this.setData({ loadingMore: true })
+
+    try {
+      const recipes = await recipeService.getRecipeList({
+        keyword: this.data.keyword,
+        categoryId: this.data.currentCategoryId,
+        sortBy: this.data.sortBy,
+        page,
+        limit: 20
+      })
+
+      this.setData({
+        recipes: reset ? recipes : this.data.recipes.concat(recipes),
+        page: page + 1,
+        hasMore: recipes.length === 20
+      })
+    } finally {
+      if (!reset) this.setData({ loadingMore: false })
+    }
   },
 
   onReachBottom() {
-    if (this.data.loading || !this.data.hasMore) return
+    if (this.data.loading || this.data.loadingMore || !this.data.hasMore) return
     this.loadRecipes(false).catch(error => showError(error, '加载更多失败'))
   },
 

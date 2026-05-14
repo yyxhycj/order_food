@@ -121,7 +121,11 @@ Page({
 
   async onSubmit(e) {
     const recipe = fromForm(e.detail.value)
-    const validation = validateRecipe(recipe)
+    const shouldPublish = recipe.status === 'published'
+    const validation = validateRecipe(recipe, {
+      requireCover: shouldPublish,
+      requireCategory: shouldPublish
+    })
 
     if (!validation.valid) {
       wx.showToast({ title: validation.message, icon: 'none' })

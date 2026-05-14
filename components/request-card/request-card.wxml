@@ -10,8 +10,8 @@
     <text class="reason" wx:if="{{request.reason}}">{{request.reason}}</text>
     <text class="reason muted" wx:else>没有备注，只是真的想吃。</text>
     <view class="footer">
-      <text>{{request.createdAtText}}</text>
-      <text wx:if="{{request.note}}">{{request.note}}</text>
+      <text class="footer-text">{{request.createdAtText}}</text>
+      <text wx:if="{{request.note}}" class="footer-text">{{request.note}}</text>
     </view>
     <view class="actions" catchtap="noop">
       <button wx:if="{{mode === 'mine' && request.canCancel}}" class="action ghost" data-action="cancel" bindtap="emitAction">取消</button>

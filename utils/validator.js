@@ -15,6 +15,10 @@ function validateRecipe(recipe, options = {}) {
     return { valid: false, message: '请上传菜谱主图' }
   }
 
+  if (options.requireCategory && !data.categoryId) {
+    return { valid: false, message: '请选择分类' }
+  }
+
   if (ingredients.filter(item => trim(item.name) && trim(item.amount)).length === 0) {
     return { valid: false, message: '请至少添加一个食材' }
   }

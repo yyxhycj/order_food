@@ -7,7 +7,10 @@
         <text class="category-name">{{item.name}}</text>
         <text class="category-desc">{{item.description || '没有描述'}}</text>
       </view>
-      <text class="category-sort">{{item.sort || 0}}</text>
+      <view class="category-side">
+        <text class="category-status {{item.status === 'active' ? 'active' : ''}}">{{item.status === 'active' ? '启用' : '停用'}}</text>
+        <text class="category-sort">{{item.sort || 0}}</text>
+      </view>
     </view>
   </view>
 
@@ -18,6 +21,10 @@
       <input class="input" placeholder="图标标识" value="{{form.icon}}" data-field="icon" bindinput="onInput" />
       <input class="input" type="number" placeholder="排序" value="{{form.sort}}" data-field="sort" bindinput="onInput" />
       <textarea class="textarea" placeholder="分类描述" value="{{form.description}}" data-field="description" bindinput="onInput"></textarea>
+      <view class="switch-row">
+        <text>启用分类</text>
+        <switch checked="{{form.status === 'active'}}" bindchange="onStatusChange" color="#9c5b37" />
+      </view>
       <view class="modal-actions">
         <button class="modal-button ghost" bindtap="closeModal">取消</button>
         <button class="modal-button primary" bindtap="saveCategory">保存</button>
